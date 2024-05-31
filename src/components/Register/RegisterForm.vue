@@ -5,37 +5,37 @@
     </div>
 
     <div class="form_container">
-      <form class="form">
+      <form class="form" @submit.prevent="registerUser">
         <p class="message">Signup now and get full access to our app.</p>
 
         <div class="flex">
           <label>
-            <input class="input" type="text" placeholder="" required="" />
+            <input class="input" type="text" v-model="firstName" placeholder="" required="" />
             <span>Firstname</span>
           </label>
 
           <label>
-            <input class="input" type="text" placeholder="" required="" />
+            <input class="input" type="text" v-model="lastName" placeholder="" required="" />
             <span>Lastname</span>
           </label>
         </div>
 
         <label>
-          <input class="input" type="phone-number" placeholder="" required="" />
+          <input class="input" type="number" v-model="phoneNumber" placeholder="" required="" />
           <span>Phone Number</span>
         </label>
 
         <label>
-          <input class="input" type="email" placeholder="" required="" />
+          <input class="input" type="email" v-model="email" placeholder="" required="" />
           <span>Email</span>
         </label>
 
         <label>
-          <input class="input" type="password" placeholder="" required="" />
+          <input class="input" type="password" v-model="password" placeholder="" required="" />
           <span>Password</span>
         </label>
         <label>
-          <input class="input" type="password" placeholder="" required="" />
+          <input class="input" type="password" v-model="confirmPassword" placeholder="" required="" />
           <span>Confirm password</span>
         </label>
         <button class="submit">Submit</button>
@@ -46,6 +46,32 @@
 </template>
 
 <script setup>
+import axios from 'axios';
+import { ref } from 'vue';
+
+const firstName = ref("")
+const lastName = ref("")
+const phoneNumber = ref("")
+const email = ref("")
+const password = ref("")
+const registerUser = async () => {
+
+  try {
+    const respone = await axios.post('http://localhost:8080/courtmaster/users/register', {
+      userId: 3,
+      firstName: firstName.value,
+      lastName: lastName.value,
+      phoneNumber: phoneNumber.value,
+      email: email.value,
+      password: password.value,
+      role: 3
+    });
+    console.log(respone.data);
+  } catch (error) {
+    console.error(error);
+  };
+
+}
 </script>
 
 <style scoped>
@@ -54,6 +80,7 @@
   justify-content: center;
   width: 100%;
 }
+
 .form {
   display: flex;
   flex-direction: column;
@@ -126,21 +153,25 @@
 
 .form label {
   position: relative;
-  display: block; /* Ensure label takes full width */
-  margin-bottom: 20px; /* Add some space between labels */
+  display: block;
+  /* Ensure label takes full width */
+  margin-bottom: 20px;
+  /* Add some space between labels */
 }
 
 .form label .input {
   width: 100%;
   padding: 10px;
-  padding-top: 20px; /* Add extra padding on top to make space for the label */
+  padding-top: 20px;
+  /* Add extra padding on top to make space for the label */
   outline: 0;
   border: 1px solid rgba(105, 105, 105, 0.397);
   border-radius: 10px;
-  font-size: 1em; /* Ensure consistent font size */
+  font-size: 1em;
+  /* Ensure consistent font size */
 }
 
-.form label .input + span {
+.form label .input+span {
   position: absolute;
   left: 10px;
   top: 10px;
@@ -148,24 +179,27 @@
   font-size: 0.9em;
   cursor: text;
   transition: 0.3s ease;
-  pointer-events: none; /* Prevent the span from interfering with input focus */
+  pointer-events: none;
+  /* Prevent the span from interfering with input focus */
 }
 
-.form label .input:placeholder-shown + span {
+.form label .input:placeholder-shown+span {
   top: 15px;
   font-size: 0.9em;
 }
 
-.form label .input:focus + span,
-.form label .input:not(:placeholder-shown) + span {
+.form label .input:focus+span,
+.form label .input:not(:placeholder-shown)+span {
   top: -10px;
   font-size: 0.7em;
   font-weight: 600;
-  background-color: white; /* Add background color to prevent text overlap */
-  padding: 0 5px; /* Add padding to create space around the text */
+  background-color: white;
+  /* Add background color to prevent text overlap */
+  padding: 0 5px;
+  /* Add padding to create space around the text */
 }
 
-.form label .input:valid + span {
+.form label .input:valid+span {
   color: green;
 }
 
