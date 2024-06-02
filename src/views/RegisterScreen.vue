@@ -14,7 +14,7 @@
 
 <script setup>
 import Logo from "../components/Register/Logo.vue";
-import OtpForm from "../components/Register/OtpForm.vue";
+// import OtpForm from "../components/Register/OtpForm.vue";
 import RegisterForm from "../components/Register/RegisterForm.vue";
 </script>
 
@@ -27,12 +27,17 @@ import RegisterForm from "../components/Register/RegisterForm.vue";
 }
 
 .left-side {
+  margin-top: 85px;
+  margin-left: -80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   flex: 1;
   background-color: white;
 }
 .right-side {
-  margin: -40px;
+  margin: -118px;
   width: 100%;
   flex: 1;
   background-color: #6babf4;

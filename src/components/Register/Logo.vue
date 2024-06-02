@@ -13,6 +13,7 @@
   
   <style>
 .image_logo {
+  margin-top: 88px;
   width: 80%;
   display: flex;
   align-items: center;
