@@ -20,13 +20,12 @@
               v-model="firstName"
               placeholder=""
               required
-              @blur="showFirstNameError = true"
+              @input="validateInput('firstName')"
+              @blur="validateInput('firstName')"
               @invalid="handleInvalid($event, 'firstName')"
             />
             <span>Firstname</span>
-            <p v-if="showFirstNameError && !firstName" class="error">
-              {{ firstNameErrorMessage }}
-            </p>
+            <p v-if="firstNameError" class="error">{{ firstNameError }}</p>
           </label>
 
           <label>
@@ -36,13 +35,12 @@
               v-model="lastName"
               placeholder=""
               required
-              @blur="showLastNameError = true"
+              @input="validateInput('lastName')"
+              @blur="validateInput('lastName')"
               @invalid="handleInvalid($event, 'lastName')"
             />
             <span>Lastname</span>
-            <p v-if="showLastNameError && !lastName" class="error">
-              {{ lastNameErrorMessage }}
-            </p>
+            <p v-if="lastNameError" class="error">{{ lastNameError }}</p>
           </label>
         </div>
 
@@ -55,13 +53,11 @@
             required
             pattern="^\d{10}$"
             @input="validatePhoneNumber"
-            @blur="showPhoneNumberError = true"
+            @blur="validatePhoneNumber"
             @invalid="handleInvalid($event, 'phoneNumber')"
           />
           <span>Phone Number (10 digits)</span>
-          <p v-if="showPhoneNumberError && !isValidPhoneNumber" class="error">
-            {{ phoneNumberErrorMessage }}
-          </p>
+          <p v-if="phoneNumberError" class="error">{{ phoneNumberError }}</p>
         </label>
 
         <label>
@@ -71,13 +67,12 @@
             v-model="email"
             placeholder=""
             required
-            @blur="showEmailError = true"
+            @input="validateInput('email')"
+            @blur="validateInput('email')"
             @invalid="handleInvalid($event, 'email')"
           />
           <span>Email (example@gmail.com)</span>
-          <p v-if="showEmailError && (!email || !isValidEmail)" class="error">
-            {{ emailErrorMessage }}
-          </p>
+          <p v-if="emailError" class="error">{{ emailError }}</p>
         </label>
 
         <label>
@@ -87,13 +82,12 @@
             v-model="password"
             placeholder=""
             required
-            @blur="showPasswordError = true"
+            @input="validatePassword"
+            @blur="validatePassword"
             @invalid="handleInvalid($event, 'password')"
           />
           <span>Password</span>
-          <p v-if="showPasswordError && !password" class="error">
-            {{ passwordErrorMessage }}
-          </p>
+          <p v-if="passwordError" class="error">{{ passwordError }}</p>
         </label>
         <label>
           <input
@@ -102,17 +96,17 @@
             v-model="confirmPassword"
             placeholder=""
             required
-            @blur="showConfirmPasswordError = true"
+            @input="validateConfirmPassword"
+            @blur="validateConfirmPassword"
             @invalid="handleInvalid($event, 'confirmPassword')"
           />
           <span>Confirm password</span>
-          <p
-            v-if="showConfirmPasswordError && password !== confirmPassword"
-            class="error"
-          >
-            {{ confirmPasswordErrorMessage }}
+          <p v-if="confirmPasswordError" class="error">
+            {{ confirmPasswordError }}
           </p>
         </label>
+
+        <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
 
         <button class="submit">Submit</button>
         <p class="signin">Already have an acount ? <a href="#">Signin</a></p>
@@ -125,91 +119,98 @@
 import axios from "axios";
 import { computed, ref } from "vue";
 
-const firstNameErrorMessage = ref("");
-const lastNameErrorMessage = ref("");
-const phoneNumberErrorMessage = ref("");
-const emailErrorMessage = ref("");
-const passwordErrorMessage = ref("");
-const confirmPasswordErrorMessage = ref("");
-
-const handleInvalid = (event, field) => {
-  event.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
-
-  if (field === "firstName") {
-    firstNameErrorMessage.value = "Please enter first name";
-  } else if (field === "lastName") {
-    lastNameErrorMessage.value = "Please enter last name";
-  } else if (field === "phoneNumber") {
-    phoneNumberErrorMessage.value =
-      "Please enter phone number into correct format";
-  } else if (field === "email") {
-    emailErrorMessage.value = "Please enter email into correct format";
-  } else if (field === "password") {
-    passwordErrorMessage.value = "Please enter password";
-  } else if (field === "confirmPassword") {
-    confirmPasswordErrorMessage.value =
-      "Please enter confirm password similarly with password";
-  }
-};
+const firstNameError = ref("");
+const lastNameError = ref("");
+const phoneNumberError = ref("");
+const emailError = ref("");
+const passwordError = ref("");
+const confirmPasswordError = ref("");
+const formError = ref(false);
+const formErrorMessage = ref();
 
 const firstName = ref("");
-const showFirstNameError = ref(false);
-
 const lastName = ref("");
-const showLastNameError = ref(false);
-
 const phoneNumber = ref("");
 const isValidPhoneNumber = computed(() => /^\d{10}$/.test(phoneNumber.value));
-const showPhoneNumberError = ref(false);
-
-const validatePhoneNumber = () => {
-  if (phoneNumber.value.length > 10) {
-    phoneNumber.value = phoneNumber.value.slice(0, 10);
-  } else {
-    showPhoneNumberError.value = !isValidPhoneNumber.value;
-  }
-};
-
 const email = ref("");
-const showEmailError = ref(false);
 const isValidEmail = computed(() => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(email.value);
 });
-
 const password = ref("");
-const showPasswordError = ref(false);
-
 const confirmPassword = ref("");
-const showConfirmPasswordError = ref(false);
 
-const showFormError = ref(false);
-const formErrorMessage = ref("");
+const handleInvalid = (event, field) => {
+  event.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
+};
 
-const isFormValid = computed(() => {
-  return (
-    firstName.value &&
-    lastName.value &&
-    isValidPhoneNumber.value &&
-    email.value &&
-    password.value &&
+const validateInput = (field) => {
+  if (field === "firstName") {
+    firstNameError.value = firstName.value
+      ? ""
+      : "Please enter your first name";
+  } else if (field === "lastName") {
+    lastNameError.value = lastName.value ? "" : "Please enter your last name";
+  } else if (field === "email") {
+    emailError.value =
+      email.value && isValidEmail.value
+        ? ""
+        : "Please enter a valid email address";
+  }
+};
+
+const validatePhoneNumber = () => {
+  if (phoneNumber.value.length > 10) {
+    phoneNumber.value = phoneNumber.value.slice(0, 10);
+  }
+  phoneNumberError.value = isValidPhoneNumber.value
+    ? ""
+    : "Please enter your phone number validatedly";
+};
+
+const validatePassword = () => {
+  passwordError.value = password.value ? "" : "Please enter password";
+};
+
+const validateConfirmPassword = () => {
+  confirmPasswordError.value =
     confirmPassword.value === password.value
+      ? ""
+      : "Please enter confirm password similarly with password";
+};
+
+const validateForm = () => {
+  const isFirstNameValid = !!firstName.value;
+  const isLastNameValid = !!lastName.value;
+  const isPhoneNumberValid = isValidPhoneNumber.value;
+  const isEmailValid = isValidEmail.value;
+  const isPasswordValid = !!password.value;
+  const isConfirmPasswordValid = confirmPassword.value === password.value;
+
+  return (
+    isFirstNameValid &&
+    isLastNameValid &&
+    isPhoneNumberValid &&
+    isEmailValid &&
+    isPasswordValid &&
+    isConfirmPasswordValid
   );
-});
+};
 
 const registerUser = async () => {
-  showFormError.value = false;
-  formErrorMessage.value = "";
+  formError.value = false;
 
-  if (!isFormValid.value) {
-    showFormError.value = true;
+  const isFormValid = validateForm();
+
+  if (!isFormValid) {
+    formError.value = true;
     formErrorMessage.value =
-      "Please complete the form correctly base on instruction";
+      "Please complete the form correctly based on instructions";
     return;
   }
 
   try {
-    const respone = await axios.post(
+    const response = await axios.post(
       "http://localhost:8080/courtmaster/users/register",
       {
         userId: 3,
@@ -221,7 +222,7 @@ const registerUser = async () => {
         role: 3,
       }
     );
-    console.log(respone.data);
+    console.log(response.data);
   } catch (error) {
     console.error(error);
   }
@@ -257,29 +258,6 @@ const registerUser = async () => {
   align-items: center;
   justify-content: center;
 }
-
-/* .title::before,
-.title::after {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  left: 0px;
-  background-color: royalblue;
-}
-
-.title::before {
-  width: 18px;
-  height: 18px;
-  background-color: royalblue;
-}
-
-.title::after {
-  width: 18px;
-  height: 18px;
-  animation: pulse 1s linear infinite;
-} */
 
 .signin {
   color: rgba(88, 87, 87, 0.822);
@@ -399,219 +377,3 @@ const registerUser = async () => {
 
 
 
-<!-- ========================================BACK-UP============================================================= -->
-<!-- <template>
-  <div class="parent_container">
-    <div class="Register_title">
-      <p class="title">Register</p>
-    </div>
-
-    <div class="form_container">
-      <form class="form" @submit.prevent="registerUser">
-        <p class="message">Signup now and get full access to our app.</p>
-
-        <div class="flex">
-          <label>
-            <input
-              class="input"
-              type="text"
-              v-model="firstName"
-              placeholder=""
-              required
-              @blur="showFirstNameError = true"
-            />
-            <span>Firstname</span>
-            <p v-if="showFirstNameError && !firstName" class="error">
-              Please enter your first name
-            </p>
-          </label>
-
-          <label>
-            <input
-              class="input"
-              type="text"
-              v-model="lastName"
-              placeholder=""
-              required
-              @blur="showLastNameError = true"
-            />
-            <span>Lastname</span>
-            <p v-if="showLastNameError && !lastName" class="error">
-              Please enter your last name
-            </p>
-          </label>
-        </div>
-
-        <label>
-          <input
-            class="input"
-            type="text"
-            v-model="phoneNumber"
-            placeholder=""
-            required
-            pattern="^\d{10}$"
-            @input="validatePhoneNumber"
-            @blur="showPhoneNumberError = true"
-          />
-          <span>Phone Number (10 digits)</span>
-          <span
-            v-if="showPhoneNumberError && !isValidPhoneNumber"
-            class="error"
-          >
-            Please enter your phone number validatedly
-          </span>
-        </label>
-
-        <label>
-          <input
-            class="input"
-            type="email"
-            v-model="email"
-            placeholder=""
-            required
-            @blur="showEmailError = true"
-            @invalid="handlePhoneNumberInvalid"
-          />
-          <span>Email (example@gmail.com)</span>
-          <p v-if="showEmailError && (!email || !isValidEmail)" class="error">
-            Please enter your email validatedly
-          </p>
-        </label>
-
-        <label>
-          <input
-            class="input"
-            type="password"
-            v-model="password"
-            placeholder=""
-            required
-            @blur="showPasswordError = true"
-          />
-          <span>Password</span>
-          <p v-if="showPasswordError && !password" class="error">
-            Please enter password
-          </p>
-        </label>
-        <label>
-          <input
-            class="input"
-            type="password"
-            v-model="confirmPassword"
-            placeholder=""
-            required
-            @blur="showConfirmPasswordError = true"
-          />
-          <span>Confirm password</span>
-          <p
-            v-if="showConfirmPasswordError && password !== confirmPassword"
-            class="error"
-          >
-            Please enter confirm password similarly with password
-          </p>
-        </label>
-
-        <h3 v-if="showFormError" class="error">{{ formErrorMessage }}</h3>
-
-        <button class="submit">Submit</button>
-        <p class="signin">Already have an acount ? <a href="#">Signin</a></p>
-      </form>
-    </div>
-  </div>
-</template>
-
-<script setup>
-import axios from "axios";
-import { computed, ref } from "vue";
-
-const handleInvalidMessage = (event) => {
-  event.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
-  firstNameErrorMessage.value = "Please enter first name";
-  lastNameErrorMessage.value = "Please enter last name";
-
-  phoneNumberErrorMessage.value =
-    "Please enter phone number into correct format";
-  emailErrorMessage.value = "Please enter email into correct format";
-  passwordErrorMessage.value = "Please enter password";
-  confirmPasswordErrorMessage.value =
-    "Please enter confirm password similarly with password";
-};
-
-const firstName = ref("");
-const showFirstNameError = ref(false);
-
-const lastName = ref("");
-
-const phoneNumber = ref("");
-const isValidPhoneNumber = computed(() => /^\d{10}$/.test(phoneNumber.value));
-const showPhoneNumberError = ref(false);
-
-const validatePhoneNumber = () => {
-  if (phoneNumber.value.length > 10) {
-    phoneNumber.value = phoneNumber.value.slice(0, 10);
-  } else {
-    showPhoneNumberError.value = !isValidPhoneNumber.value;
-  }
-};
-
-// -------------------------------------------------------------------------------------
-const email = ref("");
-const showEmailError = ref(false);
-const isValidEmail = computed(() => {
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailPattern.test(email.value);
-});
-// -------------------------------------------------------------------------------------
-
-// -------------------------------------------------------------------------------------
-const password = ref("");
-const showPasswordError = ref(false);
-// -------------------------------------------------------------------------------------
-
-const confirmPassword = ref("");
-const showConfirmPasswordError = ref(false);
-// -------------------------------------------------------------------------------------
-
-const showFormError = ref(false);
-const formErrorMessage = ref("");
-// -------------------------------------------------------------------------------------
-const isFormValid = computed(() => {
-  return (
-    firstName.value &&
-    lastName.value &&
-    isValidPhoneNumber.value &&
-    email.value &&
-    password.value &&
-    confirmPassword.value === password.value
-  );
-});
-
-const registerUser = async () => {
-  showFormError.value = false;
-  formErrorMessage.value = "";
-
-  if (!isFormValid.value) {
-    showFormError.value = true;
-    formErrorMessage.value =
-      "Please complete the form correctly base on instruction";
-    return;
-  }
-
-  try {
-    const respone = await axios.post(
-      "http://localhost:8080/courtmaster/users/register",
-      {
-        userId: 3,
-        firstName: firstName.value,
-        lastName: lastName.value,
-        phoneNumber: phoneNumber.value,
-        email: email.value,
-        password: password.value,
-        role: 3,
-      }
-    );
-    console.log(respone.data);
-  } catch (error) {
-    console.error(error);
-  }
-};
-</script> -->

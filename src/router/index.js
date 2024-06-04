@@ -18,6 +18,12 @@ const routes = [
         name: 'ForgotPasswordScreen',
         component: () => import('../views/ForgotPasswordScreen.vue') ,
     },
+
+    {
+        path: '/homepage',
+        name: 'HomePageScreen',
+        component: () => import('../views/HomePageScreen.vue') ,
+    },
 ]
 
 const router = createRouter({
