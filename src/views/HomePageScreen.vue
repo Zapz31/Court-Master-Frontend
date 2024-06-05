@@ -1,14 +1,13 @@
 <template>
   <div class="container">
-    <div class="logo">
-      <img
-        src="../../public/img/mono_blue.png"
-        alt="logo_img"
-        class="image_logo"
-      />
+    <div class="logo"><logo /><user-avatar /></div>
+
+    <div class="filter_search">
+      <filter-search />
     </div>
 
     <div class="content">
+      <club-card />
       <!-- Nội dung của trang ở đây -->
     </div>
 
@@ -18,11 +17,21 @@
   </div>
 </template>
   
-  <script>
-export default {};
+  <script setup>
+import ClubCard from "../components/Homepage/ClubCard.vue";
+import FilterSearch from "../components/Homepage/FilerSearch.vue";
+import Logo from "../components/Homepage/Logo.vue";
+import UserAvatar from "../components/Homepage/UserAvatar.vue";
 </script>
-  
+  import Cl
   <style>
+.filter_search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px;
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -30,15 +39,8 @@ export default {};
 }
 
 .logo {
-  position: fixed;
-  top: -60px;
-  left: 0;
-  padding: 1rem;
-}
-
-.logo img {
-  width: 228px; /* Đặt kích thước cố định cho logo */
-  height: auto;
+  display: flex;
+  justify-content: space-between;
 }
 
 .content {

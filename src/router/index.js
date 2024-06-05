@@ -20,7 +20,7 @@ const routes = [
     },
 
     {
-        path: '/homepage',
+        path: '/',
         name: 'HomePageScreen',
         component: () => import('../views/HomePageScreen.vue') ,
     },
