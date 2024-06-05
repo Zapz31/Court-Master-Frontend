@@ -134,7 +134,7 @@ const phoneNumber = ref("");
 const isValidPhoneNumber = computed(() => /^\d{10}$/.test(phoneNumber.value));
 const email = ref("");
 const isValidEmail = computed(() => {
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   return emailPattern.test(email.value);
 });
 const password = ref("");
