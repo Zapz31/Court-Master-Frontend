@@ -112,7 +112,8 @@
     </div>
 
     <div class="forgot_password">
-      <span>Forgot password? </span><router-link>Click Here</router-link>
+      <span>Forgot password? </span
+      ><router-link to="/forgot">Click Here</router-link>
     </div>
   </div>
   <!-- ======================================================================================================================== -->
