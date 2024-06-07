@@ -5,5 +5,6 @@
   width: 100vw;
 }
 
-:root{
+#app{
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }

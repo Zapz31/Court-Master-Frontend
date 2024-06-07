@@ -8,12 +8,7 @@
   <div class="register">
     <h1>You did not have account?</h1>
     <div class="btn_block">
-      <router-link class="button" to="/register"
-        >Register</router-link
-      >
-      <!-- <button class="button" href="../../views/RegisterScreen.vue">
-        Register
-      </button> -->
+      <router-link class="button" to="/register">Register</router-link>
     </div>
   </div>
 </template>

@@ -36,6 +36,22 @@
           v-model="otp[3]"
           @input="handleOtpInput"
         />
+
+        <input
+          id="input5"
+          type="text"
+          maxlength="1"
+          v-model="otp[4]"
+          @input="handleOtpInput"
+        />
+
+        <input
+          id="input6"
+          type="text"
+          maxlength="1"
+          v-model="otp[5]"
+          @input="handleOtpInput"
+        />
       </div>
       <div class="btn_verify">
         <button class="action" type="submit">Verify</button>
@@ -61,7 +77,7 @@ const handleOtpInput = (event) => {
   const value = event.target.value;
   otp.value[currentIndex.value] = value;
 
-  if (value.length === 1 && currentIndex.value < 3) {
+  if (value.length === 1 && currentIndex.value < 5) {
     currentIndex.value++;
   } else if (value.length === 0 && currentIndex.value > 0) {
     currentIndex.value--;
@@ -70,7 +86,7 @@ const handleOtpInput = (event) => {
 
 const submitForm = () => {
   const otpValue = otp.value.join("");
-  if (otpValue.length === 4) {
+  if (otpValue.length === 6) {
     $emit("submit", otpValue);
   }
 };

@@ -1,29 +1,38 @@
 <template>
   <div class="container">
-    <div class="logo"><logo /><user-avatar /></div>
-
-    <div class="filter_search">
-      <filter-search />
+    <div class="logo">
+      <logo />
+      <user-avatar />
     </div>
-
+    <div class="filter_search" v-click-outside="closeDropdowns">
+      <filter-search ref="filterSearchRef" />
+    </div>
     <div class="content">
       <club-card />
       <!-- Nội dung của trang ở đây -->
     </div>
-
     <div class="footer">
       <h2>Developed by Court Master team</h2>
     </div>
   </div>
 </template>
-  
-  <script setup>
+
+<script setup>
+import { ref } from "vue";
 import ClubCard from "../components/Homepage/ClubCard.vue";
 import FilterSearch from "../components/Homepage/FilerSearch.vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
+
+const filterSearchRef = ref(null);
+
+const closeDropdowns = () => {
+  if (filterSearchRef.value) {
+    filterSearchRef.value.closeAllDropdowns();
+  }
+};
 </script>
-  import Cl
+
   <style>
 .filter_search {
   display: flex;

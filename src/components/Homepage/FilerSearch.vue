@@ -1,5 +1,5 @@
 <template>
-  <div class="box">
+  <div class="box" @click.self="closeAllDropdowns">
     <div class="search">
       <input
         v-model="searchQuery"
@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="filter">
-      <div class="filter-item" @click="toggleDropdown('city')">
+      <div class="filter-item" @click.stop="toggleDropdown('city')">
         <span>{{ selectedCity || cityLabel }}</span>
         <div v-if="dropdowns.city" class="dropdown-content">
           <div v-for="city in cities" :key="city" @click="selectCity(city)">
@@ -26,7 +26,7 @@
           </div>
         </div>
       </div>
-      <div class="filter-item" @click="toggleDropdown('district')">
+      <div class="filter-item" @click.stop="toggleDropdown('district')">
         <span>{{ selectedDistrict || districtLabel }}</span>
         <div v-if="dropdowns.district" class="dropdown-content">
           <div
@@ -38,13 +38,13 @@
           </div>
         </div>
       </div>
-      <div class="filter-item" @click="toggleDropdown('openTime')">
+      <div class="filter-item" @click.stop="toggleDropdown('openTime')">
         <span>{{ openTimeLabel }}</span>
         <div v-if="dropdowns.openTime" class="dropdown-content">
           <input type="time" v-model="openTime" @change="selectOpenTime" />
         </div>
       </div>
-      <div class="filter-item" @click="toggleDropdown('hoursExpect')">
+      <div class="filter-item" @click.stop="toggleDropdown('hoursExpect')">
         <span>{{ hoursExpectLabel }}</span>
         <div v-if="dropdowns.hoursExpect" class="dropdown-content">
           <input
@@ -55,26 +55,35 @@
         </div>
       </div>
       <div class="button">
-        <button @click="performSearch" type="submit" class="button">Go</button>
+        <button @click="performSearch" type="submit" class="button">
+          Search
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
-
-const menuVisible = ref(false);
-
-function toggleMenu() {
-  menuVisible.value = !menuVisible.value;
-}
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 const searchQuery = ref("");
 const selectedCity = ref("");
 const selectedDistrict = ref("");
+
+// ===============================TEST DATA=====================================
 const cities = ref(["Hanoi", "Ho Chi Minh City", "Da Nang"]);
 const districts = ref(["District 1", "District 2", "District 3"]);
+
+// Dummy data for search results
+const searchResults = ref([
+  { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
+  { id: 2, name: "Club B", address: "def, Hanoi" },
+  { id: 3, name: "Club C", address: "ghi, Da Nang" },
+  // Add more results as needed
+]);
+
+// =============================================================================
+
 const openTime = ref("");
 const hoursExpect = ref("");
 const dropdowns = ref({
@@ -88,14 +97,6 @@ const cityLabel = ref("City/Province");
 const districtLabel = ref("District");
 const openTimeLabel = ref("Opened time");
 const hoursExpectLabel = ref("Hours of expect");
-
-// Dummy data for search results
-const searchResults = ref([
-  { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
-  { id: 2, name: "Club B", address: "def, Hanoi" },
-  { id: 3, name: "Club C", address: "ghi, Da Nang" },
-  // Add more results as needed
-]);
 
 const filteredResults = computed(() => {
   if (!searchQuery.value) return [];
@@ -111,8 +112,35 @@ const filterResults = () => {
 };
 
 const toggleDropdown = (dropdown) => {
+  closeAllDropdowns();
   dropdowns.value[dropdown] = !dropdowns.value[dropdown];
 };
+
+const closeAllDropdowns = () => {
+  dropdowns.value.city = false;
+  dropdowns.value.district = false;
+  dropdowns.value.openTime = false;
+  dropdowns.value.hoursExpect = false;
+};
+
+defineExpose({
+  closeAllDropdowns,
+});
+
+const handleOutsideClick = (event) => {
+  const filterSearch = document.querySelector(".filter_search");
+  if (filterSearch && !filterSearch.contains(event.target)) {
+    closeAllDropdowns();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener("click", handleOutsideClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", handleOutsideClick);
+});
 
 const selectCity = (city) => {
   selectedCity.value = city;
