@@ -105,31 +105,11 @@
             {{ confirmPasswordError }}
           </p>
         </label>
-        <p
-          v-if="duplicateError === 'Email or phone number has already exsit'"
-          class="error"
-        >
-          {{ duplicateError }}
-        </p>
+
         <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
 
         <button class="submit">Submit</button>
-        <!-- <p class="signin">Already have an acount ? <a href="#">Signin</a></p> -->
-        <div>
-          <p
-            class="signin"
-            v-if="
-              duplicateError === 'Email or phone number has already exsit' ||
-              duplicateError === ''
-            "
-          >
-            Already have an acount ? <a href="#">Signin</a>
-          </p>
-          <p class="signin" v-else>
-            Registered successfully, sign in here:
-            <router-link to="/login">Signin</router-link>
-          </p>
-        </div>
+        <p class="signin">Already have an acount ? <a href="#">Signin</a></p>
       </form>
     </div>
   </div>
@@ -138,7 +118,6 @@
 <script setup>
 import axios from "axios";
 import { computed, ref } from "vue";
-import { RouterLink } from "vue-router";
 
 const duplicateError = ref("");
 const firstNameError = ref("");
@@ -245,14 +224,6 @@ const registerUser = async () => {
       }
     );
     console.log(response.data);
-
-    if (
-      response.data.duplicateError === "Email or phone number has already exsit"
-    ) {
-      duplicateError.value = "Email or phone number has already exsit";
-    } else {
-      duplicateError.value = "login success";
-    }
   } catch (error) {
     console.error(error);
   }
