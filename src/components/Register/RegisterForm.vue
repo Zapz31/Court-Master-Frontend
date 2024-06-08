@@ -123,7 +123,8 @@
               duplicateError === ''
             "
           >
-            Already have an acount ? <a href="#">Signin</a>
+            Already have an acount ?
+            <router-link to="/login">Signin</router-link>
           </p>
           <p class="signin" v-else>
             Registered successfully, sign in here:
