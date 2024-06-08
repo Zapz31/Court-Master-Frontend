@@ -14,102 +14,60 @@
 
         <div class="flex">
           <label>
-            <input
-              class="input"
-              type="text"
-              v-model="firstName"
-              placeholder=""
-              required
-              @input="validateInput('firstName')"
-              @blur="validateInput('firstName')"
-              @invalid="handleInvalid($event, 'firstName')"
-            />
+            <input class="input" type="text" v-model="firstName" placeholder="" required
+              @input="validateInput('firstName')" @blur="validateInput('firstName')"
+              @invalid="handleInvalid($event, 'firstName')" />
             <span>Firstname</span>
             <p v-if="firstNameError" class="error">{{ firstNameError }}</p>
           </label>
 
           <label>
-            <input
-              class="input"
-              type="text"
-              v-model="lastName"
-              placeholder=""
-              required
-              @input="validateInput('lastName')"
-              @blur="validateInput('lastName')"
-              @invalid="handleInvalid($event, 'lastName')"
-            />
+            <input class="input" type="text" v-model="lastName" placeholder="" required
+              @input="validateInput('lastName')" @blur="validateInput('lastName')"
+              @invalid="handleInvalid($event, 'lastName')" />
             <span>Lastname</span>
             <p v-if="lastNameError" class="error">{{ lastNameError }}</p>
           </label>
         </div>
 
         <label>
-          <input
-            class="input"
-            type="text"
-            v-model="phoneNumber"
-            placeholder=""
-            required
-            pattern="^\d{10}$"
-            @input="validatePhoneNumber"
-            @blur="validatePhoneNumber"
-            @invalid="handleInvalid($event, 'phoneNumber')"
-          />
+          <input class="input" type="text" v-model="phoneNumber" placeholder="" required pattern="^\d{10}$"
+            @input="validatePhoneNumber" @blur="validatePhoneNumber" @invalid="handleInvalid($event, 'phoneNumber')" />
           <span>Phone Number (10 digits)</span>
           <p v-if="phoneNumberError" class="error">{{ phoneNumberError }}</p>
         </label>
 
         <label>
-          <input
-            class="input"
-            type="email"
-            v-model="email"
-            placeholder=""
-            required
-            @input="validateInput('email')"
-            @blur="validateInput('email')"
-            @invalid="handleInvalid($event, 'email')"
-          />
+          <input class="input" type="email" v-model="email" placeholder="" required @input="validateInput('email')"
+            @blur="validateInput('email')" @invalid="handleInvalid($event, 'email')" />
           <span>Email (example@gmail.com)</span>
           <p v-if="emailError" class="error">{{ emailError }}</p>
         </label>
 
         <label>
-          <input
-            class="input"
-            type="password"
-            v-model="password"
-            placeholder=""
-            required
-            @input="validatePassword"
-            @blur="validatePassword"
-            @invalid="handleInvalid($event, 'password')"
-          />
+          <input class="input" type="password" v-model="password" placeholder="" required @input="validatePassword"
+            @blur="validatePassword" @invalid="handleInvalid($event, 'password')" />
           <span>Password</span>
           <p v-if="passwordError" class="error">{{ passwordError }}</p>
         </label>
         <label>
-          <input
-            class="input"
-            type="password"
-            v-model="confirmPassword"
-            placeholder=""
-            required
-            @input="validateConfirmPassword"
-            @blur="validateConfirmPassword"
-            @invalid="handleInvalid($event, 'confirmPassword')"
-          />
+          <input class="input" type="password" v-model="confirmPassword" placeholder="" required
+            @input="validateConfirmPassword" @blur="validateConfirmPassword"
+            @invalid="handleInvalid($event, 'confirmPassword')" />
           <span>Confirm password</span>
           <p v-if="confirmPasswordError" class="error">
             {{ confirmPasswordError }}
           </p>
         </label>
-
+        <p v-if="duplicateError === 'Email or phone number has already exsit'" class="error">{{ duplicateError }}</p>
         <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
 
         <button class="submit">Submit</button>
-        <p class="signin">Already have an acount ? <a href="#">Signin</a></p>
+        <!-- <p class="signin">Already have an acount ? <a href="#">Signin</a></p> -->
+        <div>
+          <p class="signin" v-if="duplicateError === 'Email or phone number has already exsit' || duplicateError === ''">Already have an acount ? <a href="#">Signin</a></p>
+          <p class="signin" v-else>Registered successfully, sign in here: <router-link to = "/login">Signin</router-link></p>
+        </div>
       </form>
     </div>
   </div>
@@ -118,7 +76,9 @@
 <script setup>
 import axios from "axios";
 import { computed, ref } from "vue";
+import { RouterLink } from "vue-router";
 
+const duplicateError = ref("");
 const firstNameError = ref("");
 const lastNameError = ref("");
 const phoneNumberError = ref("");
@@ -211,7 +171,7 @@ const registerUser = async () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/users/register",
+      "http://localhost:8080/courtmaster/auth/register",
       {
         userId: 3,
         firstName: firstName.value,
@@ -223,6 +183,13 @@ const registerUser = async () => {
       }
     );
     console.log(response.data);
+    
+      if (response.data.duplicateError === "Email or phone number has already exsit") {
+        duplicateError.value = "Email or phone number has already exsit";
+      } else {
+        duplicateError.value = "login success";
+      }
+
   } catch (error) {
     console.error(error);
   }
@@ -302,7 +269,7 @@ const registerUser = async () => {
   /* Ensure consistent font size */
 }
 
-.form label .input + span {
+.form label .input+span {
   position: absolute;
   left: 10px;
   top: 10px;
@@ -314,13 +281,13 @@ const registerUser = async () => {
   /* Prevent the span from interfering with input focus */
 }
 
-.form label .input:placeholder-shown + span {
+.form label .input:placeholder-shown+span {
   top: 15px;
   font-size: 0.9em;
 }
 
-.form label .input:focus + span,
-.form label .input:not(:placeholder-shown) + span {
+.form label .input:focus+span,
+.form label .input:not(:placeholder-shown)+span {
   top: -10px;
   font-size: 0.7em;
   font-weight: 600;
@@ -330,7 +297,7 @@ const registerUser = async () => {
   /* Add padding to create space around the text */
 }
 
-.form label .input:valid + span {
+.form label .input:valid+span {
   color: green;
 }
 
@@ -373,7 +340,3 @@ const registerUser = async () => {
   }
 }
 </style>
-
-
-
-
