@@ -48,94 +48,211 @@ const formatTime = (time) => {
     .padStart(2, "0")}`;
 };
 
-// Tạo danh sách để lưu trữ trạng thái của các ô
-const cellStates = ref([]);
+// Tạo danh sách để lưu trữ các phiên chơi
+const sessions = ref([]);
 
-// Hàm khởi tạo dữ liệu mẫu
-const initializeCellStates = () => {
-  for (let time of times.value) {
-    for (let court = 1; court <= courtCount; court++) {
-      cellStates.value.push({
-        time: formatTime(time),
-        court: court,
-        status: "empty",
-      });
-    }
-  }
+//dữ liệu cần truyền cho 1 phiên chơi
+// =====================================TEST BACKEND DATA===========================================
+const initializeSessions = () => {
+  sessions.value.push({
+    startTime: "16:30",
+    endTime: "18:30",
+    court: 9,
+    status: "booked",
+  });
+  sessions.value.push({
+    startTime: "14:30",
+    endTime: "16:00",
+    court: 5,
+    status: "booked",
+  });
+
+  sessions.value.push({
+    startTime: "14:30",
+    endTime: "16:00",
+    court: 8,
+    status: "booked",
+  });
+
+  sessions.value.push({
+    startTime: "06:30",
+    endTime: "08:00",
+    court: 1,
+    status: "booked",
+  });
+
+  sessions.value.push({
+    startTime: "12:30",
+    endTime: "15:00",
+    court: 3,
+    status: "booked",
+  });
+
+  sessions.value.push({
+    startTime: "15:00",
+    endTime: "20:00",
+    court: 3,
+    status: "bookedByUser",
+  });
 };
 
-// Khởi tạo dữ liệu mẫu
-initializeCellStates();
-
-// ========================================DATA TEST================================================
-cellStates.value.find(
-  (cell) => cell.time === "00:30" && cell.court === 9
-).status = "booked"; // Ví dụ một ô đã được đặt chỗ
-cellStates.value.find(
-  (cell) => cell.time === "01:30" && cell.court === 5
-).status = "booked"; // Ví dụ một ô đã được đặt chỗ
-cellStates.value.find(
-  (cell) => cell.time === "02:00" && cell.court === 3
-).status = "bookedByUser"; // Ví dụ một ô đã được đặt bởi người dùng
 // =================================================================================================
+
+// Khởi tạo dữ liệu mẫu
+initializeSessions();
 
 let isDragging = ref(false);
 let dragStartCell = ref(null);
+let selectedCells = ref([]);
 
+//Xanh duong dam: cua người khác đặt (đẩy từ BE)
+//Cam: cua người dùng đặt từ trước đó (đẩy từ BE)
+//Xanh lá: Chọn giờ chơi mới (FE)
 const handleMouseDown = (time, court) => {
-  const cell = cellStates.value.find(
-    (cell) => cell.time === formatTime(time) && cell.court === court
+  const startTime = formatTime(time);
+  const cell = sessions.value.find(
+    (session) =>
+      session.court === court &&
+      startTime >= session.startTime &&
+      startTime < session.endTime
   );
 
-  if (cell.status === "booked" || cell.status === "bookedByUser") {
+  if (cell) {
+    if (cell.status === "selected") {
+      // Hủy chọn các ô đã được chọn trước đó
+      sessions.value = sessions.value.filter(
+        (session) =>
+          !(
+            session.court === court &&
+            session.startTime === cell.startTime &&
+            session.status === "selected"
+          )
+      );
+      return;
+    }
     return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
   }
 
   isDragging.value = true;
-  dragStartCell.value = { time: formatTime(time), court: court };
-  updateCellState(time, court);
+  dragStartCell.value = { time: startTime, court: court };
+  selectedCells.value = [{ time: startTime, court: court }];
+  updateSession(startTime, court, true);
 };
 
 const handleMouseEnter = (time, court) => {
   if (isDragging.value) {
-    updateCellState(time, court);
+    const startTime = dragStartCell.value.time;
+    const currentTime = formatTime(time);
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [currentHour, currentMinute] = currentTime.split(":").map(Number);
+
+    const startTotalMinutes = startHour * 60 + startMinute;
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+    const timeDiff = Math.abs(currentTotalMinutes - startTotalMinutes);
+    const steps = timeDiff / 30;
+
+    selectedCells.value = [];
+
+    for (let i = 0; i <= steps; i++) {
+      const newTime =
+        startTotalMinutes +
+        (currentTotalMinutes > startTotalMinutes ? i : -i) * 30;
+      selectedCells.value.push({ time: formatTime(newTime), court: court });
+      updateSession(formatTime(newTime), court, false);
+    }
   }
 };
 
 const handleMouseUp = () => {
   isDragging.value = false;
-};
+  const sessionStart = selectedCells.value[0].time;
+  const sessionEnd = selectedCells.value[selectedCells.value.length - 1].time;
+  const court = selectedCells.value[0].court;
 
-const updateCellState = (time, court) => {
-  const cell = cellStates.value.find(
-    (cell) => cell.time === formatTime(time) && cell.court === court
+  const existingSession = sessions.value.find(
+    (session) =>
+      session.court === court &&
+      session.startTime === sessionStart &&
+      session.status === "selected"
   );
 
-  if (cell.status === "booked" || cell.status === "bookedByUser") {
+  if (existingSession) {
+    existingSession.endTime = formatTime(
+      parseInt(sessionEnd.split(":")[0]) * 60 +
+        parseInt(sessionEnd.split(":")[1]) +
+        30
+    );
+  } else {
+    sessions.value.push({
+      startTime: sessionStart,
+      endTime: formatTime(
+        parseInt(sessionEnd.split(":")[0]) * 60 +
+          parseInt(sessionEnd.split(":")[1]) +
+          30
+      ),
+      court: court,
+      status: "selected",
+    });
+  }
+  selectedCells.value = [];
+};
+
+const updateSession = (time, court, isStart) => {
+  const cell = sessions.value.find(
+    (session) =>
+      session.court === court &&
+      time >= session.startTime &&
+      time < session.endTime
+  );
+
+  if (cell) {
     return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
   }
 
-  if (cell.status === "empty") {
-    cell.status = "selected";
-  } else if (cell.status === "selected") {
-    cell.status = "empty";
+  const existingSession = sessions.value.find(
+    (session) =>
+      session.court === court &&
+      session.endTime === time &&
+      session.status === "selected"
+  );
+
+  if (existingSession && !isStart) {
+    existingSession.endTime = formatTime(
+      parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
+    );
+  } else if (isStart) {
+    sessions.value.push({
+      startTime: time,
+      endTime: formatTime(
+        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
+      ),
+      court: court,
+      status: "selected",
+    });
   }
 };
 
 const getCellClass = (time, court) => {
-  const cell = cellStates.value.find(
-    (cell) => cell.time === formatTime(time) && cell.court === court
+  const formattedTime = formatTime(time);
+  const session = sessions.value.find(
+    (session) =>
+      session.court === court &&
+      formattedTime >= session.startTime &&
+      formattedTime < session.endTime
   );
 
-  if (cell.status === "booked") {
-    return "booked";
-  } else if (cell.status === "bookedByUser") {
-    return "bookedByUser";
-  } else if (cell.status === "selected") {
-    return "selected";
-  } else {
-    return "";
+  if (session) {
+    if (session.status === "booked") {
+      return "booked";
+    } else if (session.status === "bookedByUser") {
+      return "bookedByUser";
+    } else if (session.status === "selected") {
+      return "selected";
+    }
   }
+
+  return "";
 };
 </script>
 
