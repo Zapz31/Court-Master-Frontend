@@ -45,9 +45,11 @@
           type="text"
           class="input_field"
           id="email_field"
-        />
-      </div>
+          v-model="emailOrPhone"
+        />       
+      </div>   
     </div>
+    <p v-if="invalidMess === 'Your email is not registered'">Your email or phone is not registered</p>
     <!-- ------------------------------------------------------------------------------------- -->
     <div class="input_container">
       <label class="input_label" for="password_field">Password</label>
@@ -85,10 +87,13 @@
           type="password"
           class="input_field"
           id="password_field"
-        />
+          v-model="password"
+        />       
       </div>
+      
     </div>
   </div>
+  <p v-if="invalidMess === 'Invalid password'">Your password is not valid</p>
 
   <!-- ------------------------------------------------------------------------------------- -->
 
@@ -112,12 +117,12 @@
     </div>
 
     <div class="forgot_password">
-      <span>Forgot password? </span
+      <span>Forgot password? </span>
       ><router-link to="/forgot">Click Here</router-link>
     </div>
   </div>
   <!-- ======================================================================================================================== -->
-  <button title="Sign In" type="submit" class="sign-in_btn">
+  <button title="Sign In" @click="signin" type="submit" class="sign-in_btn">
     <span>Sign In</span>
   </button>
 
@@ -187,13 +192,34 @@
 
 <script setup>
 import { ref } from "vue";
-
+import router from "../../router";
 const title = "Xin chao VueJS";
 const count = ref(0);
+const invalidMess = ref('');
 
-const tangSo = () => {
-  count.value++;
-};
+    const emailOrPhone = ref('');
+    const password = ref('');
+const signin = async () => {
+      try {
+        const response = await axios.post('http://localhost:8080/courtmaster/auth/signin', {
+          emailOrPhoneNumber: emailOrPhone.value,
+          password: password.value
+        },
+        { withCredentials: true }
+      
+      );
+        
+        console.log(response.data);
+        if(response.data.massage !== "Invalid password" && response.data.massage !== "Your email is not registered"){
+          router.push('/');
+        } 
+        invalidMess.value = response.data.massage;  // Invalid password // Your email is not registered
+        
+      } catch (error) {
+        console.error('Đã xảy ra lỗi:', error);
+        
+      }
+    };
 </script>
 
 
