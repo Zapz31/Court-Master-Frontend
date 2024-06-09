@@ -222,7 +222,7 @@ const validateForm = () => {
 
 const registerUser = async () => {
   formError.value = false;
-
+  const currentDate = new Date().toISOString().split('T')[0];
   const isFormValid = validateForm();
 
   if (!isFormValid) {
@@ -243,6 +243,7 @@ const registerUser = async () => {
         email: email.value,
         password: password.value,
         role: 3,
+        registerDate: currentDate
       }
     );
     console.log(response.data);
