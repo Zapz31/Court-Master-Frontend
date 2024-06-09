@@ -24,6 +24,12 @@ const routes = [
         name: 'HomePageScreen',
         component: () => import('../views/HomePageScreen.vue') ,
     },
+
+    {
+        path: '/schedule',
+        name: 'ScheduleScreen',
+        component: () => import('../views/ScheduleScreen.vue') ,
+    },
 ]
 
 const router = createRouter({
