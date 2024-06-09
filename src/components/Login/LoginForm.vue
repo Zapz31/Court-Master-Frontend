@@ -49,7 +49,7 @@
         />       
       </div>   
     </div>
-    <p v-if="invalidMess === 'Your email is not registered'">Your email or phone is not registered</p>
+    <p v-if="invalidMess === 'Your email is not registered'">Email hoặc số điện thoại của bạn chưa được đăng ký</p>
     <!-- ------------------------------------------------------------------------------------- -->
     <div class="input_container">
       <label class="input_label" for="password_field">Password</label>
@@ -93,7 +93,7 @@
       
     </div>
   </div>
-  <p v-if="invalidMess === 'Invalid password'">Your password is not valid</p>
+  <p v-if="invalidMess === 'Invalid password'">Mật khẩu không hợp lệ</p>
 
   <!-- ------------------------------------------------------------------------------------- -->
 

@@ -15,19 +15,19 @@
         <template v-if="userRole === 'customer'">
           <router-link to="/customer/orders">My Orders</router-link>
           <router-link to="/customer/profile">My Profile</router-link>
-          <router-link to="/logout">Logout</router-link>
+          <button @click="signout">Đăng xuất</button>
           <!-- Thêm các router-link khác cho customer -->
         </template>
         <template v-else-if="userRole === 'staff'">
           <router-link to="/staff/orders">Manage Orders</router-link>
           <router-link to="/staff/customers">Manage Customers</router-link>
-          <router-link to="/logout">Logout</router-link>
+          <button @click="signout">Đăng xuất</button>
           <!-- Thêm các router-link khác cho staff -->
         </template>
         <template v-else-if="userRole === 'manager'">
           <router-link to="/manager/reports">Reports</router-link>
           <router-link to="/manager/settings">Settings</router-link>
-          <router-link to="/logout">Logout</router-link>
+          <button @click="signout">Đăng xuất</button>
           <!-- Thêm các router-link khác cho manager -->
         </template>
       </div>
@@ -37,6 +37,9 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
+import { useAuthStore } from "../../stores/auth";
+import router from "../../router";
+const authStore = useAuthStore();
 
 // ===========================================DATA TEST==============================================
 const props = defineProps({
@@ -80,6 +83,28 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
 });
+
+const signout = async () => {
+      try {
+        const response = await axios.post('http://localhost:8080/courtmaster/auth/signout', {
+         
+        },
+        { withCredentials: true }
+      
+      );
+        
+        console.log(response.data);
+        authStore.logout();
+        router.push("/login");
+        
+        
+      } catch (error) {
+        console.error('Đã xảy ra lỗi:', error);
+        
+      }
+    };
+  
+    
 //
 </script>
 

@@ -30,17 +30,19 @@
         <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
         <button class="submit" type="submit">Submit</button>
       </form>
+      <p v-if="invalidMess === 'Your email is not registered'">Email của bạn chưa được đăng ký</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-
+import router from "../../router";
 const email = ref("");
 const emailError = ref("");
 const formError = ref(false);
 const formErrorMessage = ref("");
+const invalidMess = ref("");
 
 const validateInput = (field) => {
   // Validate email input
@@ -59,10 +61,27 @@ const handleInvalid = (event, field) => {
   validateInput(field);
 };
 
-const submitForm = () => {
+const submitForm = async() => {
   if (emailError.value === "") {
     formError.value = false;
     // $emit('submit', email.value);
+    try {
+        const response = await axios.post('http://localhost:8080/courtmaster/auth/forgotpassword/aaaa', {
+        } 
+      );
+        
+        console.log(response.data);
+        if(response.data.massage !== "Your email is not registered"){
+            router.push("");
+        } else {
+            invalidMess.value = response.data.massage;  
+        } 
+        
+        
+      } catch (error) {
+        console.error('Đã xảy ra lỗi:', error);
+        
+      }
   } else {
     formError.value = true;
     formErrorMessage.value = "Please fix the errors before submitting.";
