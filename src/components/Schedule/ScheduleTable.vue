@@ -23,8 +23,8 @@
     </table>
   </div>
 </template>
-  
-  <script setup>
+
+<script setup>
 import { computed, ref } from "vue";
 
 const courtCount = 10; // Thay đổi giá trị này tùy theo số sân của CLB
@@ -138,8 +138,8 @@ const getCellClass = (time, court) => {
   }
 };
 </script>
-  
-  <style>
+
+<style>
 table {
   width: 100%;
   border-collapse: collapse;
@@ -198,4 +198,3 @@ tbody tr:first-child td {
   border-top: 2px solid #ddd; /* Thêm viền ngăn cách phía trên hàng đầu tiên của bảng */
 }
 </style>
-  
