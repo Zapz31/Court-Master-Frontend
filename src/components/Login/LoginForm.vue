@@ -193,12 +193,21 @@
 <script setup>
 import { ref } from "vue";
 import router from "../../router";
-const title = "Xin chao VueJS";
-const count = ref(0);
+import { useAuthStore } from "../../stores/auth";
+const authStore = useAuthStore();
 const invalidMess = ref('');
-
     const emailOrPhone = ref('');
     const password = ref('');
+
+    const newUser = ref({
+      userId: "",
+      email: "",
+      phoneNumber: "",
+      birthDay: "",
+      RegisterDate: "",
+      role: "",
+    });
+
 const signin = async () => {
       try {
         const response = await axios.post('http://localhost:8080/courtmaster/auth/signin', {
@@ -211,7 +220,16 @@ const signin = async () => {
         
         console.log(response.data);
         if(response.data.massage !== "Invalid password" && response.data.massage !== "Your email is not registered"){
+          newUser.value.userId = response.data.userId;
+          newUser.value.email = response.data.email;
+          newUser.value.phoneNumber = response.data.phoneNumber;
+          newUser.value.birthDay = response.data.birthDay;
+          newUser.value.RegisterDate = response.data.registerDate;
+          newUser.value.role = response.data.role;
+          authStore.updateUser(newUser);
+
           router.push('/');
+
         } 
         invalidMess.value = response.data.massage;  // Invalid password // Your email is not registered
         
@@ -220,12 +238,9 @@ const signin = async () => {
         
       }
     };
+  
+    
 </script>
-
-
-<!-- ===============================================================================================================
-=============================================================================================================== -->
-
 <style>
 .form_container {
   width: fit-content;

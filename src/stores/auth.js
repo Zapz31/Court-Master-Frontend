@@ -1,44 +1,56 @@
 import router from "../router";
 import { defineStore } from "pinia";
-import Cookies from "js-cookie";
-export const useAuthStore = defineStore('auth', {
-    state: () => ({
-        token: Cookies.get('token') ? Cookies.get('token') : null, 
-        returnURL: '/',
-    }),
-    actions: {
-        login(username, password, remember) {
-            axios.post(
-                'http://localhost:8080/api/auth/login',
-                {}, // Empty body
-                {
-                    auth: {
-                        username,
-                        password
-                    },
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            )
-            .then((res) => {
-                if (res.status === 200) {
-                    this.user_id = res.data.user.member_id;
-                    this.token = res.data.token;
-                    // Save token and user_id in cookies
-                    Cookies.set('token', this.token, { expires: 7 }); // Expires in 7 days
-                    if (remember) {
-                        Cookies.set('user_id', this.user_id, { expires: 7 });
-                    } else {
-                        Cookies.remove('user_id');
-                    }
-                    router.push(this.returnURL || '/');
-                }
-            })
-            .catch((error) => {
-                console.error('Error logging in:', error);
-            });
-        },
-        
+import { ref } from "vue";
+export const useAuthStore = defineStore("auth", ()=> {
+    const user = ref({
+        userId: "",
+        email: "",
+        phoneNumber: "",
+        birthDay: "",
+        RegisterDate: "",
+        role:"",
+    });
+
+   // Get user information after login
+    function updateUser(userData) {
+        user.value = { ...user.value, ...userData };
+        saveUserToLocalStorage();
+      }
+
+    // Save user data to localStorage
+  function saveUserToLocalStorage() {
+    localStorage.setItem("user", JSON.stringify(user.value));
+  }
+
+  // Load user data from localStorage
+  function loadUserFromLocalStorage() {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      user.value = JSON.parse(storedUser);
     }
-}); 
+  }
+
+  // Logout function to remove user data from localStorage
+  function logout() {
+    localStorage.removeItem("user");
+    user.value = {
+      userId: "",
+      email: "",
+      phoneNumber: "",
+      birthDay: "",
+      RegisterDate: "",
+      role: "",
+    };
+    router.push("/login"); // Redirect to login page after logout
+  }
+
+  // Load user data from localStorage on store initialization
+  loadUserFromLocalStorage();
+  return {
+    user,
+    updateUser,
+    saveUserToLocalStorage,
+    loadUserFromLocalStorage,
+    logout,
+  };
+});
