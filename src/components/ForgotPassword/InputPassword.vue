@@ -50,6 +50,8 @@
   <script setup>
 import { ref } from "vue";
 
+import { useForgotPass } from "../../stores/forgotpasswordStore";
+const useForgotPss = useForgotPass();
 const password = ref("");
 const confirmPassword = ref("");
 const passwordError = ref("");
@@ -87,7 +89,7 @@ const handleInvalid = (event, field) => {
 const submitForm = () => {
   if (passwordError.value === "" && confirmPasswordError.value === "") {
     formError.value = false;
-    $emit("submit", password.value, confirmPassword.value);
+    useForgotPss.password = password;
   } else {
     formError.value = true;
     formErrorMessage.value = "Please fix the errors before submitting.";

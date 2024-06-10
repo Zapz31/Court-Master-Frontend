@@ -30,20 +30,21 @@
         <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
         <button class="submit" type="submit">Submit</button>
       </form>
-      <p v-if="invalidMess === 'Your email is not registered'">Email của bạn chưa được đăng ký</p>
+      
     </div>
+    <p id="notFoundMail" v-if="useForgotPassword.invalidMess === 'Your email is not registered'">Email của bạn chưa được đăng ký</p>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import router from "../../router";
+import { useForgotPass } from "../../stores/forgotpasswordStore";
 const email = ref("");
 const emailError = ref("");
 const formError = ref(false);
 const formErrorMessage = ref("");
-const invalidMess = ref("");
-
+const useForgotPassword = useForgotPass();
 const validateInput = (field) => {
   // Validate email input
   if (field === "email") {
@@ -65,23 +66,7 @@ const submitForm = async() => {
   if (emailError.value === "") {
     formError.value = false;
     // $emit('submit', email.value);
-    try {
-        const response = await axios.post('http://localhost:8080/courtmaster/auth/forgotpassword/aaaa', {
-        } 
-      );
-        
-        console.log(response.data);
-        if(response.data.massage !== "Your email is not registered"){
-            router.push("");
-        } else {
-            invalidMess.value = response.data.massage;  
-        } 
-        
-        
-      } catch (error) {
-        console.error('Đã xảy ra lỗi:', error);
-        
-      }
+    useForgotPassword.email = email;
   } else {
     formError.value = true;
     formErrorMessage.value = "Please fix the errors before submitting.";
@@ -91,6 +76,11 @@ const submitForm = async() => {
 
 
 <style scoped>
+
+#notFoundMail{
+  padding-left:360px;
+}
+
 .parent_container {
   margin-top: 150px;
 }

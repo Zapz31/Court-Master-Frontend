@@ -58,10 +58,16 @@
       </div>
     </form>
   </div>
+  <p class="invalidOTP" v-if="useForgotPassword.invalidMess === 'Your token is expired'">OTP đã hết hạn</p>
+  <p class="invalidOTP" v-if="useForgotPassword.invalidMess === 'Invalid Token'">OTP không hợp lệ</p>
 </template>
 
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import { useForgotPass } from "../../stores/forgotpasswordStore";
+const useForgotPassword = useForgotPass();
+
+
 
 const props = defineProps({
   email: {
@@ -70,7 +76,7 @@ const props = defineProps({
   },
 });
 
-const otp = ref(["", "", "", ""]);
+const otp = ref(["", "", "", "", "", ""]);
 const currentIndex = ref(0);
 
 const handleOtpInput = (event) => {
@@ -86,9 +92,10 @@ const handleOtpInput = (event) => {
 
 const submitForm = () => {
   const otpValue = otp.value.join("");
-  if (otpValue.length === 6) {
-    $emit("submit", otpValue);
-  }
+  useForgotPassword.otp = otpValue;
+  // if (otpValue.length === 6) {
+  //   $emit("submit", otpValue);
+  // }
 };
 
 let inputs;
@@ -111,6 +118,11 @@ watch(currentIndex, (newIndex) => {
   margin-top: 120px;
   display: flex;
   justify-content: center;
+}
+
+.invalidOTP {
+  justify-content: center;
+  padding-left: 410px;
 }
 
 .form {
