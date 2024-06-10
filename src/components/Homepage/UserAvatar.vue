@@ -13,21 +13,27 @@
       </div>
       <div v-if="menuVisible" class="dropdown-content">
         <template v-if="userRole === 'customer'">
-          <router-link to="/customer/orders">My Orders</router-link>
-          <router-link to="/customer/profile">My Profile</router-link>
-          <button @click="signout">Đăng xuất</button>
+          <router-link to="/customer/profile">View Profile</router-link>
+          <router-link to="/customer/booking">My Booking</router-link>
+
+          <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho customer -->
         </template>
         <template v-else-if="userRole === 'staff'">
           <router-link to="/staff/orders">Manage Orders</router-link>
           <router-link to="/staff/customers">Manage Customers</router-link>
-          <button @click="signout">Đăng xuất</button>
+          <router-link to="/customer/profile">My Profile</router-link>
+
+          <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho staff -->
         </template>
         <template v-else-if="userRole === 'manager'">
           <router-link to="/manager/reports">Reports</router-link>
           <router-link to="/manager/settings">Settings</router-link>
-          <button @click="signout">Đăng xuất</button>
+          <router-link to="/customer/profile">My Profile</router-link>
+          <router-link to="/customer/profile">Manage my court</router-link>
+
+          <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho manager -->
         </template>
       </div>
@@ -37,8 +43,8 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
-import { useAuthStore } from "../../stores/auth";
 import router from "../../router";
+import { useAuthStore } from "../../stores/auth";
 const authStore = useAuthStore();
 
 // ===========================================DATA TEST==============================================
@@ -46,7 +52,7 @@ const props = defineProps({
   userRole: {
     type: String,
     //de test nhap role bang tay vao
-    default: "manager",
+    default: "customer",
   },
   userName: {
     type: String,
@@ -85,26 +91,21 @@ onUnmounted(() => {
 });
 
 const signout = async () => {
-      try {
-        const response = await axios.post('http://localhost:8080/courtmaster/auth/signout', {
-         
-        },
-        { withCredentials: true }
-      
-      );
-        
-        console.log(response.data);
-        authStore.logout();
-        router.push("/login");
-        
-        
-      } catch (error) {
-        console.error('Đã xảy ra lỗi:', error);
-        
-      }
-    };
-  
-    
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/courtmaster/auth/signout",
+      {},
+      { withCredentials: true }
+    );
+
+    console.log(response.data);
+    authStore.logout();
+    router.push("/login");
+  } catch (error) {
+    console.error("Đã xảy ra lỗi:", error);
+  }
+};
+
 //
 </script>
 
@@ -183,6 +184,23 @@ const signout = async () => {
   display: block;
 }
 .dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.dropdown-content button {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 16.5px;
+}
+
+.dropdown-content button:hover {
   background-color: #ddd;
 }
 </style>
