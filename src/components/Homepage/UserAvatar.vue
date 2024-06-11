@@ -6,10 +6,10 @@
     </div>
     <div v-else class="box">
       <div class="username">
-        <h4>{{ userName }}</h4>
+        <h4>{{ authStore.user.firstName }} {{ authStore.user.lastName }}</h4>
       </div>
       <div class="avatar">
-        <img :src="userAvatar" :alt="userName" />
+        <img :src="authStore.user.imageURL" :alt="userName" />
       </div>
       <div v-if="menuVisible" class="dropdown-content">
         <template v-if="userRole === 'customer'">
@@ -45,7 +45,17 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import router from "../../router";
 import { useAuthStore } from "../../stores/auth";
+import { storeToRefs } from 'pinia';
+
+
 const authStore = useAuthStore();
+
+// const { user } = storeToRefs(authStore);
+ const link = ref("");
+ const userName = ref("");
+//  link.value = user.value.imageURL;
+//  userName.value = user.value.firstName;
+
 
 // ===========================================DATA TEST==============================================
 const props = defineProps({
@@ -84,10 +94,14 @@ const handleOutsideClick = (event) => {
 
 onMounted(() => {
   document.addEventListener("click", handleOutsideClick);
+  authStore.loadUserFromLocalStorage();
+  console.log(authStore.user.imageURL);
+  console.log(1);
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
+  
 });
 
 const signout = async () => {
@@ -100,7 +114,8 @@ const signout = async () => {
 
     console.log(response.data);
     authStore.logout();
-    router.push("/login");
+    // router.push("/login");
+    window.location.replace("/login")
   } catch (error) {
     console.error("Đã xảy ra lỗi:", error);
   }

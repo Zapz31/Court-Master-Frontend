@@ -55,6 +55,7 @@ const closeDropdowns = () => {
 .content {
   flex-grow: 1;
   padding: 1rem;
+  z-index: 10;
 }
 
 .footer {

@@ -9,8 +9,11 @@ export const useAuthStore = defineStore("auth", ()=> {
         birthDay: "",
         RegisterDate: "",
         role:"",
-        imageURL:""
+        imageURL:"",
+        firstName:"",
+        lastName:"",
     });
+    
 
    // Get user information after login
     function updateUser(userData) {
@@ -21,11 +24,14 @@ export const useAuthStore = defineStore("auth", ()=> {
     // Save user data to localStorage
   function saveUserToLocalStorage() {
     localStorage.setItem("user", JSON.stringify(user.value));
+    
   }
 
   // Load user data from localStorage
   function loadUserFromLocalStorage() {
     const storedUser = localStorage.getItem("user");
+    // console.log(storedUser);
+    
     if (storedUser) {
       user.value = JSON.parse(storedUser);
     }
@@ -41,7 +47,9 @@ export const useAuthStore = defineStore("auth", ()=> {
       birthDay: "",
       RegisterDate: "",
       role: "",
-      imageURL:""
+      imageURL:"",
+      firstName:"",
+      lastName:"",
     };
     router.push("/login"); // Redirect to login page after logout
   }

@@ -22,27 +22,10 @@
       </div>
     </div>
     <div class="filter">
-      <div class="filter-item">
-        <div
-          class="dropdown-toggle"
-          @click.stop="toggleDropdown('city')"
-          :class="{ active: dropdowns.city }"
-        >
-          <span>{{ selectedCity || cityLabel }}</span>
-          <i class="fas fa-chevron-down"></i>
-        </div>
+      <div class="filter-item" @click.stop="toggleDropdown('city')">
+        <span>{{ selectedCity || cityLabel }}</span>
         <div v-if="dropdowns.city" class="dropdown-content">
-          <input
-            v-model="citySearch"
-            @input="filterCities"
-            type="text"
-            placeholder="Search cities..."
-          />
-          <div
-            v-for="(city, index) in displayedCities"
-            :key="index"
-            @click="selectCity(city)"
-          >
+          <div v-for="city in cities" :key="city" @click="selectCity(city)">
             {{ city }}
           </div>
           <div v-if="filteredCities.length > 5" class="scroll-indicator">
@@ -50,22 +33,9 @@
           </div>
         </div>
       </div>
-      <div class="filter-item">
-        <div
-          class="dropdown-toggle"
-          @click.stop="toggleDropdown('district')"
-          :class="{ active: dropdowns.district }"
-        >
-          <span>{{ selectedDistrict || districtLabel }}</span>
-          <i class="fas fa-chevron-down"></i>
-        </div>
+      <div class="filter-item" @click.stop="toggleDropdown('district')">
+        <span>{{ selectedDistrict || districtLabel }}</span>
         <div v-if="dropdowns.district" class="dropdown-content">
-          <input
-            v-model="districtSearch"
-            @input="filterDistricts"
-            type="text"
-            placeholder="Search districts..."
-          />
           <div
             v-for="(district, index) in displayedDistricts"
             :key="index"
@@ -80,21 +50,13 @@
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('openTime')">
         <span>{{ openTimeLabel }}</span>
-        <div v-if="dropdowns.openTime" class="dropdown-content time-dropdown">
-          <input
-            type="time"
-            v-model="openTime"
-            @change="selectOpenTime"
-            class="time-input"
-          />
+        <div v-if="dropdowns.openTime" class="dropdown-content">
+          <input type="time" v-model="openTime" @change="selectOpenTime" />
         </div>
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('hoursExpect')">
         <span>{{ hoursExpectLabel }}</span>
-        <div
-          v-if="dropdowns.hoursExpect"
-          class="dropdown-content time-dropdown"
-        >
+        <div v-if="dropdowns.hoursExpect" class="dropdown-content">
           <input
             type="time"
             v-model="hoursExpect"
@@ -151,6 +113,8 @@ const searchResults = ref([
   { id: 2, name: "Club B", address: "def, Hanoi" },
   { id: 3, name: "Club C", address: "ghi, Da Nang" },
 ]);
+
+// =============================================================================
 
 const openTime = ref("");
 const hoursExpect = ref("");
@@ -288,9 +252,13 @@ const performSearch = () => {
   transition: transform 0.3s ease;
 }
 
-.box:hover {
-  transform: scale(1.05);
+#filter {
+  z-index: 29;
 }
+
+/* .box:hover {
+  transform: scale(1.05);
+} */
 
 .search {
   display: flex;
