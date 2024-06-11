@@ -9,6 +9,7 @@ export const useAuthStore = defineStore("auth", ()=> {
         birthDay: "",
         RegisterDate: "",
         role:"",
+        imageURL:""
     });
 
    // Get user information after login
@@ -40,6 +41,7 @@ export const useAuthStore = defineStore("auth", ()=> {
       birthDay: "",
       RegisterDate: "",
       role: "",
+      imageURL:""
     };
     router.push("/login"); // Redirect to login page after logout
   }

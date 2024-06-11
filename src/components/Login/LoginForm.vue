@@ -206,6 +206,7 @@ const invalidMess = ref('');
       birthDay: "",
       RegisterDate: "",
       role: "",
+      imageURL: ""
     });
 
 const signin = async () => {
@@ -226,6 +227,7 @@ const signin = async () => {
           newUser.value.birthDay = response.data.birthDay;
           newUser.value.RegisterDate = response.data.registerDate;
           newUser.value.role = response.data.role;
+          newUser.value.imageURL = response.data.imageUrlString;
           authStore.updateUser(newUser);
 
           router.push('/');
