@@ -1,5 +1,5 @@
 <template>
-  <div class="box" @click.self="closeAllDropdowns">
+  <div class="box" @click.self="closeAllDropdowns"     >
     <div class="search">
       <input
         v-model="searchQuery"
@@ -20,7 +20,7 @@
     <div class="filter">
       <div class="filter-item" @click.stop="toggleDropdown('city')">
         <span>{{ selectedCity || cityLabel }}</span>
-        <div v-if="dropdowns.city" class="dropdown-content">
+        <div v-if="dropdowns.city" class="dropdown-content" @mouseover="mouseoverHandle" id="filter"   @mouseout="mouseoutHandle">
           <div v-for="city in cities" :key="city" @click="selectCity(city)">
             {{ city }}
           </div>
@@ -28,7 +28,7 @@
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('district')">
         <span>{{ selectedDistrict || districtLabel }}</span>
-        <div v-if="dropdowns.district" class="dropdown-content">
+        <div v-if="dropdowns.district" class="dropdown-content" @mouseover="mouseoverHandle" id="filter"   @mouseout="mouseoutHandle">
           <div
             v-for="district in districts"
             :key="district"
@@ -40,13 +40,13 @@
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('openTime')">
         <span>{{ openTimeLabel }}</span>
-        <div v-if="dropdowns.openTime" class="dropdown-content">
+        <div v-if="dropdowns.openTime" class="dropdown-content"   @mouseover="mouseoverHandle" id="filter"   @mouseout="mouseoutHandle">
           <input type="time" v-model="openTime" @change="selectOpenTime" />
         </div>
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('hoursExpect')">
         <span>{{ hoursExpectLabel }}</span>
-        <div v-if="dropdowns.hoursExpect" class="dropdown-content">
+        <div v-if="dropdowns.hoursExpect" class="dropdown-content" @mouseover="mouseoverHandle" id="filter"   @mouseout="mouseoutHandle">
           <input
             type="time"
             v-model="hoursExpect"
@@ -83,6 +83,16 @@ const searchResults = ref([
 ]);
 
 // =============================================================================
+
+function mouseoverHandle(){
+  document.getElementById("filter").style.zIndex = 30
+}
+
+
+function mouseoutHandle(){
+  document.getElementById("filter").style.zIndex = 29
+}
+
 
 const openTime = ref("");
 const hoursExpect = ref("");
@@ -188,9 +198,14 @@ const performSearch = () => {
   transition: transform 0.3s ease;
 }
 
-.box:hover {
-  transform: scale(1.05);
+
+#filter{
+  z-index: 29;
 }
+
+/* .box:hover {
+  transform: scale(1.05);
+} */
 
 .search {
   display: flex;

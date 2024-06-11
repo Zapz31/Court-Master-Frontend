@@ -118,7 +118,8 @@
 
     <div class="forgot_password">
       <span>Forgot password? </span>
-      ><router-link to="/forgot">Click Here</router-link>
+      <!-- ><router-link to="/forgot">Click Here</router-link> -->
+       <a href="/forgot">Click here</a>
     </div>
   </div>
   <!-- ======================================================================================================================== -->
@@ -206,7 +207,9 @@ const invalidMess = ref('');
       birthDay: "",
       RegisterDate: "",
       role: "",
-      imageURL: ""
+      imageURL: "",
+      fistName: "",
+      lastName: ""
     });
 
 const signin = async () => {
@@ -221,14 +224,18 @@ const signin = async () => {
         
         console.log(response.data);
         if(response.data.massage !== "Invalid password" && response.data.massage !== "Your email is not registered"){
-          newUser.value.userId = response.data.userId;
-          newUser.value.email = response.data.email;
-          newUser.value.phoneNumber = response.data.phoneNumber;
-          newUser.value.birthDay = response.data.birthDay;
-          newUser.value.RegisterDate = response.data.registerDate;
-          newUser.value.role = response.data.role;
-          newUser.value.imageURL = response.data.imageUrlString;
-          authStore.updateUser(newUser);
+          authStore.user.userId = response.data.userId;
+          authStore.user.email = response.data.email;
+          authStore.user.birthDay = response.data.birthDay;
+          authStore.user.RegisterDate = response.data.registerDate;
+          authStore.user.phoneNumber = response.data.phoneNumber;
+          authStore.user.role = response.data.role;
+          authStore.user.imageURL = response.data.imageUrlString;
+          authStore.user.firstName = response.data.firstName;
+          authStore.user.lastName = response.data.lastName;
+
+          // authStore.updateUser(newUser);
+          authStore.saveUserToLocalStorage();
 
           router.push('/');
 
