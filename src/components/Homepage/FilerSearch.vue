@@ -4,7 +4,6 @@
       <input
         v-model="searchQuery"
         @input="filterResults"
-        @focus="closeAllDropdowns"
         placeholder="Type a name or address..."
         type="text"
       />
@@ -22,10 +21,27 @@
       </div>
     </div>
     <div class="filter">
-      <div class="filter-item" @click.stop="toggleDropdown('city')">
-        <span>{{ selectedCity || cityLabel }}</span>
+      <div class="filter-item">
+        <div
+          class="dropdown-toggle"
+          @click.stop="toggleDropdown('city')"
+          :class="{ active: dropdowns.city }"
+        >
+          <span>{{ selectedCity || cityLabel }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
         <div v-if="dropdowns.city" class="dropdown-content">
-          <div v-for="city in cities" :key="city" @click="selectCity(city)">
+          <input
+            v-model="citySearch"
+            @input="filterCities"
+            type="text"
+            placeholder="Search cities..."
+          />
+          <div
+            v-for="(city, index) in displayedCities"
+            :key="index"
+            @click="selectCity(city)"
+          >
             {{ city }}
           </div>
           <div v-if="filteredCities.length > 5" class="scroll-indicator">
@@ -33,9 +49,22 @@
           </div>
         </div>
       </div>
-      <div class="filter-item" @click.stop="toggleDropdown('district')">
-        <span>{{ selectedDistrict || districtLabel }}</span>
+      <div class="filter-item">
+        <div
+          class="dropdown-toggle"
+          @click.stop="toggleDropdown('district')"
+          :class="{ active: dropdowns.district }"
+        >
+          <span>{{ selectedDistrict || districtLabel }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
         <div v-if="dropdowns.district" class="dropdown-content">
+          <input
+            v-model="districtSearch"
+            @input="filterDistricts"
+            type="text"
+            placeholder="Search districts..."
+          />
           <div
             v-for="(district, index) in displayedDistricts"
             :key="index"
@@ -50,13 +79,21 @@
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('openTime')">
         <span>{{ openTimeLabel }}</span>
-        <div v-if="dropdowns.openTime" class="dropdown-content">
-          <input type="time" v-model="openTime" @change="selectOpenTime" />
+        <div v-if="dropdowns.openTime" class="dropdown-content time-dropdown">
+          <input
+            type="time"
+            v-model="openTime"
+            @change="selectOpenTime"
+            class="time-input"
+          />
         </div>
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('hoursExpect')">
         <span>{{ hoursExpectLabel }}</span>
-        <div v-if="dropdowns.hoursExpect" class="dropdown-content">
+        <div
+          v-if="dropdowns.hoursExpect"
+          class="dropdown-content time-dropdown"
+        >
           <input
             type="time"
             v-model="hoursExpect"
@@ -113,8 +150,6 @@ const searchResults = ref([
   { id: 2, name: "Club B", address: "def, Hanoi" },
   { id: 3, name: "Club C", address: "ghi, Da Nang" },
 ]);
-
-// =============================================================================
 
 const openTime = ref("");
 const hoursExpect = ref("");
@@ -252,13 +287,9 @@ const performSearch = () => {
   transition: transform 0.3s ease;
 }
 
-#filter {
-  z-index: 29;
-}
-
-/* .box:hover {
+.box:hover {
   transform: scale(1.05);
-} */
+}
 
 .search {
   display: flex;
@@ -316,7 +347,7 @@ const performSearch = () => {
 
 .filter-item input {
   width: 78%;
-  padding: 5px;
+  padding: 0px;
   border: none; /* Remove border from filter input */
   border-radius: 5px;
   outline: none; /* Remove outline */
@@ -383,7 +414,7 @@ const performSearch = () => {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   padding: 10px;
-  z-index: 1;
+  /* z-index: 1; */
   width: calc(100% - 60px);
 }
 

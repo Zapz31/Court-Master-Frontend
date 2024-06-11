@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="club-list" @mouseover="mouseoverHandle" id="club-list"   @mouseout="mouseoutHandle">
+    <div class="club-list">
       <router-link
         v-for="club in clubs"
         :key="club.id"
@@ -23,15 +23,6 @@ import { useRouter } from "vue-router";
 
 // const clubs = ref([]);
 const router = useRouter();
-
-function mouseoverHandle(){
-  document.getElementById("club-list").style.zIndex = 30
-}
-
-
-function mouseoutHandle(){
-  document.getElementById("club-list").style.zIndex = 29
-}
 
 onMounted(async () => {
   try {
@@ -98,11 +89,6 @@ const clubs = ref([
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
-}
-
-
-#club-list{
-  z-index: 29;
 }
 
 .club-card {
