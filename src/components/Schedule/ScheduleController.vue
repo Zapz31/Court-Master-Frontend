@@ -1,5 +1,6 @@
 <template>
   <div class="controller">
+    <img src="../../../public/img/mono_blue_crop.png" class="logo" alt="" />
     <div class="date-picker">
       <input type="date" v-model="selectedDate" />
     </div>
@@ -112,6 +113,11 @@ const selectedType = ref("one-time");
   outline: none;
   border-color: #6babf4;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+  height: 38px;
+  width: 130px;
 }
 </style>
   

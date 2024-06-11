@@ -4,53 +4,102 @@
       <input
         v-model="searchQuery"
         @input="filterResults"
+        @focus="closeAllDropdowns"
         placeholder="Type a name or address..."
         type="text"
       />
       <div v-if="filteredResults.length > 0" class="search-results">
         <div
-          v-for="result in filteredResults"
-          :key="result.id"
+          v-for="(result, index) in displayedResults"
+          :key="index"
           @click="selectResult(result)"
         >
           {{ result.name }} - {{ result.address }}
         </div>
+        <div v-if="filteredResults.length > 5" class="scroll-indicator">
+          Scroll for more results
+        </div>
       </div>
     </div>
     <div class="filter">
-      <div class="filter-item" @click.stop="toggleDropdown('city')">
-        <span>{{ selectedCity || cityLabel }}</span>
+      <div class="filter-item">
+        <div
+          class="dropdown-toggle"
+          @click.stop="toggleDropdown('city')"
+          :class="{ active: dropdowns.city }"
+        >
+          <span>{{ selectedCity || cityLabel }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
         <div v-if="dropdowns.city" class="dropdown-content">
-          <div v-for="city in cities" :key="city" @click="selectCity(city)">
+          <input
+            v-model="citySearch"
+            @input="filterCities"
+            type="text"
+            placeholder="Search cities..."
+          />
+          <div
+            v-for="(city, index) in displayedCities"
+            :key="index"
+            @click="selectCity(city)"
+          >
             {{ city }}
+          </div>
+          <div v-if="filteredCities.length > 5" class="scroll-indicator">
+            Scroll for more
           </div>
         </div>
       </div>
-      <div class="filter-item" @click.stop="toggleDropdown('district')">
-        <span>{{ selectedDistrict || districtLabel }}</span>
+      <div class="filter-item">
+        <div
+          class="dropdown-toggle"
+          @click.stop="toggleDropdown('district')"
+          :class="{ active: dropdowns.district }"
+        >
+          <span>{{ selectedDistrict || districtLabel }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
         <div v-if="dropdowns.district" class="dropdown-content">
+          <input
+            v-model="districtSearch"
+            @input="filterDistricts"
+            type="text"
+            placeholder="Search districts..."
+          />
           <div
-            v-for="district in districts"
-            :key="district"
+            v-for="(district, index) in displayedDistricts"
+            :key="index"
             @click="selectDistrict(district)"
           >
             {{ district }}
+          </div>
+          <div v-if="filteredDistricts.length > 5" class="scroll-indicator">
+            Scroll for more
           </div>
         </div>
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('openTime')">
         <span>{{ openTimeLabel }}</span>
-        <div v-if="dropdowns.openTime" class="dropdown-content">
-          <input type="time" v-model="openTime" @change="selectOpenTime" />
+        <div v-if="dropdowns.openTime" class="dropdown-content time-dropdown">
+          <input
+            type="time"
+            v-model="openTime"
+            @change="selectOpenTime"
+            class="time-input"
+          />
         </div>
       </div>
       <div class="filter-item" @click.stop="toggleDropdown('hoursExpect')">
         <span>{{ hoursExpectLabel }}</span>
-        <div v-if="dropdowns.hoursExpect" class="dropdown-content">
+        <div
+          v-if="dropdowns.hoursExpect"
+          class="dropdown-content time-dropdown"
+        >
           <input
             type="time"
             v-model="hoursExpect"
             @change="selectHoursExpect"
+            class="time-input"
           />
         </div>
       </div>
@@ -69,20 +118,39 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 const searchQuery = ref("");
 const selectedCity = ref("");
 const selectedDistrict = ref("");
+const citySearch = ref("");
+const districtSearch = ref("");
 
-// ===============================TEST DATA=====================================
-const cities = ref(["Hanoi", "Ho Chi Minh City", "Da Nang"]);
-const districts = ref(["District 1", "District 2", "District 3"]);
+const cities = ref([
+  "Hanoi",
+  "Ho Chi Minh City",
+  "Da Nang",
+  "Hai Phong",
+  "Can Tho",
+  "Bien Hoa",
+  "Rach Gia",
+  "Vung Tau",
+  "Nha Trang",
+  "Quy Nhon",
+]);
+const districts = ref([
+  "District 1",
+  "District 2",
+  "District 3",
+  "District 4",
+  "District 5",
+  "District 6",
+  "District 7",
+  "District 8",
+  "District 9",
+  "District 10",
+]);
 
-// Dummy data for search results
 const searchResults = ref([
   { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
   { id: 2, name: "Club B", address: "def, Hanoi" },
   { id: 3, name: "Club C", address: "ghi, Da Nang" },
-  // Add more results as needed
 ]);
-
-// =============================================================================
 
 const openTime = ref("");
 const hoursExpect = ref("");
@@ -107,9 +175,11 @@ const filteredResults = computed(() => {
   );
 });
 
-const filterResults = () => {
-  // No additional logic needed here
-};
+const displayedResults = computed(() => {
+  return filteredResults.value.slice(0, 5);
+});
+
+const filterResults = () => {};
 
 const toggleDropdown = (dropdown) => {
   closeAllDropdowns();
@@ -142,16 +212,46 @@ onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
 });
 
+const filteredCities = computed(() => {
+  return cities.value.filter((city) =>
+    city.toLowerCase().includes(citySearch.value.toLowerCase())
+  );
+});
+
+const displayedCities = computed(() => {
+  return filteredCities.value.slice(0, 5);
+});
+
+const filterCities = () => {
+  dropdowns.value.city = true;
+};
+
 const selectCity = (city) => {
   selectedCity.value = city;
   cityLabel.value = city;
   dropdowns.value.city = false;
+  citySearch.value = "";
+};
+
+const filteredDistricts = computed(() => {
+  return districts.value.filter((district) =>
+    district.toLowerCase().includes(districtSearch.value.toLowerCase())
+  );
+});
+
+const displayedDistricts = computed(() => {
+  return filteredDistricts.value.slice(0, 5);
+});
+
+const filterDistricts = () => {
+  dropdowns.value.district = true;
 };
 
 const selectDistrict = (district) => {
   selectedDistrict.value = district;
   districtLabel.value = district;
   dropdowns.value.district = false;
+  districtSearch.value = "";
 };
 
 const selectOpenTime = () => {
@@ -246,22 +346,58 @@ const performSearch = () => {
   transform: scale(1.1);
 }
 
+.filter-item input {
+  width: 78%;
+  padding: 5px;
+  border: none; /* Remove border from filter input */
+  border-radius: 5px;
+  outline: none; /* Remove outline */
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border: none; /* Remove border from dropdown toggle */
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.dropdown-toggle.active {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.dropdown-toggle i {
+  margin-left: 5px;
+}
+
 .dropdown-content {
   position: absolute;
   top: 100%;
   left: 0;
   background-color: white;
   min-width: 160px;
+  max-height: 200px;
+  overflow-y: auto;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
   padding: 10px;
-  z-index: 1;
+  /* z-index: 1; */
 }
 
 .dropdown-content div,
 .dropdown-content input {
   padding: 10px;
   cursor: pointer;
+}
+
+.dropdown-content input[type="text"] {
+  border: none;
+  outline: none; /* Remove outline from dropdown input */
 }
 
 .dropdown-content div:hover,
@@ -274,6 +410,8 @@ const performSearch = () => {
   top: 100%;
   left: 0;
   background-color: white;
+  max-height: 200px;
+  overflow-y: auto;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   padding: 10px;
@@ -290,9 +428,29 @@ const performSearch = () => {
   background-color: #ddd;
 }
 
+.scroll-indicator {
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
 .selected-value {
   margin-top: 5px;
   font-size: 14px;
   color: gray;
+}
+
+.time-input {
+  border: none;
+  outline: none;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.time-dropdown {
+  width: 180px;
 }
 </style>
