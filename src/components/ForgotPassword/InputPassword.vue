@@ -61,8 +61,8 @@ const formErrorMessage = ref("");
 
 const validatePassword = () => {
   // Validate password
-  if (password.value.length < 8) {
-    passwordError.value = "Password must be at least 8 characters long";
+  if (password.value.length < 1) {
+    passwordError.value = "Password must be at least 1 characters long";
   } else {
     passwordError.value = "";
   }

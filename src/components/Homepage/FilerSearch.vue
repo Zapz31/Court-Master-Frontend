@@ -22,6 +22,7 @@
     </div>
     <div class="filter">
       <div class="filter-item">
+         <!-- ===================== City/Province Dropdown =========================== -->
         <div
           class="dropdown-toggle"
           @click.stop="toggleDropdown('city')"
@@ -38,11 +39,11 @@
             placeholder="Search cities..."
           />
           <div
-            v-for="(city, index) in displayedCities"
+            v-for="(cities, index) in displayedCities"
             :key="index"
-            @click="selectCity(city)"
+            @click="selectCity(cities)"
           >
-            {{ city }}
+            {{ cities }}
           </div>
           <div v-if="filteredCities.length > 5" class="scroll-indicator">
             Scroll for more
@@ -112,7 +113,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch} from "vue";
+import { useAddressFilter } from "../../stores/addressFilter";
 
 const searchQuery = ref("");
 const selectedCity = ref("");
@@ -120,30 +122,12 @@ const selectedDistrict = ref("");
 const citySearch = ref("");
 const districtSearch = ref("");
 
-const cities = ref([
-  "Hanoi",
-  "Ho Chi Minh City",
-  "Da Nang",
-  "Hai Phong",
-  "Can Tho",
-  "Bien Hoa",
-  "Rach Gia",
-  "Vung Tau",
-  "Nha Trang",
-  "Quy Nhon",
-]);
-const districts = ref([
-  "District 1",
-  "District 2",
-  "District 3",
-  "District 4",
-  "District 5",
-  "District 6",
-  "District 7",
-  "District 8",
-  "District 9",
-  "District 10",
-]);
+
+const cities = ref([]);
+const districts = ref([]);
+
+const addressFilter = useAddressFilter();
+
 
 const searchResults = ref([
   { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
@@ -203,8 +187,27 @@ const handleOutsideClick = (event) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener("click", handleOutsideClick);
+
+  try {
+    await addressFilter.fetchCities();
+    cities.value = addressFilter.citiesList;
+    console.log("day la cities: ");
+    console.log(cities.value); // Kiểm tra giá trị cities
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+  }
+});
+
+watch(selectedCity, async (newCity) => {
+  if (newCity) {
+    await addressFilter.fetchDistrict(newCity);
+    districts.value = addressFilter.districtsList;
+  } else {
+    districts.value = [];
+  }
+  selectedDistrict.value = "";
 });
 
 onUnmounted(() => {
@@ -218,7 +221,7 @@ const filteredCities = computed(() => {
 });
 
 const displayedCities = computed(() => {
-  return filteredCities.value.slice(0, 5);
+  return filteredCities.value.slice(0, 63);
 });
 
 const filterCities = () => {
@@ -239,7 +242,7 @@ const filteredDistricts = computed(() => {
 });
 
 const displayedDistricts = computed(() => {
-  return filteredDistricts.value.slice(0, 5);
+  return filteredDistricts.value.slice(0, 200);
 });
 
 const filterDistricts = () => {
