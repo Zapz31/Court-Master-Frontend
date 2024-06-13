@@ -2,7 +2,7 @@
   <div class="controller">
     <img src="../../../public/img/mono_blue_crop.png" class="logo" alt="" />
     <div class="date-picker">
-      <input type="date" v-model="selectedDate" />
+      <input type="date" v-model="selectedDate" @change="handleDateChange" />
     </div>
     <div class="type-dropdown">
       <label>Type:</label>
@@ -18,9 +18,14 @@
   
   <script setup>
 import { ref } from "vue";
-
+import { useScheduleStore } from "../../stores/scheduleStore";
 const selectedDate = ref("");
 const selectedType = ref("one-time");
+
+const scheduleStore = useScheduleStore();
+const handleDateChange = () => {
+  scheduleStore.updateSelectedDate(selectedDate.value);
+};
 </script>
   
   <style scoped>

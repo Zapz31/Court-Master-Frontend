@@ -26,6 +26,9 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { useScheduleStore } from "../../stores/scheduleStore";
+
+const scheduleStore = useScheduleStore();
 
 const courtCount = 10; // Thay đổi giá trị này tùy theo số sân của CLB
 
@@ -119,6 +122,52 @@ const handleMouseDown = (time, court) => {
 
   if (cell) {
     if (cell.status === "selected") {
+      // Xóa dữ liệu khung giờ chơi hiện tại
+      scheduleStore.startTime = "";
+      scheduleStore.endTime = "";
+      scheduleStore.court = null;
+      scheduleStore.price = 0;
+
+      // Hiển thị lại thông tin của khung giờ chơi trước đó (nếu có)
+      const previousSession = sessions.value.find(
+        (session) =>
+          session.court === court &&
+          session.endTime < cell.startTime &&
+          session.status === "selected"
+      );
+
+      if (previousSession) {
+        scheduleStore.updateScheduleInfo(
+          previousSession.startTime,
+          previousSession.endTime,
+          court
+        );
+      }
+
+      // Xóa các ô đã được chọn
+      sessions.value = sessions.value.filter(
+        (session) =>
+          !(
+            session.court === court &&
+            session.startTime === cell.startTime &&
+            session.status === "selected"
+          )
+      );
+      return;
+    }
+    return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
+  }
+
+  // const startTime = formatTime(time);
+  // const cell = sessions.value.find(
+  //   (session) =>
+  //     session.court === court &&
+  //     startTime >= session.startTime &&
+  //     startTime < session.endTime
+  // );
+
+  if (cell) {
+    if (cell.status === "selected") {
       // Hủy chọn các ô đã được chọn trước đó
       sessions.value = sessions.value.filter(
         (session) =>
@@ -170,31 +219,16 @@ const handleMouseUp = () => {
   const sessionEnd = selectedCells.value[selectedCells.value.length - 1].time;
   const court = selectedCells.value[0].court;
 
-  const existingSession = sessions.value.find(
-    (session) =>
-      session.court === court &&
-      session.startTime === sessionStart &&
-      session.status === "selected"
-  );
+  const existingSession =
+    scheduleStore.court === court && scheduleStore.endTime === sessionStart;
 
   if (existingSession) {
-    existingSession.endTime = formatTime(
-      parseInt(sessionEnd.split(":")[0]) * 60 +
-        parseInt(sessionEnd.split(":")[1]) +
-        30
-    );
+    scheduleStore.endTime = sessionEnd;
+    scheduleStore.calculatePrice();
   } else {
-    sessions.value.push({
-      startTime: sessionStart,
-      endTime: formatTime(
-        parseInt(sessionEnd.split(":")[0]) * 60 +
-          parseInt(sessionEnd.split(":")[1]) +
-          30
-      ),
-      court: court,
-      status: "selected",
-    });
+    scheduleStore.updateScheduleInfo(sessionStart, sessionEnd, court);
   }
+
   selectedCells.value = [];
 };
 

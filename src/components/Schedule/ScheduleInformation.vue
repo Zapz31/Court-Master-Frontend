@@ -1,55 +1,91 @@
-<!-- src/components/Schedule/ScheduleInformation.vue -->
 <template>
   <div class="schedule-information">
-    <div class="info-item">
-      <label>Time: {{ time }}</label>
+    <div
+      v-if="
+        scheduleStore.startTime && scheduleStore.endTime && scheduleStore.court
+      "
+      class="info-item"
+    >
+      <!-- Hiển thị thông tin khi có dữ liệu -->
+      <label
+        >Time: {{ scheduleStore.startTime }} -
+        {{ scheduleStore.endTime }}</label
+      >
       <br />
       <label for="">Hours: {{ hours }} h</label>
     </div>
-    <div class="info-item">
-      <label>Price: {{ price }} VNĐ</label>
+    <div v-else class="info-item">
+      <label>Chưa chọn khung giờ chơi</label>
     </div>
-    <div class="info-item">
-      <label>Date: {{ date }}</label>
+    <div
+      v-if="
+        scheduleStore.startTime && scheduleStore.endTime && scheduleStore.court
+      "
+      class="info-item"
+    >
+      <label>Price: {{ scheduleStore.price }} VNĐ</label>
+    </div>
+    <div
+      v-if="
+        scheduleStore.startTime && scheduleStore.endTime && scheduleStore.court
+      "
+      class="info-item"
+    >
+      <label>Court: {{ scheduleStore.court }}</label>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useScheduleStore } from "../../stores/scheduleStore";
 
-// Các giá trị ví dụ, bạn có thể thay thế bằng giá trị động
-const time = ref("01:00 - 02:30");
-const hours = ref("1.5");
-const price = ref("200.000");
-const date = ref("09/06/2024");
+const scheduleStore = useScheduleStore();
+
+const hours = computed(() => {
+  const [startHour, startMinute] = scheduleStore.startTime
+    .split(":")
+    .map(Number);
+  const [endHour, endMinute] = scheduleStore.endTime.split(":").map(Number);
+  const startTotalMinutes = startHour * 60 + startMinute;
+  const endTotalMinutes = endHour * 60 + endMinute;
+  const totalMinutes = endTotalMinutes - startTotalMinutes;
+  return (totalMinutes / 60).toFixed(1);
+});
 </script>
 
-<style scoped>
+<style>
 .schedule-information {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 68px;
   background-color: #f5f5f5;
   padding: 16px;
-  border-top: 1px solid #ddd;
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
-  z-index: 1000; /* Đảm bảo nằm trên cùng */
+  z-index: 100;
 }
 
 .info-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin: 0 20px;
+  text-align: center;
 }
 
-label {
-  font-weight: italic;
-  margin-bottom: 2.8px;
+.info-item label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.info-item label:first-child {
+  font-size: 16px;
+}
+
+.info-item label:last-child {
+  font-size: 14px;
+  color: #666;
 }
 </style>
