@@ -30,6 +30,11 @@ const routes = [
         name: 'ScheduleScreen',
         component: () => import('../views/ScheduleScreen.vue') ,
     },
+    {
+        path: '/detail',
+        name: 'ClubDetailScreen',
+        component: () => import('../views/ClubDetailScreen.vue') ,
+    },
 ]
 
 const router = createRouter({

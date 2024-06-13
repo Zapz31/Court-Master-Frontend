@@ -39,6 +39,8 @@ const closeDropdowns = () => {
   align-items: center;
   justify-content: center;
   padding: 36px;
+  margin-bottom: auto;
+  margin-top: -100px;
 }
 
 .container {
@@ -55,6 +57,7 @@ const closeDropdowns = () => {
 .content {
   flex-grow: 1;
   padding: 1rem;
+  margin-left: 140px; 
 }
 
 .footer {
