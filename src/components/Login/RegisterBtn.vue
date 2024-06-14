@@ -8,7 +8,7 @@
   <div class="register">
     <h1>You did not have account?</h1>
     <div class="btn_block">
-      <router-link class="button" to="/register">Register</router-link>
+      <a class="button" href="/register">Register</a>
     </div>
   </div>
 </template>
