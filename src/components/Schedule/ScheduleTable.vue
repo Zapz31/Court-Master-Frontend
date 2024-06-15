@@ -17,7 +17,19 @@
             @mousedown="handleMouseDown(time, court)"
             @mouseenter="handleMouseEnter(time, court)"
             @mouseup="handleMouseUp"
-          ></td>
+            @mouseleave="hidePopup"
+          >
+            <session-popup
+              v-if="showPopup && hoveredSession"
+              :startTime="hoveredSession.startTime"
+              :endTime="hoveredSession.endTime"
+              :show="true"
+              :style="{
+                left: popupPosition.x + 'px',
+                top: popupPosition.y + 'px',
+              }"
+            />
+          </td>
         </tr>
       </tbody>
     </table>
@@ -27,6 +39,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useScheduleStore } from "../../stores/scheduleStore";
+import SessionPopup from "../../components/Schedule/SessionPopup.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -188,6 +201,10 @@ const handleMouseDown = (time, court) => {
   updateSession(startTime, court, true);
 };
 
+const showPopup = ref(false);
+const hoveredSession = ref(null);
+const popupPosition = ref({ x: 0, y: 0 });
+
 const handleMouseEnter = (time, court) => {
   if (isDragging.value) {
     const startTime = dragStartCell.value.time;
@@ -210,7 +227,32 @@ const handleMouseEnter = (time, court) => {
       selectedCells.value.push({ time: formatTime(newTime), court: court });
       updateSession(formatTime(newTime), court, false);
     }
+  } else {
+    const session = sessions.value.find(
+      (session) =>
+        session.court === court &&
+        session.startTime <= formatTime(time) &&
+        formatTime(time) < session.endTime &&
+        (session.status === "bookedByUser" || session.status === "selected")
+    );
+
+    if (session) {
+      showPopup.value = true;
+      hoveredSession.value = session;
+      const cellRect = event.currentTarget.getBoundingClientRect();
+      popupPosition.value = {
+        x: cellRect.left + cellRect.width / 2,
+        y: cellRect.top + cellRect.height,
+      };
+    } else {
+      hidePopup();
+    }
   }
+};
+
+const hidePopup = () => {
+  showPopup.value = false;
+  hoveredSession.value = null;
 };
 
 const handleMouseUp = () => {
