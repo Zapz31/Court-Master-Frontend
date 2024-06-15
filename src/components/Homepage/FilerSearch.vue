@@ -212,6 +212,7 @@ const closeAllDropdowns = () => {
   dropdowns.value.district = false;
   dropdowns.value.openTime = false;
   dropdowns.value.hoursExpect = false;
+  dropdowns.value.ward = false;
 };
 
 defineExpose({
@@ -330,13 +331,28 @@ const selectResult = (result) => {
   searchQuery.value = `${result.name} - ${result.address}`;
 };
 
-const performSearch = () => {
-  console.log(`Searching for: ${searchQuery.value}`);
-  console.log(`City: ${selectedCity.value}`);
-  console.log(`District: ${selectedDistrict.value}`);
-  console.log(`Open Time: ${openTime.value}`);
-  console.log(`Hours Expect: ${hoursExpect.value}`);
+const performSearch = async () => {
+  // console.log(`Searching for: ${searchQuery.value}`);
+  // console.log(`City: ${selectedCity.value}`);
+  // console.log(`District: ${selectedDistrict.value}`);
+  // console.log(`Open Time: ${openTime.value}`);
+  // console.log(`Hours Expect: ${hoursExpect.value}`);
+  const dataFilter = {
+    nameOrUnitNumber: searchQuery.value,
+    province: selectCity.value,
+    district: selectedDistrict.value,
+    ward: selectedWard.value,
+    openedTime: openTime.value,
+    hoursOfExpect: hoursExpect.value
+  }
+
 };
+
+const searchResults = ref([
+  { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
+  { id: 2, name: "Club B", address: "def, Hanoi" },
+  { id: 3, name: "Club C", address: "ghi, Da Nang" },
+]);
 </script>
 
 <style scoped>

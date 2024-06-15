@@ -43,14 +43,22 @@ export const useAddressFilter = defineStore("address", ()=> {
 
       const fetchWards = async (citieName, districtName) => {
         try {
-          const response = await axios.get("http://localhost:8080/courtmaster/filter/address/wards",{
+          const body = JSON.stringify({
             provinceFullName: citieName,
             districtFullName: districtName
           });
+          const response = await axios.post("http://localhost:8080/courtmaster/filter/address/wards", body, 
+            {
+              headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+              }
+            });
           // Lấy toàn bộ giá trị của thuộc tính fullName
           const fullNameValues = response.data.map(item => item.fullName);
           // Gán giá trị cho mảng cities
           wardsList.value = fullNameValues;
+          console.log("this is wardsList: ");
+          console.log(wardsList);
         } catch (error) {
           console.error("Error fetching cities:", error);
         }
