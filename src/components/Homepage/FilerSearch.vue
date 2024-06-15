@@ -22,7 +22,7 @@
     </div>
     <div class="filter">
       <div class="filter-item">
-         <!-- ===================== City/Province Dropdown =========================== -->
+        <!-- ===================== City/Province Dropdown =========================== -->
         <div
           class="dropdown-toggle"
           @click.stop="toggleDropdown('city')"
@@ -78,6 +78,37 @@
           </div>
         </div>
       </div>
+
+      <div class="filter-item">
+        <!-- ===================== Ward Dropdown =========================== -->
+        <div
+          class="dropdown-toggle"
+          @click.stop="toggleDropdown('ward')"
+          :class="{ active: dropdowns.ward }"
+        >
+          <span>{{ selectedWard || wardLabel }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div v-if="dropdowns.ward" class="dropdown-content">
+          <input
+            v-model="wardSearch"
+            @input="filterWards"
+            type="text"
+            placeholder="Search wards..."
+          />
+          <div
+            v-for="(ward, index) in displayedWards"
+            :key="index"
+            @click="selectWard(ward)"
+          >
+            {{ ward }}
+          </div>
+          <div v-if="filteredWards.length > 5" class="scroll-indicator">
+            Scroll for more
+          </div>
+        </div>
+      </div>
+
       <div class="filter-item" @click.stop="toggleDropdown('openTime')">
         <span>{{ openTimeLabel }}</span>
         <div v-if="dropdowns.openTime" class="dropdown-content time-dropdown">
@@ -113,7 +144,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch} from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useAddressFilter } from "../../stores/addressFilter";
 
 const searchQuery = ref("");
@@ -121,25 +152,32 @@ const selectedCity = ref("");
 const selectedDistrict = ref("");
 const citySearch = ref("");
 const districtSearch = ref("");
-
+const selectedWard = ref("");
+const wardSearch = ref("");
+const wardLabel = ref("Ward");
 
 const cities = ref([]);
 const districts = ref([]);
+const wards = ref([]);
 
 const addressFilter = useAddressFilter();
 
-
-const searchResults = ref([
-  { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
-  { id: 2, name: "Club B", address: "def, Hanoi" },
-  { id: 3, name: "Club C", address: "ghi, Da Nang" },
-]);
+watch(selectedDistrict, async (newDistrict) => {
+  if (newDistrict) {
+    await addressFilter.fetchWards(selectedCity.value, newDistrict);
+    wards.value = addressFilter.wardsList;
+  } else {
+    wards.value = [];
+  }
+  selectedWard.value = "";
+});
 
 const openTime = ref("");
 const hoursExpect = ref("");
 const dropdowns = ref({
   city: false,
   district: false,
+  ward: false,
   openTime: false,
   hoursExpect: false,
 });
@@ -256,6 +294,28 @@ const selectDistrict = (district) => {
   districtSearch.value = "";
 };
 
+//----------------------------------------------Ward
+const filteredWards = computed(() => {
+  return wards.value.filter((ward) =>
+    ward.toLowerCase().includes(wardSearch.value.toLowerCase())
+  );
+});
+
+const displayedWards = computed(() => {
+  return filteredWards.value.slice(0, 200);
+});
+
+const filterWards = () => {
+  dropdowns.value.ward = true;
+};
+
+const selectWard = (ward) => {
+  selectedWard.value = ward;
+  wardLabel.value = ward;
+  dropdowns.value.ward = false;
+  wardSearch.value = "";
+};
+//----------------------------------------------Ward
 const selectOpenTime = () => {
   openTimeLabel.value = openTime.value;
   dropdowns.value.openTime = false;
