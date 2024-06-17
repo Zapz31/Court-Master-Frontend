@@ -122,7 +122,7 @@ const handleDateChange = () => {
 
 .logo {
   height: 38px;
-  width: 130px;
+  width: 126px;
 }
 </style>
   

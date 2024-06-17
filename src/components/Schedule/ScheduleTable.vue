@@ -20,9 +20,7 @@
             @mouseleave="hidePopup"
           >
             <session-popup
-              v-if="showPopup && hoveredSession"
-              :startTime="hoveredSession.startTime"
-              :endTime="hoveredSession.endTime"
+              v-if="showPopup"
               :show="true"
               :style="{
                 left: popupPosition.x + 'px',
@@ -38,8 +36,8 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { useScheduleStore } from "../../stores/scheduleStore";
 import SessionPopup from "../../components/Schedule/SessionPopup.vue";
+import { useScheduleStore } from "../../stores/scheduleStore";
 
 const scheduleStore = useScheduleStore();
 

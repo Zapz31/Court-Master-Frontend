@@ -1,34 +1,27 @@
 <template>
   <div v-if="showPopup" class="session-popup">
     <div class="popup-content">
-      <p><strong>Start time:</strong> {{ startTime }}</p>
-      <p><strong>End time:</strong> {{ endTime }}</p>
+      <p><strong>Start time:</strong> {{ scheduleStore.startTime }}</p>
+      <p><strong>End time:</strong> {{ scheduleStore.endTime }}</p>
       <p><strong>Hours:</strong> {{ hours }} h</p>
-      <p><strong>Price:</strong> {{ price }} VNĐ</p>
+      <p><strong>Price:</strong> {{ scheduleStore.price }} VNĐ</p>
     </div>
   </div>
 </template>
-  
-  <script setup>
-import { computed } from "vue";
 
-const props = defineProps({
-  startTime: String,
-  endTime: String,
-  show: Boolean,
-});
+<script setup>
+import { computed } from "vue";
+import { useScheduleStore } from "../../stores/scheduleStore";
+
+const scheduleStore = useScheduleStore();
 
 const hours = computed(() => {
-  const [startHour, startMinute] = props.startTime.split(":").map(Number);
-  const [endHour, endMinute] = props.endTime.split(":").map(Number);
+  const [startHour, startMinute] = scheduleStore.startTime
+    .split(":")
+    .map(Number);
+  const [endHour, endMinute] = scheduleStore.endTime.split(":").map(Number);
   const startTotalMinutes = startHour * 60 + startMinute;
   const endTotalMinutes = endHour * 60 + endMinute;
-
-  if (endTotalMinutes < startTotalMinutes) {
-    // If the end time is earlier than the start time, assume it spans to the next day
-    endTotalMinutes += 24 * 60;
-  }
-
   const totalMinutes = endTotalMinutes - startTotalMinutes;
   return (totalMinutes / 60).toFixed(1);
 });
@@ -39,11 +32,11 @@ const price = computed(() => {
 });
 
 const showPopup = computed(() => {
-  return props.show && props.startTime && props.endTime;
+  return scheduleStore.startTime && scheduleStore.endTime;
 });
 </script>
-  
-  <style scoped>
+
+<style scoped>
 .session-popup {
   position: absolute;
   background-color: white;

@@ -7,7 +7,11 @@
         :to="`/clubs/${club.clubId}`"
         class="club-card"
       >
-        <img :src="getImageUrl(club.clubImageBase64)" :alt="club.clubName" class="club-image" />
+        <img
+          :src="getImageUrl(club.clubImageBase64)"
+          :alt="club.clubName"
+          class="club-image"
+        />
         <h3>{{ club.clubName }}</h3>
         <p>Address: {{ club.clubAddress }}</p>
         <p>Average price: {{ club.averagePrice }} VND/hour</p>
@@ -18,18 +22,19 @@
   
   <script setup>
 // import { ref } from "vue";
+import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
-
 
 // const clubs = ref([]);
 const router = useRouter();
-const clubs = ref([])
+const clubs = ref([]);
 
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:8080/courtmaster/clubs/clubsView");
+    const response = await axios.get(
+      "http://localhost:8080/courtmaster/clubs/clubsView"
+    );
     clubs.value = await response.data;
   } catch (error) {
     console.error("Failed to fetch clubs:", error);
@@ -37,9 +42,8 @@ onMounted(async () => {
 });
 
 const getImageUrl = (base64String) => {
-  return `data:image/png;base64,${base64String}`
-}
-
+  return `data:image/png;base64,${base64String}`;
+};
 
 // ============================= TEST DATA -CLUB LIST========================================================================================
 // const clubs = ref([
