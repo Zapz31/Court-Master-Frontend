@@ -24,8 +24,14 @@ export const useScheduleStore = defineStore('schedule', {
       const hours = totalMinutes / 60
       this.price = hours * 80000 // Giá mặc định 80.000 VNĐ/giờ
     },
+    
     updateSelectedDate(date) {
       this.selectedDate = date
     },
   },
+  
+
+  
+
+  
 })
