@@ -1,10 +1,9 @@
 <template>
-
-  <div class="name">
-    <h1>BadmintonSpace Arena</h1>
-  </div>
-  <div id="app">
-    <div class="images" v-viewer>
+  <div>
+    <div class="name">
+      <h1>BadmintonSpace Arena</h1>
+    </div>
+    <div class="images">
       <div id="image-column1">
         <img src="https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg" />
       </div>
@@ -19,140 +18,129 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="address">
-    <p>Nguyễn Văn Tăng, Phường Long Thạnh Mỹ, Tp. Thủ Đức</p>
-  </div>
-
-  <button>
-    <router-link to="/schedule">View Schedule</router-link>
-  </button>
-
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Day Week</th>
-          <th>Time Slots</th>
-          <th>One Time</th>
-          <th>Long-term</th>
-          <th>Flexible</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td rowspan="2">Mon - Fri</td>
-          <td>5h - 17h</td>
-          <td>79.000VNĐ</td>
-          <td>68.000VNĐ</td>
-          <td>68.000VNĐ</td>
-        </tr>
-        <tr>
-          <td>22h - 17h</td>
-          <td>89.000VNĐ</td>
-          <td>79.000VNĐ</td>
-          <td>79.000VNĐ</td>
-        </tr>
-        <tr>
-          <td rowspan="2">Sat - Sun<br>Holiday</td>
-          <td>5h - 17h</td>
-          <td>99.000VNĐ</td>
-          <td>88.000VNĐ</td>
-          <td>78.000VNĐ</td>
-        </tr>
-        <tr>
-          <td>5h - 17h</td>
-          <td>109.000VNĐ</td>
-          <td>98.000VNĐ</td>
-          <td>98.000VNĐ</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="detail">
-    <p>
-      BadmintonSpace Arena is a premier destination for badminton enthusiasts, combining modern design with
-      top-notch amenities. The spacious courts feature advanced LED lighting and international-standard surfaces,
-      ensuring optimal play conditions.<br><br>
-      Beyond excellent facilities, BadmintonSpace Arena prides itself on outstanding customer service, with friendly
-      and professional staff. Relax in comfortable lounges, utilize modern locker rooms, and rejuvenate in
-      fully-equipped recovery areas.<br><br>
-      Regular tournaments and social events offer players of all levels the chance to compete and connect.
-      Experience the passion and excellence of badminton at BadmintonSpace Arena – where the sport's finest come
-      together!
-    </p>
-  </div>
-
-  <div class="comments-container">
-    <div class="commenter">
-      <div class="comment-header">
-        <div class="avatar">
-          <img src="../../../public/img/avatarCourtMaster.jpg" alt="Avatar">
-        </div>
-        <div class="user-info">
-          <h4>Doan Minh Tien</h4>
-          <div class="rating">
-            <input value="5" name="rate" id="star5" type="radio">
-            <label title="text" for="star5"></label>
-            <input value="4" name="rate" id="star4" type="radio">
-            <label title="text" for="star4"></label>
-            <input value="3" name="rate" id="star3" type="radio">
-            <label title="text" for="star3"></label>
-            <input value="2" name="rate" id="star2" type="radio">
-            <label title="text" for="star2"></label>
-            <input value="1" name="rate" id="star1" type="radio" checked="">
-            <label title="text" for="star1"></label>
-          </div>
-        </div>
-      </div>
-      <div class="form">
-        <input class="input" placeholder="Comment....." required="" type="text">
-        <span class="input-border"></span>
-      </div>
+    <div class="address">
+      <p>Nguyễn Văn Tăng, Phường Long Thạnh Mỹ, Tp. Thủ Đức</p>
     </div>
-    <div class="comment">
-      <div class="comment-header">
+    <button>
+      <router-link to="/schedule">View Schedule</router-link>
+    </button>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Day Week</th>
+            <th>Time Slots</th>
+            <th>One Time</th>
+            <th>Long-term</th>
+            <th>Flexible</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2">Mon - Fri</td>
+            <td>5h - 17h</td>
+            <td>79.000VNĐ</td>
+            <td>68.000VNĐ</td>
+            <td>68.000VNĐ</td>
+          </tr>
+          <tr>
+            <td>22h - 17h</td>
+            <td>89.000VNĐ</td>
+            <td>79.000VNĐ</td>
+            <td>79.000VNĐ</td>
+          </tr>
+          <tr>
+            <td rowspan="2">Sat - Sun<br>Holiday</td>
+            <td>5h - 17h</td>
+            <td>99.000VNĐ</td>
+            <td>88.000VNĐ</td>
+            <td>78.000VNĐ</td>
+          </tr>
+          <tr>
+            <td>5h - 17h</td>
+            <td>109.000VNĐ</td>
+            <td>98.000VNĐ</td>
+            <td>98.000VNĐ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail">
+      <p>
+        BadmintonSpace Arena is a premier destination for badminton enthusiasts, combining modern design with
+        top-notch amenities. The spacious courts feature advanced LED lighting and international-standard surfaces,
+        ensuring optimal play conditions.<br><br>
+        Beyond excellent facilities, BadmintonSpace Arena prides itself on outstanding customer service, with friendly
+        and professional staff. Relax in comfortable lounges, utilize modern locker rooms, and rejuvenate in
+        fully-equipped recovery areas.<br><br>
+        Regular tournaments and social events offer players of all levels the chance to compete and connect.
+        Experience the passion and excellence of badminton at BadmintonSpace Arena – where the sport's finest come
+        together!
+      </p>
+    </div>
+    <div class="comments-container">
+      <div class="commenter">
         <div class="avatar">
           <img src="../../../public/img/avatarCourtMaster.jpg" alt="Avatar">
         </div>
         <div class="user-info">
+          <h4>Doan Minh Tien<br><br><br></h4>
+          <div class="form">
+            <input class="input" placeholder="Comment....." required="" type="text">
+            <span class="input-border"></span>
+          </div>
+        </div>
+        <div class="rating">
+          <input value="5" name="rate" id="star5" type="radio">
+          <label title="text" for="star5"></label>
+          <input value="4" name="rate" id="star4" type="radio">
+          <label title="text" for="star4"></label>
+          <input value="3" name="rate" id="star3" type="radio">
+          <label title="text" for="star3"></label>
+          <input value="2" name="rate" id="star2" type="radio">
+          <label title="text" for="star2"></label>
+          <input value="1" name="rate" id="star1" type="radio" checked="">
+          <label title="text" for="star1"></label>
+        </div>
+      </div>
+      <div class="comment">
+        <div class="avatar1">
+          <img src="../../../public/img/avatarCourtMaster.jpg" alt="Avatar">
+        </div>
+        <div class="user-info1">
           <h4>Thanh Nhan Vo <span class="date">18:03 15/05/2024</span></h4>
-          <div class="rating1">
-            <span class="star-icon" :class="{ filled: rating >= 1 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating >= 2 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating >= 3 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating >= 4 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating >= 5 }">&#9733;</span>
-          </div>
+          <p>This is a great place for badminton! The courts are well-maintained, and the staff is friendly. Highly
+            recommended!</p>
+        </div>
+        <div class="rating1">
+          <span class="star-icon" :class="{ filled: rating >= 1 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating >= 2 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating >= 3 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating >= 4 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating >= 5 }">&#9733;</span>
         </div>
       </div>
-      <div class="comment-body">
-        <p>This is a great place for badminton! The courts are well-maintained, and the staff is friendly. Highly
-          recommended!</p>
-      </div>
-    </div> 
-    <div class="comment">
-      <div class="comment-header">
-        <div class="avatar">
+      <br>
+      <div class="comment">
+        <div class="avatar1">
           <img src="../../../public/img/avatarCourtMaster.jpg" alt="Avatar">
         </div>
-        <div class="user-info">
+        <div class="user-info1">
           <h4>Hans Hoffmann <span class="date">11:14 13/06/2024</span></h4>
-          <div class="rating1">
-            <span class="star-icon" :class="{ filled: rating1 >= 1 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating1 >= 2 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating1 >= 3 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating1 >= 4 }">&#9733;</span>
-            <span class="star-icon" :class="{ filled: rating1 >= 5 }">&#9733;</span>
-          </div>
+          <p>Noice, bruh!</p>
+        </div>
+        <div class="rating1">
+          <span class="star-icon" :class="{ filled: rating1 >= 1 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating1 >= 2 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating1 >= 3 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating1 >= 4 }">&#9733;</span>
+          <span class="star-icon" :class="{ filled: rating1 >= 5 }">&#9733;</span>
         </div>
       </div>
-      <div class="comment-body">
-        <p>Noice, bruh!</p>
-      </div>
-    </div>     
-     <!-- Add more comments here --> 
+      <!-- Add more comments here -->
+    </div>
   </div>
 </template>
 
@@ -161,7 +149,8 @@ export default {
   data() {
     return {
       rating: 5,
-      rating1: 3 // Set the initial rating value here
+      rating1: 3 
+      // Set the initial rating value here
     }
   }
 }
@@ -356,34 +345,39 @@ tr:nth-child(even) {
 
 .comment {
   display: flex;
-  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
   border: 1px solid #ddd;
   border-radius: 100px;
-  padding: 15px;
-  margin-bottom: 10px;
-}
-
-.comment-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  row-gap: 30px;
 }
 
 .avatar img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-right: 10px;
-  margin-top: 0px;
+  margin-left: 15px;
+  flex-grow: 1;
+  display: flex;
+}
+
+.avatar1 img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-left: 30px;
+  flex-grow: 1;
+  display: flex;
+}
+
+.user-info1 {
+  margin-left: 20px;
+  flex-grow: 2;
 }
 
 .user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-info h4 {
-  margin-top: -10px;
+  margin-left: 20px;
+  flex-grow: 2;
 }
 
 .date {
@@ -391,17 +385,12 @@ tr:nth-child(even) {
   color: #888;
 }
 
-.comment-body p {
-  margin-left: 50px;
-  margin-right: 180px;
-  margin-top: -45px;
-  margin-bottom: -10px;
-  line-height: 1.5;
+.rating1 {
+  margin-right: 20px;
 }
 
 .rating {
-  padding-left: 650px;
-  margin-top: -30px;
+  margin-right: 5px;
 }
 
 .rating:not(:checked)>input {
@@ -445,10 +434,8 @@ tr:nth-child(even) {
   --input-hovered-color: #4985e01f;
   position: relative;
   width: var(--width-of-input);
-  margin-left: 50px;
-  margin-right: 200px;
+  margin-left: -7px;
   margin-top: -45px;
-  margin-bottom: -5px;
   line-height: 1.5;
 }
 
@@ -481,31 +468,11 @@ input:focus {
 
 .commenter {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   border: 1px solid #ddd;
   padding: 15px;
   margin-bottom: 10px;
-}
-
-.commenter-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.commenter-body p {
-  margin-left: 50px;
-  margin-right: 180px;
-  margin-top: -45px;
-  margin-bottom: -10px;
-  line-height: 1.5;
-}
-
-.rating1 {
-  padding-left: 650px;
-  margin-top: -30px;
-  display: flex;
-  align-items: center;
 }
 
 .star-icon {

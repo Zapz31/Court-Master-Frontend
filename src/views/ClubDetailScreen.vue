@@ -35,8 +35,8 @@
   .content {
     flex-grow: 1;
     padding: 1rem;
-    margin-left: 290px;
-    margin-right: 290px;
+    margin-left: 20%;
+    margin-right: 20%;
     margin-top: -100px;
   }
   

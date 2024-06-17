@@ -35,6 +35,11 @@ const routes = [
         name: 'ClubDetailScreen',
         component: () => import('../views/ClubDetailScreen.vue') ,
     },
+    {
+        path: '/history',
+        name: 'BookingHistoryScreen',
+        component: () => import('../views/BookingHistoryScreen.vue') ,
+    },
 ]
 
 const router = createRouter({
