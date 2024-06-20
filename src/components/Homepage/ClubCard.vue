@@ -44,55 +44,6 @@ onMounted(async () => {
 const getImageUrl = (base64String) => {
   return `data:image/png;base64,${base64String}`;
 };
-
-// ============================= TEST DATA -CLUB LIST========================================================================================
-// const clubs = ref([
-//   {
-//     id: 1,
-//     name: "Club Name 1",
-//     address: "abc, Ho Chi Minh city",
-//     averagePrice: 80000,
-//     imageUrl:
-//       "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
-//   },
-//   {
-//     id: 2,
-//     name: "Club Name 2",
-//     address: "abc, Ho Chi Minh city",
-//     averagePrice: 80000,
-//     imageUrl:
-//       "https://shopvnb.com/uploads/tin_tuc/review-san-cau-long-quan-12-san-cau-long-nhat-pham.webp",
-//   },
-
-//   {
-//     id: 3,
-//     name: "Club Name 1",
-//     address: "abc, Ho Chi Minh city",
-//     averagePrice: 80000,
-//     imageUrl:
-//       "https://shopvnb.com/uploads/tin_tuc/review-san-cau-long-quan-12-san-cau-long-nhat-pham.webp",
-//   },
-
-//   {
-//     id: 3,
-//     name: "Club Name 1",
-//     address: "abc, Ho Chi Minh city",
-//     averagePrice: 80000,
-//     imageUrl:
-//       "https://shopvnb.com/uploads/tin_tuc/review-san-cau-long-quan-12-san-cau-long-nhat-pham.webp",
-//   },
-//   {
-//     id: 3,
-//     name: "Club Name 1",
-//     address: "abc, Ho Chi Minh city",
-//     averagePrice: 80000,
-//     imageUrl:
-//       "https://shopvnb.com/uploads/tin_tuc/review-san-cau-long-quan-12-san-cau-long-nhat-pham.webp",
-//   },
-//   // ============================= TEMP LIST CLUB========================================================================================
-
-//   //Add more club objects as needed
-// ]);
 </script>
   
 <style scoped>

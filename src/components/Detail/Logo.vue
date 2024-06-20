@@ -1,10 +1,12 @@
 <template>
   <div class="logo">
-    <img
-      src="../../../public/img/mono_blue.png"
-      alt="logo_img"
-      class="image_logo"
-    />
+    <router-link to="/">
+      <img
+        src="../../../public/img/mono_blue.png"
+        alt="logo_img"
+        class="image_logo"
+      />
+    </router-link>
   </div>
 </template>
 

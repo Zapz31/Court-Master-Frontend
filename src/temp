@@ -1,0 +1,105 @@
+import { ref } from "vue";
+
+const clubName = ref("");
+
+const images = ref([
+  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
+  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
+  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
+  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
+  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
+  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
+  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
+  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
+  "https://babolat.com.vn/wp-content/uploads/2023/10/san-cau-long-viettel.jpg",
+]);
+
+const address = ref("Nguyễn Văn Tăng, Phường Long Thạnh Mỹ, Tp. Thủ Đức");
+
+const timeSlots = ref([
+  ["Mon - Fri", "5h - 17h", "79.000VNĐ", "68.000VNĐ", "68.000VNĐ"],
+  ["Mon - Fri", "22h - 17h", "89.000VNĐ", "79.000VNĐ", "79.000VNĐ"],
+  ["Sat - Sun", "5h - 17h", "99.000VNĐ", "88.000VNĐ", "78.000VNĐ"],
+  ["Sat - Sun", "5h - 17h", "109.000VNĐ", "98.000VNĐ", "98.000VNĐ"],
+]);
+
+const details = ref(
+  `BadmintonSpace Arena is a premier destination for badminton enthusiasts,
+  combining modern design with top-notch amenities. The spacious courts
+  feature advanced LED lighting and international-standard surfaces,
+  ensuring optimal play conditions.\n\n
+  Beyond excellent facilities, BadmintonSpace Arena prides itself on
+  outstanding customer service, with friendly and professional staff.
+  Relax in comfortable lounges, utilize modern locker rooms, and
+  rejuvenate in fully-equipped recovery areas.\n\n
+  Regular tournaments and social events offer players of all levels the
+  chance to compete and connect. Experience the passion and excellence of
+  badminton at BadmintonSpace Arena – where the sport's finest come
+  together!`
+);
+
+const comments = ref([
+  {
+    name: "Thanh Nhan Vo",
+    date: "18:03 15/05/2024",
+    text: "This is a great place for badminton! The courts are well-maintained, and the staff is friendly. Highly recommended!",
+    rating: 5,
+  },
+  {
+    name: "Hans Hoffmann",
+    date: "11:14 13/06/2024",
+    text: "Noice, bruh!",
+    rating: 3,
+  },
+]);
+
+const newComment = ref("");
+const newRating = ref(5);
+
+const handleEnterKey = (event) => {
+  if (event.shiftKey) {
+    return; // Allow Shift+Enter to create a new line
+  }
+  event.preventDefault(); // Prevent default Enter behavior
+  submitComment(); // Submit the form
+};
+
+const submitComment = () => {
+  if (!newComment.value.trim()) return; // Do nothing if the comment is empty
+
+  comments.value.push({
+    name: "Doan Minh Tien",
+    date: new Date().toLocaleString(),
+    text: newComment.value,
+    rating: newRating.value,
+  });
+
+  newComment.value = ""; // Clear the comment input
+  newRating.value = 5; // Reset the rating
+};
+
+const showPopup = ref(false);
+const currentImageIndex = ref(0);
+
+const openImagePopup = (index) => {
+  currentImageIndex.value = index;
+  showPopup.value = true;
+};
+
+const closeImagePopup = () => {
+  showPopup.value = false;
+};
+
+const prevImage = () => {
+  currentImageIndex.value =
+    currentImageIndex.value > 0
+      ? currentImageIndex.value - 1
+      : images.value.length - 1;
+};
+
+const nextImage = () => {
+  currentImageIndex.value =
+    currentImageIndex.value < images.value.length - 1
+      ? currentImageIndex.value + 1
+      : 0;
+};

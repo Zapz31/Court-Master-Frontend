@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export const useScheduleStore = defineStore('schedule', {
   state: () => ({
-    selectedDate: '',
+    selectedDate: '', // Khởi tạo với ngày hiện tại
     startTime: '',
     endTime: '',
     court: null,
@@ -10,10 +10,10 @@ export const useScheduleStore = defineStore('schedule', {
   }),
   actions: {
     updateScheduleInfo(start, end, courtNumber) {
-      this.startTime = start
-      this.endTime = end
-      this.court = courtNumber
-      this.calculatePrice()
+      this.startTime = start;
+      this.endTime = end;
+      this.court = courtNumber;
+      this.calculatePrice();
     },
     calculatePrice() {
       const [startHour, startMinute] = this.startTime.split(':').map(Number)
@@ -24,14 +24,18 @@ export const useScheduleStore = defineStore('schedule', {
       const hours = totalMinutes / 60
       this.price = hours * 80000 // Giá mặc định 80.000 VNĐ/giờ
     },
-    
+
+    initializeSelectedDate() {
+      const today = new Date().toISOString().split('T')[0];
+      this.selectedDate = today;
+    },
+
     updateSelectedDate(date) {
-      this.selectedDate = date
+      this.selectedDate = date;
+    },
+    initializeSelectedDate() {
+      const today = new Date().toISOString().split('T')[0]
+      this.selectedDate = today
     },
   },
-  
-
-  
-
-  
 })

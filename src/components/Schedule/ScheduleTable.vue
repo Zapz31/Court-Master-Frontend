@@ -15,29 +15,37 @@
             :key="court"
             :class="getCellClass(time, court)"
             @mousedown="handleMouseDown(time, court)"
-            @mouseenter="handleMouseEnter(time, court)"
+            @mouseenter="handleMouseEnter(time, court, $event)"
             @mouseup="handleMouseUp"
             @mouseleave="hidePopup"
           >
-            <session-popup
+            <slot-popup
               v-if="showPopup"
               :show="true"
               :style="{
                 left: popupPosition.x + 'px',
                 top: popupPosition.y + 'px',
               }"
+              class="slot-popup"
             />
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-</template>
+</template> 
 
 <script setup>
-import { computed, ref } from "vue";
-import SessionPopup from "../../components/Schedule/SessionPopup.vue";
+import { computed, defineProps, ref, watch } from "vue";
 import { useScheduleStore } from "../../stores/scheduleStore";
+import SlotPopup from "../Schedule/SessionPopup.vue";
+
+const props = defineProps({
+  selectedDate: {
+    type: String,
+    required: true,
+  },
+});
 
 const scheduleStore = useScheduleStore();
 
@@ -73,12 +81,14 @@ const initializeSessions = () => {
     endTime: "18:30",
     court: 9,
     status: "booked",
+    date: "18/06/2024",
   });
   sessions.value.push({
     startTime: "14:30",
     endTime: "16:00",
     court: 5,
     status: "booked",
+    date: "19/06/2024",
   });
 
   sessions.value.push({
@@ -86,6 +96,7 @@ const initializeSessions = () => {
     endTime: "16:00",
     court: 8,
     status: "booked",
+    date: "20/06/2024",
   });
 
   sessions.value.push({
@@ -93,6 +104,7 @@ const initializeSessions = () => {
     endTime: "08:00",
     court: 1,
     status: "booked",
+    date: "21/06/2024",
   });
 
   sessions.value.push({
@@ -100,6 +112,7 @@ const initializeSessions = () => {
     endTime: "15:00",
     court: 3,
     status: "booked",
+    date: "22/06/2024",
   });
 
   sessions.value.push({
@@ -107,6 +120,7 @@ const initializeSessions = () => {
     endTime: "20:00",
     court: 3,
     status: "bookedByUser",
+    date: "23/06/2024",
   });
 };
 
@@ -114,6 +128,36 @@ const initializeSessions = () => {
 
 // Khởi tạo dữ liệu mẫu
 initializeSessions();
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+const filteredSessions = ref([]);
+
+watch(
+  () => props.selectedDate,
+  (newDate) => {
+    filterSessionsByDate(newDate);
+  },
+  { immediate: true }
+);
+
+function filterSessionsByDate(date) {
+  if (date === "") {
+    // Nếu không có ngày được chọn, không hiển thị bất kỳ session nào
+    filteredSessions.value = [];
+  } else {
+    const formattedDate = formatDate(date); // Chuyển đổi ngày sang định dạng "dd/mm/yyyy"
+    filteredSessions.value = sessions.value.filter(
+      (session) => session.date === formattedDate
+    );
+  }
+}
 
 let isDragging = ref(false);
 let dragStartCell = ref(null);
@@ -124,7 +168,7 @@ let selectedCells = ref([]);
 //Xanh lá: Chọn giờ chơi mới (FE)
 const handleMouseDown = (time, court) => {
   const startTime = formatTime(time);
-  const cell = sessions.value.find(
+  const cell = filteredSessions.value.find(
     (session) =>
       session.court === court &&
       startTime >= session.startTime &&
@@ -140,7 +184,7 @@ const handleMouseDown = (time, court) => {
       scheduleStore.price = 0;
 
       // Hiển thị lại thông tin của khung giờ chơi trước đó (nếu có)
-      const previousSession = sessions.value.find(
+      const previousSession = filteredSessions.value.find(
         (session) =>
           session.court === court &&
           session.endTime < cell.startTime &&
@@ -156,31 +200,7 @@ const handleMouseDown = (time, court) => {
       }
 
       // Xóa các ô đã được chọn
-      sessions.value = sessions.value.filter(
-        (session) =>
-          !(
-            session.court === court &&
-            session.startTime === cell.startTime &&
-            session.status === "selected"
-          )
-      );
-      return;
-    }
-    return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
-  }
-
-  // const startTime = formatTime(time);
-  // const cell = sessions.value.find(
-  //   (session) =>
-  //     session.court === court &&
-  //     startTime >= session.startTime &&
-  //     startTime < session.endTime
-  // );
-
-  if (cell) {
-    if (cell.status === "selected") {
-      // Hủy chọn các ô đã được chọn trước đó
-      sessions.value = sessions.value.filter(
+      filteredSessions.value = filteredSessions.value.filter(
         (session) =>
           !(
             session.court === court &&
@@ -203,7 +223,7 @@ const showPopup = ref(false);
 const hoveredSession = ref(null);
 const popupPosition = ref({ x: 0, y: 0 });
 
-const handleMouseEnter = (time, court) => {
+const handleMouseEnter = (time, court, event) => {
   if (isDragging.value) {
     const startTime = dragStartCell.value.time;
     const currentTime = formatTime(time);
@@ -226,77 +246,81 @@ const handleMouseEnter = (time, court) => {
       updateSession(formatTime(newTime), court, false);
     }
   } else {
-    const session = sessions.value.find(
+    const session = filteredSessions.value.find(
       (session) =>
         session.court === court &&
         session.startTime <= formatTime(time) &&
         formatTime(time) < session.endTime &&
         (session.status === "bookedByUser" || session.status === "selected")
     );
-
     if (session) {
       showPopup.value = true;
       hoveredSession.value = session;
       const cellRect = event.currentTarget.getBoundingClientRect();
-      popupPosition.value = {
-        x: cellRect.left + cellRect.width / 2,
-        y: cellRect.top + cellRect.height,
-      };
+      const windowHeight = window.innerHeight;
+      const popupHeight = 80; // Chiều cao ước tính của popup
+
+      // Kiểm tra xem popup có bị che bởi thanh thông tin hay không
+      const bottomOffset = windowHeight - cellRect.bottom;
+      if (bottomOffset < popupHeight) {
+        // Nếu có, hiển thị popup ở phía trên ô
+        popupPosition.value = {
+          x: cellRect.right,
+          y: cellRect.top - popupHeight,
+        };
+      } else {
+        // Nếu không, hiển thị popup bên cạnh ô
+        popupPosition.value = {
+          x: cellRect.right,
+          y: cellRect.top,
+        };
+      }
     } else {
       hidePopup();
     }
   }
 };
-
 const hidePopup = () => {
   showPopup.value = false;
   hoveredSession.value = null;
 };
-
 const handleMouseUp = () => {
   isDragging.value = false;
   const sessionStart = selectedCells.value[0].time;
   const sessionEnd = selectedCells.value[selectedCells.value.length - 1].time;
   const court = selectedCells.value[0].court;
-
   const existingSession =
     scheduleStore.court === court && scheduleStore.endTime === sessionStart;
-
   if (existingSession) {
     scheduleStore.endTime = sessionEnd;
     scheduleStore.calculatePrice();
   } else {
     scheduleStore.updateScheduleInfo(sessionStart, sessionEnd, court);
   }
-
   selectedCells.value = [];
 };
-
 const updateSession = (time, court, isStart) => {
-  const cell = sessions.value.find(
+  const cell = filteredSessions.value.find(
     (session) =>
       session.court === court &&
       time >= session.startTime &&
       time < session.endTime
   );
-
   if (cell) {
     return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
   }
-
-  const existingSession = sessions.value.find(
+  const existingSession = filteredSessions.value.find(
     (session) =>
       session.court === court &&
       session.endTime === time &&
       session.status === "selected"
   );
-
   if (existingSession && !isStart) {
     existingSession.endTime = formatTime(
       parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
     );
   } else if (isStart) {
-    sessions.value.push({
+    filteredSessions.value.push({
       startTime: time,
       endTime: formatTime(
         parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
@@ -306,29 +330,27 @@ const updateSession = (time, court, isStart) => {
     });
   }
 };
-
 const getCellClass = (time, court) => {
   const formattedTime = formatTime(time);
-  const session = sessions.value.find(
+  const session = filteredSessions.value.find(
     (session) =>
       session.court === court &&
       formattedTime >= session.startTime &&
       formattedTime < session.endTime
   );
-
   if (session) {
     if (session.status === "booked") {
       return "booked";
     } else if (session.status === "bookedByUser") {
-      return "bookedByUser";
+      return "bookedByUser ";
     } else if (session.status === "selected") {
       return "selected";
     }
   }
-
   return "";
 };
 </script>
+
 
 <style>
 table {
