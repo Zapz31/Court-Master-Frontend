@@ -4,14 +4,23 @@
       <h1>{{ currentClub.clubName }}</h1>
     </div>
 
-    <div class="album">
-      <div class="imageNames">
-        <div
-          v-for="(image, index) in currentClub.imageNames"
-          :key="index"
-          @click="openImagePopup(index)"
-        >
-          <img :src="getImageUrl(image.imageName)" />
+    <div
+      v-if="currentClub.imageNames && currentClub.imageNames.length > 0"
+      class="album"
+    >
+      <div class="image-container">
+        <img
+          :src="
+            getImageUrl(currentClub.imageNames[currentImageIndex].imageName)
+          "
+          alt="Club Image"
+          class="main-image"
+          @click="openImagePopup(currentImageIndex)"
+        />
+
+        <div class="navigation-buttons">
+          <button @click="prevImage">❮</button>
+          <button @click="nextImage">❯</button>
         </div>
       </div>
     </div>
@@ -19,7 +28,7 @@
     <div class="clubAddress">
       <p>{{ currentClub.clubAddress }}</p>
     </div>
-    <button>
+    <button class="button">
       <router-link to="/schedule">View Schedule</router-link>
     </button>
 
@@ -53,7 +62,7 @@
               v-for="pricing in frame.pricingServiceList"
               :key="pricing.dateOfWeek"
             >
-              {{ pricing[mode] }} VNĐ
+              {{ pricing[mode] }} ₫
             </td>
           </tr>
         </tbody>
@@ -164,33 +173,27 @@
       </form>
     </div>
 
-    <div v-if="showPopup" class="image-popup">
+    <div v-if="showPopup" class="popup-overlay" @click="closeImagePopup">
       <div class="popup-content">
         <span class="close" @click="closeImagePopup">&times;</span>
         <img
-          :src="currentClub?.imageNames[currentImageIndex].imageName"
+          :src="
+            getImageUrl(currentClub.imageNames[currentImageIndex].imageName)
+          "
           class="popup-image"
         />
-        <a class="prev" @click="prevImage">&#10094;</a>
-        <a class="next" @click="nextImage">&#10095;</a>
+        <!-- <a class="prev" @click="prevImage">&#10094;</a>
+        <a class="next" @click="nextImage">&#10095;</a> -->
       </div>
     </div>
   </div>
 </template>
 
+
 <script setup>
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useClubStore } from "../../stores/clubMng";
-
-onMounted(async () => {
-  const clubId = route.params.clubId;
-  await clubStore.fetchClubById(clubId);
-});
-const route = useRoute();
-const clubStore = useClubStore();
-const { currentClub } = storeToRefs(clubStore);
 
 const props = defineProps({
   clubId: {
@@ -199,24 +202,43 @@ const props = defineProps({
   },
 });
 
+const clubStore = useClubStore();
+const { currentClub } = storeToRefs(clubStore);
+
+const showPopup = ref(false);
+const currentImageIndex = ref(0);
+let autoSlideInterval = null;
+
 const fetchClubData = async () => {
-  await clubStore.fetchClubById(props.clubId);
+  try {
+    await clubStore.fetchClubById(props.clubId);
+    // Start auto slide after data is fetched
+    startAutoSlide();
+  } catch (error) {
+    console.error("Error fetching club data:", error);
+    // You might want to set an error state here and display it in the template
+  }
 };
 
 onMounted(fetchClubData);
 
-watch(() => props.clubId, fetchClubData);
-
-const showPopup = ref(false);
-const currentImageIndex = ref(0);
+watch(
+  () => props.clubId,
+  () => {
+    stopAutoSlide();
+    fetchClubData();
+  }
+);
 
 const getImageUrl = (base64String) => {
-  return `data:image/png;base64,${base64String}`;
+  return base64String ? `data:image/png;base64,${base64String}` : "";
 };
 
 const openImagePopup = (index) => {
-  currentImageIndex.value = index;
-  showPopup.value = true;
+  if (currentClub.value && currentClub.value.imageNames) {
+    currentImageIndex.value = index;
+    showPopup.value = true;
+  }
 };
 
 const closeImagePopup = () => {
@@ -224,16 +246,40 @@ const closeImagePopup = () => {
 };
 
 const prevImage = () => {
-  currentImageIndex.value =
-    (currentImageIndex.value - 1 + currentClub.value.imageNames.length) %
-    currentClub.value.imageNames.length;
+  if (currentClub.value && currentClub.value.imageNames) {
+    currentImageIndex.value =
+      (currentImageIndex.value - 1 + currentClub.value.imageNames.length) %
+      currentClub.value.imageNames.length;
+  }
 };
 
 const nextImage = () => {
-  currentImageIndex.value =
-    (currentImageIndex.value + 1) % currentClub.value.imageNames.length;
+  if (currentClub.value && currentClub.value.imageNames) {
+    currentImageIndex.value =
+      (currentImageIndex.value + 1) % currentClub.value.imageNames.length;
+  }
 };
 
+const startAutoSlide = () => {
+  if (
+    currentClub.value &&
+    currentClub.value.imageNames &&
+    currentClub.value.imageNames.length > 1
+  ) {
+    stopAutoSlide(); // Ensure any existing interval is cleared
+    autoSlideInterval = setInterval(nextImage, 5678);
+  }
+};
+
+const stopAutoSlide = () => {
+  if (autoSlideInterval) {
+    clearInterval(autoSlideInterval);
+    autoSlideInterval = null;
+  }
+};
+
+onBeforeUnmount(stopAutoSlide);
+//===========================FIXED FUNCTION OF COMMENT================================================
 const comments = ref([
   {
     name: "Thanh Nhan Vo",
@@ -283,21 +329,19 @@ const submitComment = () => {
   newComment.value = ""; // Clear the comment input
   newRating.value = 1; // Reset the rating
 };
+
+//======================================================================================================
 </script>
+
 
 <style scoped>
 .name {
   font-size: medium;
-  color: rgb(79, 167, 250);
+  color: #6babf4;
 }
 
 .button {
   border-radius: 50%;
-}
-
-.album {
-  display: flex;
-  justify-content: center;
 }
 
 .comments-container,
@@ -306,72 +350,91 @@ h4 {
   margin-top: 11px;
 }
 
-.imageNames {
-  display: grid;
-  grid-template-columns: 350px 350px 200px;
-  gap: 10px;
-  cursor: pointer;
-}
-
-.imageNames-column {
+.album {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-#image-column1 img {
-  width: 400px;
-  height: 265px;
-  border-radius: 15px;
-  grid-row: 1/3;
-}
-
-#image-column1:hover {
-  transform: scale(1.02);
-}
-
-#image-column2 img {
-  margin-left: 50px;
-  width: 350px;
-  height: 266px;
-  border-radius: 15px;
-  grid-row: 1/3;
-}
-
-#image-column3 img {
-  margin-left: 50px;
-  max-width: 400px;
-  max-height: 130px;
-  border-radius: 15px;
-}
-
-.image-container {
+  justify-content: center;
+  align-items: center;
   position: relative;
 }
 
-.image-container .overlay {
+.image-container {
+  margin-left: 108px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.main-image {
+  width: 998px;
+  height: 355px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 10px;
   position: absolute;
-  top: 0px;
-  left: 0px;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  padding: 53px 14px 53px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  justify-content: space-between;
+  transition: transform 1s ease;
+}
+
+.navigation-buttons button {
+  background: none;
+  border: 1px;
+  font-size: 2rem;
+  cursor: pointer;
+  color: grey;
+  transform: scale(1.2);
+}
+
+.navigation-buttons button:hover {
+  color: #6babf4; /* Change to blue on hover */
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  position: relative;
+  max-width: 80%;
+  max-height: 80%;
+}
+
+.popup-image {
+  max-width: 1000px;
+  max-height: 488px;
   border-radius: 15px;
-  font-size: 20px;
+  object-fit: cover;
 }
 
-.overlay {
-  margin-left: 50px;
+.close,
+.prev,
+.next {
+  position: absolute;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: white;
 }
 
-.image-container:hover {
-  transform: scale(1.02);
-}
-
-.clubAddress p {
-  font-size: 16px;
-  color: #555;
-  font-weight: bold;
+.close {
+  top: 10px;
+  right: 10px;
 }
 
 .button-container {
@@ -382,7 +445,7 @@ h4 {
   /* Add some spacing */
 }
 
-button {
+.button {
   appearance: button;
   border: solid transparent;
   border-radius: 16px;
@@ -410,9 +473,9 @@ button {
   float: right;
 }
 
-button:after {
+.button:after {
   background-clip: padding-box;
-  background-color: #1cb0f6;
+  background-color: #6babf4;
   border: solid transparent;
   border-radius: 16px;
   border-width: 0 0 4px;
@@ -425,24 +488,24 @@ button:after {
   z-index: -1;
 }
 
-button:main,
-button:focus {
+.button:main,
+.button:focus {
   user-select: auto;
 }
 
-button:hover {
+.button:hover {
   transform: scale(1.05);
 }
 
-button:disabled {
+.button:disabled {
   cursor: auto;
 }
 
-button:active {
+.button:active {
   padding-bottom: 10px;
 }
 
-button a {
+.button a {
   color: inherit;
   /* Inherit text color from parent */
   text-decoration: none;
