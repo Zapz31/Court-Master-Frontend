@@ -1,28 +1,23 @@
 <template>
-  <div>
+  <div v-if="currentClub">
     <div class="name">
-      <h1>{{ clubName }}</h1>
+      <h1>{{ currentClub.clubName }}</h1>
     </div>
 
     <div class="album">
-      <div class="images">
-        <div id="image-column1" @click="openImagePopup(0)">
-          <img :src="images[0]" />
-        </div>
-        <div id="image-column2" @click="openImagePopup(1)">
-          <img :src="images[1]" />
-        </div>
-        <div id="image-column3">
-          <img id="image" :src="images[2]" />
-          <div class="image-container" @click="openImagePopup(2)">
-            <img :src="images[2]" />
-          </div>
+      <div class="imageNames">
+        <div
+          v-for="(image, index) in currentClub.imageNames"
+          :key="index"
+          @click="openImagePopup(index)"
+        >
+          <img :src="getImageUrl(image.imageName)" />
         </div>
       </div>
     </div>
 
-    <div class="address">
-      <p>{{ address }}</p>
+    <div class="clubAddress">
+      <p>{{ currentClub.clubAddress }}</p>
     </div>
     <button>
       <router-link to="/schedule">View Schedule</router-link>
@@ -30,7 +25,7 @@
 
     <div class="time-frame-container">
       <table
-        v-for="frame in timeFrame"
+        v-for="frame in currentClub.timeFrame"
         :key="frame.timeFrameId"
         class="time-frame-table"
       >
@@ -52,31 +47,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Flexible-time</td>
+          <tr v-for="mode in ['flexible', 'oneTimePlay', 'fixed']" :key="mode">
+            <td>{{ mode }}</td>
             <td
               v-for="pricing in frame.pricingServiceList"
               :key="pricing.dateOfWeek"
             >
-              {{ pricing.flexible }} VNĐ
-            </td>
-          </tr>
-          <tr>
-            <td>One-time</td>
-            <td
-              v-for="pricing in frame.pricingServiceList"
-              :key="pricing.dateOfWeek"
-            >
-              {{ pricing.oneTimePlay }} VNĐ
-            </td>
-          </tr>
-          <tr>
-            <td>Fixed-time</td>
-            <td
-              v-for="pricing in frame.pricingServiceList"
-              :key="pricing.dateOfWeek"
-            >
-              {{ pricing.fixed }} VNĐ
+              {{ pricing[mode] }} VNĐ
             </td>
           </tr>
         </tbody>
@@ -84,7 +61,7 @@
     </div>
 
     <div class="detail">
-      <p>{{ details }}</p>
+      <p>{{ currentClub.clubDescription }}</p>
     </div>
 
     <div class="comments-container">
@@ -109,48 +86,6 @@
               @keydown.enter="handleEnterKey"
               maxlength="1000"
             ></textarea>
-            <!-- <div class="rating">
-              <input
-                value="1"
-                name="rate"
-                id="star1"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star1"></label>
-              <input
-                value="2"
-                name="rate"
-                id="star2"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star2"></label>
-              <input
-                value="3"
-                name="rate"
-                id="star3"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star3"></label>
-              <input
-                value="4"
-                name="rate"
-                id="star4"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star4"></label>
-              <input
-                value="5"
-                name="rate"
-                id="star5"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star5"></label>
-            </div> -->
 
             <div class="rating">
               <input
@@ -220,7 +155,7 @@
               <span class="star-icon" :class="{ filled: comment.rating >= 4 }"
                 >&#9733;</span
               >
-              <span class="star-icon" :class="{ filled: (comment.rating = 5) }"
+              <span class="star-icon" :class="{ filled: comment.rating >= 5 }"
                 >&#9733;</span
               >
             </div>
@@ -232,7 +167,10 @@
     <div v-if="showPopup" class="image-popup">
       <div class="popup-content">
         <span class="close" @click="closeImagePopup">&times;</span>
-        <img :src="images[currentImageIndex]" class="popup-image" />
+        <img
+          :src="currentClub?.imageNames[currentImageIndex].imageName"
+          class="popup-image"
+        />
         <a class="prev" @click="prevImage">&#10094;</a>
         <a class="next" @click="nextImage">&#10095;</a>
       </div>
@@ -241,188 +179,60 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { storeToRefs } from "pinia";
+import { onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useClubStore } from "../../stores/clubMng";
 
-const clubName = ref("");
+onMounted(async () => {
+  const clubId = route.params.clubId;
+  await clubStore.fetchClubById(clubId);
+});
+const route = useRoute();
+const clubStore = useClubStore();
+const { currentClub } = storeToRefs(clubStore);
 
-const images = ref([
-  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
-  "https://babolat.com.vn/wp-content/uploads/2023/10/san-cau-long-viettel.jpg",
-]);
-
-const address = ref("Nguyễn Văn Tăng, Phường Long Thạnh Mỹ, Tp. Thủ Đức");
-
-const timeFrame = ref([
-  {
-    timeFrameId: "TF000001",
-    starTime: "17:30:00",
-    endTime: "19:30:00",
-    pricingServiceList: [
-      {
-        dateOfWeek: "Mon",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Tue",
-        flexible: 34000,
-        fixed: 38000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Wed",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Thu",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Fri",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Sat",
-        flexible: 34000,
-        fixed: 40000,
-        oneTimePlay: 37000,
-      },
-      {
-        dateOfWeek: "Sun",
-        flexible: 34000,
-        fixed: 40000,
-        oneTimePlay: 37000,
-      },
-    ],
+const props = defineProps({
+  clubId: {
+    type: String,
+    required: true,
   },
-  {
-    timeFrameId: "TF000002",
-    starTime: "05:30:00",
-    endTime: "12:30:00",
-    pricingServiceList: [
-      {
-        dateOfWeek: "Mon",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Tue",
-        flexible: 35000,
-        fixed: 38000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Wed",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Thu",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Fri",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Sat",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 38000,
-      },
-      {
-        dateOfWeek: "Sun",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 37000,
-      },
-    ],
-  },
-  {
-    timeFrameId: "TF000003",
-    starTime: "19:30:00",
-    endTime: "23:30:00",
-    pricingServiceList: [
-      {
-        dateOfWeek: "Mon",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Tue",
-        flexible: 35000,
-        fixed: 38000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Wed",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Thu",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Fri",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Sat",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 38000,
-      },
-      {
-        dateOfWeek: "Sun",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 37000,
-      },
-    ],
-  },
-]);
+});
 
-const details = ref(
-  `BadmintonSpace Arena is a premier destination for badminton enthusiasts,
-  combining modern design with top-notch amenities. The spacious courts
-  feature advanced LED lighting and international-standard surfaces,
-  ensuring optimal play conditions.\n\n
-  Beyond excellent facilities, BadmintonSpace Arena prides itself on
-  outstanding customer service, with friendly and professional staff.
-  Relax in comfortable lounges, utilize modern locker rooms, and
-  rejuvenate in fully-equipped recovery areas.\n\n
-  Regular tournaments and social events offer players of all levels the
-  chance to compete and connect. Experience the passion and excellence of
-  badminton at BadmintonSpace Arena – where the sport's finest come
-  together!`
-);
+const fetchClubData = async () => {
+  await clubStore.fetchClubById(props.clubId);
+};
+
+onMounted(fetchClubData);
+
+watch(() => props.clubId, fetchClubData);
+
+const showPopup = ref(false);
+const currentImageIndex = ref(0);
+
+const getImageUrl = (base64String) => {
+  return `data:image/png;base64,${base64String}`;
+};
+
+const openImagePopup = (index) => {
+  currentImageIndex.value = index;
+  showPopup.value = true;
+};
+
+const closeImagePopup = () => {
+  showPopup.value = false;
+};
+
+const prevImage = () => {
+  currentImageIndex.value =
+    (currentImageIndex.value - 1 + currentClub.value.imageNames.length) %
+    currentClub.value.imageNames.length;
+};
+
+const nextImage = () => {
+  currentImageIndex.value =
+    (currentImageIndex.value + 1) % currentClub.value.imageNames.length;
+};
 
 const comments = ref([
   {
@@ -473,32 +283,6 @@ const submitComment = () => {
   newComment.value = ""; // Clear the comment input
   newRating.value = 1; // Reset the rating
 };
-
-const showPopup = ref(false);
-const currentImageIndex = ref(0);
-
-const openImagePopup = (index) => {
-  currentImageIndex.value = index;
-  showPopup.value = true;
-};
-
-const closeImagePopup = () => {
-  showPopup.value = false;
-};
-
-const prevImage = () => {
-  currentImageIndex.value =
-    currentImageIndex.value > 0
-      ? currentImageIndex.value - 1
-      : images.value.length - 1;
-};
-
-const nextImage = () => {
-  currentImageIndex.value =
-    currentImageIndex.value < images.value.length - 1
-      ? currentImageIndex.value + 1
-      : 0;
-};
 </script>
 
 <style scoped>
@@ -522,14 +306,14 @@ h4 {
   margin-top: 11px;
 }
 
-.images {
+.imageNames {
   display: grid;
   grid-template-columns: 350px 350px 200px;
   gap: 10px;
   cursor: pointer;
 }
 
-.images-column {
+.imageNames-column {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -560,10 +344,6 @@ h4 {
   max-height: 130px;
   border-radius: 15px;
 }
-/*
-#image:hover {
-  transform: scale(1.02);
-} */
 
 .image-container {
   position: relative;
@@ -588,7 +368,7 @@ h4 {
   transform: scale(1.02);
 }
 
-.address p {
+.clubAddress p {
   font-size: 16px;
   color: #555;
   font-weight: bold;
@@ -695,7 +475,8 @@ button a {
 }
 
 .time-frame-table thead {
-  background-color: #f2f2f2;
+  background-color: #6babf4;
+  color: white;
 }
 
 .time-frame-table th {

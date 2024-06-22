@@ -343,9 +343,8 @@ const performSearch = async () => {
     district: selectedDistrict.value,
     ward: selectedWard.value,
     openedTime: openTime.value,
-    hoursOfExpect: hoursExpect.value
-  }
-
+    hoursOfExpect: hoursExpect.value,
+  };
 };
 
 const searchResults = ref([
@@ -416,7 +415,7 @@ const searchResults = ref([
   padding: 10px;
   background-color: white;
   border-radius: 10px;
-  text-align: center;
+  text-align: left;
   transition: transform 0.3s ease;
 }
 
