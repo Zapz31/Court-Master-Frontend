@@ -31,10 +31,12 @@ const routes = [
         component: () => import('../views/ScheduleScreen.vue') ,
     },
     {
-        path: '/detail',
+        path: '/clubs/:clubId',
         name: 'ClubDetailScreen',
         component: () => import('../views/ClubDetailScreen.vue') ,
     },
+
+
     {
         path: '/history',
         name: 'BookingHistoryScreen',

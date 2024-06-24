@@ -1,36 +1,40 @@
 <template>
-  <div>
+  <div v-if="currentClub">
     <div class="name">
-      <h1>{{ clubName }}</h1>
+      <h1>{{ currentClub.clubName }}</h1>
     </div>
 
-    <div class="album">
-      <div class="images">
-        <div id="image-column1" @click="openImagePopup(0)">
-          <img :src="images[0]" />
-        </div>
-        <div id="image-column2" @click="openImagePopup(1)">
-          <img :src="images[1]" />
-        </div>
-        <div id="image-column3">
-          <img id="image" :src="images[2]" />
-          <div class="image-container" @click="openImagePopup(2)">
-            <img :src="images[2]" />
-          </div>
+    <div
+      v-if="currentClub.imageNames && currentClub.imageNames.length > 0"
+      class="album"
+    >
+      <div class="image-container">
+        <img
+          :src="
+            getImageUrl(currentClub.imageNames[currentImageIndex].imageName)
+          "
+          alt="Club Image"
+          class="main-image"
+          @click="openImagePopup(currentImageIndex)"
+        />
+
+        <div class="navigation-buttons">
+          <button @click="prevImage">❮</button>
+          <button @click="nextImage">❯</button>
         </div>
       </div>
     </div>
 
-    <div class="address">
-      <p>{{ address }}</p>
+    <div class="clubAddress">
+      <p>{{ currentClub.clubAddress }}</p>
     </div>
-    <button>
+    <button class="button">
       <router-link to="/schedule">View Schedule</router-link>
     </button>
 
     <div class="time-frame-container">
       <table
-        v-for="frame in timeFrame"
+        v-for="frame in currentClub.timeFrame"
         :key="frame.timeFrameId"
         class="time-frame-table"
       >
@@ -52,31 +56,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Flexible-time</td>
+          <tr v-for="mode in ['flexible', 'oneTimePlay', 'fixed']" :key="mode">
+            <td>{{ mode }}</td>
             <td
               v-for="pricing in frame.pricingServiceList"
               :key="pricing.dateOfWeek"
             >
-              {{ pricing.flexible }} VNĐ
-            </td>
-          </tr>
-          <tr>
-            <td>One-time</td>
-            <td
-              v-for="pricing in frame.pricingServiceList"
-              :key="pricing.dateOfWeek"
-            >
-              {{ pricing.oneTimePlay }} VNĐ
-            </td>
-          </tr>
-          <tr>
-            <td>Fixed-time</td>
-            <td
-              v-for="pricing in frame.pricingServiceList"
-              :key="pricing.dateOfWeek"
-            >
-              {{ pricing.fixed }} VNĐ
+              {{ pricing[mode] }} ₫
             </td>
           </tr>
         </tbody>
@@ -84,7 +70,7 @@
     </div>
 
     <div class="detail">
-      <p>{{ details }}</p>
+      <p>{{ currentClub.clubDescription }}</p>
     </div>
 
     <div class="comments-container">
@@ -109,48 +95,6 @@
               @keydown.enter="handleEnterKey"
               maxlength="1000"
             ></textarea>
-            <!-- <div class="rating">
-              <input
-                value="1"
-                name="rate"
-                id="star1"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star1"></label>
-              <input
-                value="2"
-                name="rate"
-                id="star2"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star2"></label>
-              <input
-                value="3"
-                name="rate"
-                id="star3"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star3"></label>
-              <input
-                value="4"
-                name="rate"
-                id="star4"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star4"></label>
-              <input
-                value="5"
-                name="rate"
-                id="star5"
-                type="radio"
-                v-model="newRating"
-              />
-              <label title="text" for="star5"></label>
-            </div> -->
 
             <div class="rating">
               <input
@@ -220,7 +164,7 @@
               <span class="star-icon" :class="{ filled: comment.rating >= 4 }"
                 >&#9733;</span
               >
-              <span class="star-icon" :class="{ filled: (comment.rating = 5) }"
+              <span class="star-icon" :class="{ filled: comment.rating >= 5 }"
                 >&#9733;</span
               >
             </div>
@@ -229,201 +173,113 @@
       </form>
     </div>
 
-    <div v-if="showPopup" class="image-popup">
+    <div v-if="showPopup" class="popup-overlay" @click="closeImagePopup">
       <div class="popup-content">
         <span class="close" @click="closeImagePopup">&times;</span>
-        <img :src="images[currentImageIndex]" class="popup-image" />
-        <a class="prev" @click="prevImage">&#10094;</a>
-        <a class="next" @click="nextImage">&#10095;</a>
+        <img
+          :src="
+            getImageUrl(currentClub.imageNames[currentImageIndex].imageName)
+          "
+          class="popup-image"
+        />
+        <!-- <a class="prev" @click="prevImage">&#10094;</a>
+        <a class="next" @click="nextImage">&#10095;</a> -->
       </div>
     </div>
   </div>
 </template>
 
+
 <script setup>
-import { ref } from "vue";
+import { storeToRefs } from "pinia";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useClubStore } from "../../stores/clubMng";
 
-const clubName = ref("");
-
-const images = ref([
-  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
-  "https://thethao365.com.vn/Data/upload/images/Product/Caulong/kich-thuoc-san-cau-long.jpg",
-  "https://sieuthicaulong.vn/userfiles/files/san-cau-long-quan-3-1.jpg",
-  "https://babolat.com.vn/wp-content/uploads/2023/10/san-cau-long-viettel.jpg",
-]);
-
-const address = ref("Nguyễn Văn Tăng, Phường Long Thạnh Mỹ, Tp. Thủ Đức");
-
-const timeFrame = ref([
-  {
-    timeFrameId: "TF000001",
-    starTime: "17:30:00",
-    endTime: "19:30:00",
-    pricingServiceList: [
-      {
-        dateOfWeek: "Mon",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Tue",
-        flexible: 34000,
-        fixed: 38000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Wed",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Thu",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Fri",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Sat",
-        flexible: 34000,
-        fixed: 40000,
-        oneTimePlay: 37000,
-      },
-      {
-        dateOfWeek: "Sun",
-        flexible: 34000,
-        fixed: 40000,
-        oneTimePlay: 37000,
-      },
-    ],
+const props = defineProps({
+  clubId: {
+    type: String,
+    required: true,
   },
-  {
-    timeFrameId: "TF000002",
-    starTime: "05:30:00",
-    endTime: "12:30:00",
-    pricingServiceList: [
-      {
-        dateOfWeek: "Mon",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Tue",
-        flexible: 35000,
-        fixed: 38000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Wed",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Thu",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Fri",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Sat",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 38000,
-      },
-      {
-        dateOfWeek: "Sun",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 37000,
-      },
-    ],
-  },
-  {
-    timeFrameId: "TF000003",
-    starTime: "19:30:00",
-    endTime: "23:30:00",
-    pricingServiceList: [
-      {
-        dateOfWeek: "Mon",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Tue",
-        flexible: 35000,
-        fixed: 38000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Wed",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Thu",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Fri",
-        flexible: 34000,
-        fixed: 32000,
-        oneTimePlay: 35000,
-      },
-      {
-        dateOfWeek: "Sat",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 38000,
-      },
-      {
-        dateOfWeek: "Sun",
-        flexible: 34000,
-        fixed: 42000,
-        oneTimePlay: 37000,
-      },
-    ],
-  },
-]);
+});
 
-const details = ref(
-  `BadmintonSpace Arena is a premier destination for badminton enthusiasts,
-  combining modern design with top-notch amenities. The spacious courts
-  feature advanced LED lighting and international-standard surfaces,
-  ensuring optimal play conditions.\n\n
-  Beyond excellent facilities, BadmintonSpace Arena prides itself on
-  outstanding customer service, with friendly and professional staff.
-  Relax in comfortable lounges, utilize modern locker rooms, and
-  rejuvenate in fully-equipped recovery areas.\n\n
-  Regular tournaments and social events offer players of all levels the
-  chance to compete and connect. Experience the passion and excellence of
-  badminton at BadmintonSpace Arena – where the sport's finest come
-  together!`
+const clubStore = useClubStore();
+const { currentClub } = storeToRefs(clubStore);
+
+const showPopup = ref(false);
+const currentImageIndex = ref(0);
+let autoSlideInterval = null;
+
+const fetchClubData = async () => {
+  try {
+    await clubStore.fetchClubById(props.clubId);
+    // Start auto slide after data is fetched
+    startAutoSlide();
+  } catch (error) {
+    console.error("Error fetching club data:", error);
+    // You might want to set an error state here and display it in the template
+  }
+};
+
+onMounted(fetchClubData);
+
+watch(
+  () => props.clubId,
+  () => {
+    stopAutoSlide();
+    fetchClubData();
+  }
 );
 
+const getImageUrl = (base64String) => {
+  return base64String ? `data:image/png;base64,${base64String}` : "";
+};
+
+const openImagePopup = (index) => {
+  if (currentClub.value && currentClub.value.imageNames) {
+    currentImageIndex.value = index;
+    showPopup.value = true;
+  }
+};
+
+const closeImagePopup = () => {
+  showPopup.value = false;
+};
+
+const prevImage = () => {
+  if (currentClub.value && currentClub.value.imageNames) {
+    currentImageIndex.value =
+      (currentImageIndex.value - 1 + currentClub.value.imageNames.length) %
+      currentClub.value.imageNames.length;
+  }
+};
+
+const nextImage = () => {
+  if (currentClub.value && currentClub.value.imageNames) {
+    currentImageIndex.value =
+      (currentImageIndex.value + 1) % currentClub.value.imageNames.length;
+  }
+};
+
+const startAutoSlide = () => {
+  if (
+    currentClub.value &&
+    currentClub.value.imageNames &&
+    currentClub.value.imageNames.length > 1
+  ) {
+    stopAutoSlide(); // Ensure any existing interval is cleared
+    autoSlideInterval = setInterval(nextImage, 5678);
+  }
+};
+
+const stopAutoSlide = () => {
+  if (autoSlideInterval) {
+    clearInterval(autoSlideInterval);
+    autoSlideInterval = null;
+  }
+};
+
+onBeforeUnmount(stopAutoSlide);
+//===========================FIXED FUNCTION OF COMMENT================================================
 const comments = ref([
   {
     name: "Thanh Nhan Vo",
@@ -474,46 +330,18 @@ const submitComment = () => {
   newRating.value = 1; // Reset the rating
 };
 
-const showPopup = ref(false);
-const currentImageIndex = ref(0);
-
-const openImagePopup = (index) => {
-  currentImageIndex.value = index;
-  showPopup.value = true;
-};
-
-const closeImagePopup = () => {
-  showPopup.value = false;
-};
-
-const prevImage = () => {
-  currentImageIndex.value =
-    currentImageIndex.value > 0
-      ? currentImageIndex.value - 1
-      : images.value.length - 1;
-};
-
-const nextImage = () => {
-  currentImageIndex.value =
-    currentImageIndex.value < images.value.length - 1
-      ? currentImageIndex.value + 1
-      : 0;
-};
+//======================================================================================================
 </script>
+
 
 <style scoped>
 .name {
   font-size: medium;
-  color: rgb(79, 167, 250);
+  color: #6babf4;
 }
 
 .button {
   border-radius: 50%;
-}
-
-.album {
-  display: flex;
-  justify-content: center;
 }
 
 .comments-container,
@@ -522,76 +350,91 @@ h4 {
   margin-top: 11px;
 }
 
-.images {
-  display: grid;
-  grid-template-columns: 350px 350px 200px;
-  gap: 10px;
-  cursor: pointer;
-}
-
-.images-column {
+.album {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-#image-column1 img {
-  width: 400px;
-  height: 265px;
-  border-radius: 15px;
-  grid-row: 1/3;
-}
-
-#image-column1:hover {
-  transform: scale(1.02);
-}
-
-#image-column2 img {
-  margin-left: 50px;
-  width: 350px;
-  height: 266px;
-  border-radius: 15px;
-  grid-row: 1/3;
-}
-
-#image-column3 img {
-  margin-left: 50px;
-  max-width: 400px;
-  max-height: 130px;
-  border-radius: 15px;
-}
-/*
-#image:hover {
-  transform: scale(1.02);
-} */
-
-.image-container {
+  justify-content: center;
+  align-items: center;
   position: relative;
 }
 
-.image-container .overlay {
+.image-container {
+  margin-left: 108px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.main-image {
+  width: 998px;
+  height: 355px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 10px;
   position: absolute;
-  top: 0px;
-  left: 0px;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  padding: 53px 14px 53px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  justify-content: space-between;
+  transition: transform 1s ease;
+}
+
+.navigation-buttons button {
+  background: none;
+  border: 1px;
+  font-size: 2rem;
+  cursor: pointer;
+  color: grey;
+  transform: scale(1.2);
+}
+
+.navigation-buttons button:hover {
+  color: #6babf4; /* Change to blue on hover */
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  position: relative;
+  max-width: 80%;
+  max-height: 80%;
+}
+
+.popup-image {
+  max-width: 1000px;
+  max-height: 488px;
   border-radius: 15px;
-  font-size: 20px;
+  object-fit: cover;
 }
 
-.overlay {
-  margin-left: 50px;
+.close,
+.prev,
+.next {
+  position: absolute;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: white;
 }
 
-.image-container:hover {
-  transform: scale(1.02);
-}
-
-.address p {
-  font-size: 16px;
-  color: #555;
-  font-weight: bold;
+.close {
+  top: 10px;
+  right: 10px;
 }
 
 .button-container {
@@ -602,7 +445,7 @@ h4 {
   /* Add some spacing */
 }
 
-button {
+.button {
   appearance: button;
   border: solid transparent;
   border-radius: 16px;
@@ -630,9 +473,9 @@ button {
   float: right;
 }
 
-button:after {
+.button:after {
   background-clip: padding-box;
-  background-color: #1cb0f6;
+  background-color: #6babf4;
   border: solid transparent;
   border-radius: 16px;
   border-width: 0 0 4px;
@@ -645,24 +488,24 @@ button:after {
   z-index: -1;
 }
 
-button:main,
-button:focus {
+.button:main,
+.button:focus {
   user-select: auto;
 }
 
-button:hover {
+.button:hover {
   transform: scale(1.05);
 }
 
-button:disabled {
+.button:disabled {
   cursor: auto;
 }
 
-button:active {
+.button:active {
   padding-bottom: 10px;
 }
 
-button a {
+.button a {
   color: inherit;
   /* Inherit text color from parent */
   text-decoration: none;
@@ -695,7 +538,8 @@ button a {
 }
 
 .time-frame-table thead {
-  background-color: #f2f2f2;
+  background-color: #6babf4;
+  color: white;
 }
 
 .time-frame-table th {

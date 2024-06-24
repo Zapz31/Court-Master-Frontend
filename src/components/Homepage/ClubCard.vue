@@ -6,6 +6,7 @@
         :key="club.clubId"
         :to="`/clubs/${club.clubId}`"
         class="club-card"
+        @click="setCurrentClub(club)"
       >
         <img
           :src="getImageUrl(club.clubImageBase64)"
@@ -20,29 +21,24 @@
   </div>
 </template>
   
-  <script setup>
-// import { ref } from "vue";
-import axios from "axios";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+<script setup>
+import { storeToRefs } from "pinia";
+import { onMounted } from "vue";
+import { useClubStore } from "../../stores/clubMng";
 
-// const clubs = ref([]);
-const router = useRouter();
-const clubs = ref([]);
+const clubStore = useClubStore();
+const { clubs } = storeToRefs(clubStore);
 
 onMounted(async () => {
-  try {
-    const response = await axios.get(
-      "http://localhost:8080/courtmaster/clubs/clubsView"
-    );
-    clubs.value = await response.data;
-  } catch (error) {
-    console.error("Failed to fetch clubs:", error);
-  }
+  await clubStore.fetchClubs();
 });
 
 const getImageUrl = (base64String) => {
   return `data:image/png;base64,${base64String}`;
+};
+
+const setCurrentClub = (club) => {
+  clubStore.setCurrentClub(club);
 };
 </script>
   
