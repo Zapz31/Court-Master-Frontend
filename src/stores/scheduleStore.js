@@ -2,40 +2,40 @@ import { defineStore } from 'pinia';
 
 export const useScheduleStore = defineStore('schedule', {
   state: () => ({
-    selectedDate: '', // Khởi tạo với ngày hiện tại
-    startTime: '',
-    endTime: '',
-    court: null,
-    price: 0,
+    selectedDate: '',
+    sessions: [],
   }),
   actions: {
-    updateScheduleInfo(start, end, courtNumber) {
-      this.startTime = start;
-      this.endTime = end;
-      this.court = courtNumber;
-      this.calculatePrice();
+    addSession(start, end, courtNumber) {
+      const price = this.calculatePrice(start, end);
+      this.sessions.push({
+        startTime: start,
+        endTime: end,
+        court: courtNumber,
+        price: price,
+      });
     },
-    calculatePrice() {
-      const [startHour, startMinute] = this.startTime.split(':').map(Number)
-      const [endHour, endMinute] = this.endTime.split(':').map(Number)
-      const startTotalMinutes = startHour * 60 + startMinute
-      const endTotalMinutes = endHour * 60 + endMinute
-      const totalMinutes = endTotalMinutes - startTotalMinutes
-      const hours = totalMinutes / 60
-      this.price = hours * 80000 // Giá mặc định 80.000 VNĐ/giờ
+    removeSession(index) {
+      this.sessions.splice(index, 1);
     },
-
+    calculatePrice(start, end) {
+      const [startHour, startMinute] = start.split(':').map(Number);
+      const [endHour, endMinute] = end.split(':').map(Number);
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const endTotalMinutes = endHour * 60 + endMinute;
+      const totalMinutes = endTotalMinutes - startTotalMinutes;
+      const hours = totalMinutes / 60;
+      return hours * 80000; // Giá mặc định 80.000 VNĐ/giờ
+    },
     initializeSelectedDate() {
       const today = new Date().toISOString().split('T')[0];
       this.selectedDate = today;
     },
-
     updateSelectedDate(date) {
       this.selectedDate = date;
     },
-    initializeSelectedDate() {
-      const today = new Date().toISOString().split('T')[0]
-      this.selectedDate = today
+    clearSessions() {
+      this.sessions = [];
     },
   },
-})
+});

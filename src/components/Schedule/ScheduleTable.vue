@@ -19,7 +19,7 @@
             @mouseup="handleMouseUp"
             @mouseleave="hidePopup"
           >
-            <slot-popup
+            <!-- <slot-popup
               v-if="showPopup"
               :show="true"
               :style="{
@@ -27,7 +27,7 @@
                 top: popupPosition.y + 'px',
               }"
               class="slot-popup"
-            />
+            /> -->
           </td>
         </tr>
       </tbody>
@@ -36,22 +36,13 @@
 </template> 
 
 <script setup>
-import { computed, defineProps, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useScheduleStore } from "../../stores/scheduleStore";
-import SlotPopup from "../Schedule/SessionPopup.vue";
-
-const props = defineProps({
-  selectedDate: {
-    type: String,
-    required: true,
-  },
-});
 
 const scheduleStore = useScheduleStore();
 
-const courtCount = 10; // Thay đổi giá trị này tùy theo số sân của CLB
+const courtCount = 10;
 
-// Time được fixed cố định 24h tức 48 hàng
 const times = computed(() => {
   const times = [];
   for (let hour = 0; hour < 24; hour++) {
@@ -70,63 +61,72 @@ const formatTime = (time) => {
     .padStart(2, "0")}`;
 };
 
-// Tạo danh sách để lưu trữ các phiên chơi
 const sessions = ref([]);
 
-//dữ liệu cần truyền cho 1 phiên chơi
-// =====================================TEST BACKEND DATA===========================================
 const initializeSessions = () => {
-  sessions.value.push({
-    startTime: "16:30",
-    endTime: "18:30",
-    court: 9,
-    status: "booked",
-    date: "18/06/2024",
-  });
-  sessions.value.push({
-    startTime: "14:30",
-    endTime: "16:00",
-    court: 5,
-    status: "booked",
-    date: "19/06/2024",
-  });
+  sessions.value = [
+    {
+      startTime: "16:30",
+      endTime: "18:30",
+      court: 9,
+      status: "booked",
+      date: "18/06/2024",
+    },
 
-  sessions.value.push({
-    startTime: "14:30",
-    endTime: "16:00",
-    court: 8,
-    status: "booked",
-    date: "20/06/2024",
-  });
+    {
+      startTime: "16:30",
+      endTime: "18:30",
+      court: 1,
+      status: "booked",
+      date: "18/06/2024",
+    },
 
-  sessions.value.push({
-    startTime: "06:30",
-    endTime: "08:00",
-    court: 1,
-    status: "booked",
-    date: "21/06/2024",
-  });
+    {
+      startTime: "18:30",
+      endTime: "20:30",
+      court: 1,
+      status: "booked",
+      date: "18/06/2024",
+    },
 
-  sessions.value.push({
-    startTime: "12:30",
-    endTime: "15:00",
-    court: 3,
-    status: "booked",
-    date: "22/06/2024",
-  });
-
-  sessions.value.push({
-    startTime: "15:00",
-    endTime: "20:00",
-    court: 3,
-    status: "bookedByUser",
-    date: "23/06/2024",
-  });
+    {
+      startTime: "14:30",
+      endTime: "16:00",
+      court: 5,
+      status: "booked",
+      date: "19/06/2024",
+    },
+    {
+      startTime: "14:30",
+      endTime: "16:00",
+      court: 8,
+      status: "booked",
+      date: "20/06/2024",
+    },
+    {
+      startTime: "06:30",
+      endTime: "08:00",
+      court: 1,
+      status: "booked",
+      date: "21/06/2024",
+    },
+    {
+      startTime: "12:30",
+      endTime: "15:00",
+      court: 3,
+      status: "booked",
+      date: "22/06/2024",
+    },
+    {
+      startTime: "15:00",
+      endTime: "20:00",
+      court: 3,
+      status: "bookedByUser",
+      date: "23/06/2024",
+    },
+  ];
 };
 
-// =================================================================================================
-
-// Khởi tạo dữ liệu mẫu
 initializeSessions();
 
 const formatDate = (dateString) => {
@@ -140,7 +140,7 @@ const formatDate = (dateString) => {
 const filteredSessions = ref([]);
 
 watch(
-  () => props.selectedDate,
+  () => scheduleStore.selectedDate,
   (newDate) => {
     filterSessionsByDate(newDate);
   },
@@ -149,10 +149,9 @@ watch(
 
 function filterSessionsByDate(date) {
   if (date === "") {
-    // Nếu không có ngày được chọn, không hiển thị bất kỳ session nào
     filteredSessions.value = [];
   } else {
-    const formattedDate = formatDate(date); // Chuyển đổi ngày sang định dạng "dd/mm/yyyy"
+    const formattedDate = formatDate(date);
     filteredSessions.value = sessions.value.filter(
       (session) => session.date === formattedDate
     );
@@ -163,9 +162,6 @@ let isDragging = ref(false);
 let dragStartCell = ref(null);
 let selectedCells = ref([]);
 
-//Xanh duong dam: cua người khác đặt (đẩy từ BE)
-//Cam: cua người dùng đặt từ trước đó (đẩy từ BE)
-//Xanh lá: Chọn giờ chơi mới (FE)
 const handleMouseDown = (time, court) => {
   const startTime = formatTime(time);
   const cell = filteredSessions.value.find(
@@ -177,29 +173,18 @@ const handleMouseDown = (time, court) => {
 
   if (cell) {
     if (cell.status === "selected") {
-      // Xóa dữ liệu khung giờ chơi hiện tại
-      scheduleStore.startTime = "";
-      scheduleStore.endTime = "";
-      scheduleStore.court = null;
-      scheduleStore.price = 0;
-
-      // Hiển thị lại thông tin của khung giờ chơi trước đó (nếu có)
-      const previousSession = filteredSessions.value.find(
+      // Remove the session from the store
+      const sessionIndex = scheduleStore.sessions.findIndex(
         (session) =>
           session.court === court &&
-          session.endTime < cell.startTime &&
-          session.status === "selected"
+          session.startTime === cell.startTime &&
+          session.endTime === cell.endTime
       );
-
-      if (previousSession) {
-        scheduleStore.updateScheduleInfo(
-          previousSession.startTime,
-          previousSession.endTime,
-          court
-        );
+      if (sessionIndex !== -1) {
+        scheduleStore.removeSession(sessionIndex);
       }
 
-      // Xóa các ô đã được chọn
+      // Remove the session from filteredSessions
       filteredSessions.value = filteredSessions.value.filter(
         (session) =>
           !(
@@ -210,7 +195,7 @@ const handleMouseDown = (time, court) => {
       );
       return;
     }
-    return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
+    return;
   }
 
   isDragging.value = true;
@@ -289,16 +274,19 @@ const handleMouseUp = () => {
   const sessionStart = selectedCells.value[0].time;
   const sessionEnd = selectedCells.value[selectedCells.value.length - 1].time;
   const court = selectedCells.value[0].court;
-  const existingSession =
-    scheduleStore.court === court && scheduleStore.endTime === sessionStart;
-  if (existingSession) {
-    scheduleStore.endTime = sessionEnd;
-    scheduleStore.calculatePrice();
-  } else {
-    scheduleStore.updateScheduleInfo(sessionStart, sessionEnd, court);
-  }
+  scheduleStore.addSession(sessionStart, sessionEnd, court);
   selectedCells.value = [];
 };
+
+const removeSession = (time, court) => {
+  const sessionIndex = scheduleStore.sessions.findIndex(
+    (session) => session.startTime === time && session.court === court
+  );
+  if (sessionIndex !== -1) {
+    scheduleStore.removeSession(sessionIndex);
+  }
+};
+
 const updateSession = (time, court, isStart) => {
   const cell = filteredSessions.value.find(
     (session) =>
@@ -342,7 +330,7 @@ const getCellClass = (time, court) => {
     if (session.status === "booked") {
       return "booked";
     } else if (session.status === "bookedByUser") {
-      return "bookedByUser ";
+      return "bookedByUser";
     } else if (session.status === "selected") {
       return "selected";
     }

@@ -1,6 +1,8 @@
 <template>
   <div class="controller">
-    <img src="../../../public/img/mono_blue_crop.png" class="logo" alt="" />
+    <a href="/">
+      <img src="../../../public/img/mono_blue_crop.png" class="logo" alt="" />
+    </a>
     <div class="date-picker">
       <input type="date" v-model="selectedDate" @change="handleDateChange" />
     </div>
@@ -129,8 +131,8 @@ const handleDateChange = () => {
 }
 
 .logo {
-  height: 38px;
-  width: 126px;
+  height: 32px;
+  width: 120px;
 }
 </style>
   

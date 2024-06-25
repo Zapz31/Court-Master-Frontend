@@ -1,10 +1,12 @@
 <template>
   <div class="logo">
-    <img
-      src="../../../public/img/mono_blue.png"
-      alt="logo_img"
-      class="image_logo"
-    />
+    <a href="/">
+      <img
+        src="../../../public/img/mono_blue.png"
+        alt="logo_img"
+        class="image_logo"
+      />
+    </a>
   </div>
 </template>
 

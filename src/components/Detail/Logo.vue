@@ -1,12 +1,15 @@
 <template>
   <div class="logo">
-    <router-link to="/">
+    <a href="/">
       <img
         src="../../../public/img/mono_blue.png"
         alt="logo_img"
         class="image_logo"
       />
-    </router-link>
+    </a>
+    <!-- <router-link to="/">
+      
+    </router-link> -->
   </div>
 </template>
 

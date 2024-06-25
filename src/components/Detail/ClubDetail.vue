@@ -358,7 +358,7 @@ h4 {
 }
 
 .image-container {
-  margin-left: 108px;
+  margin-left: 28px;
   display: flex;
   justify-content: center;
   align-items: center;

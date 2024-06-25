@@ -15,7 +15,7 @@
         />
         <h3>{{ club.clubName }}</h3>
         <p>Address: {{ club.clubAddress }}</p>
-        <p>Average price: {{ club.averagePrice }} VND/hour</p>
+        <p>Average price: {{ club.averagePrice }}₫/h</p>
       </router-link>
     </div>
   </div>
