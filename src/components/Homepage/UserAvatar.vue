@@ -9,7 +9,7 @@
         <h4>{{ authStore.user.firstName }} {{ authStore.user.lastName }}</h4>
       </div>
       <div class="avatar">
-        <img :src="authStore.user.imageURL" :alt="userName" />
+        <img :src="getImageUrl(authStore.user.imageURL)" :alt="userName" />
       </div>
       <div v-if="menuVisible" class="dropdown-content">
         <template v-if="userRole === 'customer'">
@@ -119,6 +119,10 @@ const signout = async () => {
   } catch (error) {
     console.error("Đã xảy ra lỗi:", error);
   }
+};
+
+const getImageUrl = (base64String) => {
+  return `data:image/png;base64,${base64String}`;
 };
 
 //

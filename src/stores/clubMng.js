@@ -11,7 +11,7 @@ export const useClubStore = defineStore('club', {
     async fetchClubs() {
       try {
         const response = await axios.get("http://localhost:8080/courtmaster/clubs/clubsView")
-        this.clubs = response.data
+        this.clubs = response.data 
       } catch (error) {
         console.error("Failed to fetch clubs:", error)
       }

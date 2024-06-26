@@ -42,6 +42,12 @@ const routes = [
         name: 'BookingHistoryScreen',
         component: () => import('../views/BookingHistoryScreen.vue') ,
     },
+
+    {
+        path: '/payment-handle',
+        name: 'PaymentHandle',
+        component: () => import('../views/PaymentHandle.vue') ,  
+    },
 ]
 
 const router = createRouter({
