@@ -30,15 +30,18 @@
         <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
         <button class="submit" type="submit">Submit</button>
       </form>
-      
     </div>
-    <p id="notFoundMail" v-if="useForgotPassword.invalidMess === 'Your email is not registered'">Email của bạn chưa được đăng ký</p>
+    <p
+      id="notFoundMail"
+      v-if="useForgotPassword.invalidMess === 'Your email is not registered'"
+    >
+      Email của bạn chưa được đăng ký
+    </p>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import router from "../../router";
 import { useForgotPass } from "../../stores/forgotpasswordStore";
 const email = ref("");
 const emailError = ref("");
@@ -62,7 +65,7 @@ const handleInvalid = (event, field) => {
   validateInput(field);
 };
 
-const submitForm = async() => {
+const submitForm = async () => {
   if (emailError.value === "") {
     formError.value = false;
     // $emit('submit', email.value);
@@ -76,9 +79,8 @@ const submitForm = async() => {
 
 
 <style scoped>
-
-#notFoundMail{
-  padding-left:360px;
+#notFoundMail {
+  padding-left: 360px;
 }
 
 .parent_container {
@@ -133,7 +135,7 @@ const submitForm = async() => {
 }
 
 .form label .input {
-  width: 150%;
+  width: 143%;
   padding: 10px;
   padding-top: 10px;
   /* Add extra padding on top to make space for the label */

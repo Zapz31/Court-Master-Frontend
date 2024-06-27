@@ -29,7 +29,8 @@
       <p>{{ currentClub.clubAddress }}</p>
     </div>
     <button class="button">
-      <router-link to="/schedule">View Schedule</router-link>
+      <a href="/schedule">View Schedule</a>
+      <!-- sau nay loi truyen data thi xai lai <router-link to="/schedule"></router-link> -->
     </button>
 
     <div class="time-frame-container">
@@ -41,14 +42,23 @@
         <thead>
           <tr>
             <th colspan="8">
-              Time Frame {{ frame.timeFrameId }} - {{ frame.starTime }} to
+              <!--Time Frame {{ frame.timeFrameId }} - -->{{ frame.starTime }}
+              to
               {{ frame.endTime }}
             </th>
           </tr>
           <tr>
             <th>PLAY-MODE</th>
             <th
-              v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
+              v-for="day in [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+              ]"
               :key="day"
             >
               {{ day }}
@@ -524,7 +534,8 @@ h4 {
 }
 
 .time-frame-table {
-  width: 100%;
+  margin-left: -100px;
+  width: 128%;
   border-collapse: collapse;
   margin-bottom: 2rem;
 }

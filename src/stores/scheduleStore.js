@@ -3,21 +3,47 @@ import { defineStore } from 'pinia';
 export const useScheduleStore = defineStore('schedule', {
   state: () => ({
     selectedDate: '',
-    sessions: [],
+    slots: [],
   }),
   actions: {
-    addSession(start, end, courtNumber) {
+    addslot(start, end, courtNumber) {
       const price = this.calculatePrice(start, end);
-      this.sessions.push({
+      this.slots.push({
         startTime: start,
         endTime: end,
         court: courtNumber,
         price: price,
       });
     },
-    removeSession(index) {
-      this.sessions.splice(index, 1);
+    removeslot(startTime, court) {
+      const index = this.slots.findIndex(
+        slot => slot.startTime === startTime && slot.court === court
+      );
+      if (index !== -1) {
+        this.slots.splice(index, 1);
+      }
     },
+
+    removeslotByTimeAndCourt(startTime, court) {
+      const index = this.slots.findIndex(
+        slot => slot.startTime === startTime && slot.court === court
+      );
+      if (index !== -1) {
+        this.slots.splice(index, 1);
+      }
+    },
+
+    updateslotEndTime(startTime, court, newEndTime) {
+      const slotIndex = this.slots.findIndex(
+        slot => slot.startTime === startTime && slot.court === court
+      );
+      if (slotIndex !== -1) {
+        const slot = this.slots[slotIndex];
+        slot.endTime = newEndTime;
+        slot.price = this.calculatePrice(slot.startTime, newEndTime);
+      }
+    },
+
     calculatePrice(start, end) {
       const [startHour, startMinute] = start.split(':').map(Number);
       const [endHour, endMinute] = end.split(':').map(Number);
@@ -34,8 +60,8 @@ export const useScheduleStore = defineStore('schedule', {
     updateSelectedDate(date) {
       this.selectedDate = date;
     },
-    clearSessions() {
-      this.sessions = [];
+    clearslots() {
+      this.slots = [];
     },
   },
 });

@@ -1,33 +1,31 @@
 <template>
   <div class="schedule-information-wrapper" :class="{ 'is-open': isOpen }">
-    <div class="schedule-information" ref="infoPanel">
-      <h3>Thông tin đặt sân</h3>
-      <div class="info-scroll">
-        <div v-if="scheduleSessions.length > 0">
-          <div
-            v-for="(session, index) in scheduleSessions"
-            :key="index"
-            class="info-item"
-          >
-            <label>
-              Time: {{ session.startTime }} - {{ session.endTime }}
-            </label>
-            <label>
-              Hours: {{ calculateHours(session.startTime, session.endTime) }} h
-            </label>
-            <label>Price: {{ session.price }} VNĐ</label>
-            <label>Court: {{ session.court }}</label>
-          </div>
-        </div>
-        <div v-else class="info-item">
-          <label>Chưa chọn khung giờ chơi</label>
-        </div>
-      </div>
-    </div>
     <button @click="toggleDropdown" class="toggle-button">
       <span v-if="isOpen">&#9654;</span>
       <span v-else>&#9664;</span>
     </button>
+    <div class="schedule-information" ref="infoPanel">
+      <h3>Booking Information</h3>
+      <div class="info-scroll">
+        <div v-if="scheduleslots.length > 0">
+          <div
+            v-for="(slot, index) in scheduleslots"
+            :key="index"
+            class="info-item"
+          >
+            <label> Time: {{ slot.startTime }} - {{ slot.endTime }} </label>
+            <label>
+              Hours: {{ calculateHours(slot.startTime, slot.endTime) }} h
+            </label>
+            <label>Price: {{ slot.price }} VNĐ</label>
+            <label>Court: {{ slot.court }}</label>
+          </div>
+        </div>
+        <div v-else class="info-item">
+          <label>Not selected time yet</label>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,7 +41,7 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const scheduleSessions = computed(() => scheduleStore.sessions);
+const scheduleslots = computed(() => scheduleStore.slots);
 
 const calculateHours = (startTime, endTime) => {
   const [startHour, startMinute] = startTime.split(":").map(Number);

@@ -48,6 +48,12 @@ const routes = [
         name: 'PaymentHandle',
         component: () => import('../views/PaymentHandle.vue') ,  
     },
+
+    {
+        path: '/payment-confirm',
+        name: 'ConfirmPaymentScreen',
+        component: () => import('../views/ConfirmPaymentScreen.vue') ,  
+    },
 ]
 
 const router = createRouter({

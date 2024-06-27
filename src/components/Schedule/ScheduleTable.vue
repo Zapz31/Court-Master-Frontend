@@ -1,6 +1,10 @@
 <template>
   <div>
-    <table>
+    <table
+      @mousedown.prevent="handleTableMouseDown"
+      @mouseup="handleTableMouseUp"
+      @mouseleave="handleTableMouseLeave"
+    >
       <thead>
         <tr>
           <th class="time-column">Time</th>
@@ -14,7 +18,7 @@
             v-for="court in courtCount"
             :key="court"
             :class="getCellClass(time, court)"
-            @mousedown="handleMouseDown(time, court)"
+            @mousedown.prevent="handleMouseDown(time, court)"
             @mouseenter="handleMouseEnter(time, court, $event)"
             @mouseup="handleMouseUp"
             @mouseleave="hidePopup"
@@ -61,10 +65,10 @@ const formatTime = (time) => {
     .padStart(2, "0")}`;
 };
 
-const sessions = ref([]);
+const slots = ref([]);
 
-const initializeSessions = () => {
-  sessions.value = [
+const initializeslots = () => {
+  slots.value = [
     {
       startTime: "16:30",
       endTime: "18:30",
@@ -127,7 +131,7 @@ const initializeSessions = () => {
   ];
 };
 
-initializeSessions();
+initializeslots();
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -137,23 +141,23 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
-const filteredSessions = ref([]);
+const filteredslots = ref([]);
 
 watch(
   () => scheduleStore.selectedDate,
   (newDate) => {
-    filterSessionsByDate(newDate);
+    filterslotsByDate(newDate);
   },
   { immediate: true }
 );
 
-function filterSessionsByDate(date) {
+function filterslotsByDate(date) {
   if (date === "") {
-    filteredSessions.value = [];
+    filteredslots.value = [];
   } else {
     const formattedDate = formatDate(date);
-    filteredSessions.value = sessions.value.filter(
-      (session) => session.date === formattedDate
+    filteredslots.value = slots.value.filter(
+      (slot) => slot.date === formattedDate
     );
   }
 }
@@ -162,50 +166,54 @@ let isDragging = ref(false);
 let dragStartCell = ref(null);
 let selectedCells = ref([]);
 
+const handleTableMouseDown = (event) => {
+  event.preventDefault();
+};
+
+const handleTableMouseUp = () => {
+  if (isDragging.value) {
+    handleMouseUp();
+  }
+};
+
+const handleTableMouseLeave = () => {
+  if (isDragging.value) {
+    handleMouseUp();
+  }
+};
+
 const handleMouseDown = (time, court) => {
   const startTime = formatTime(time);
-  const cell = filteredSessions.value.find(
-    (session) =>
-      session.court === court &&
-      startTime >= session.startTime &&
-      startTime < session.endTime
+  const cell = filteredslots.value.find(
+    (slot) =>
+      slot.court === court &&
+      startTime >= slot.startTime &&
+      startTime < slot.endTime
   );
 
-  if (cell) {
-    if (cell.status === "selected") {
-      // Remove the session from the store
-      const sessionIndex = scheduleStore.sessions.findIndex(
-        (session) =>
-          session.court === court &&
-          session.startTime === cell.startTime &&
-          session.endTime === cell.endTime
-      );
-      if (sessionIndex !== -1) {
-        scheduleStore.removeSession(sessionIndex);
-      }
-
-      // Remove the session from filteredSessions
-      filteredSessions.value = filteredSessions.value.filter(
-        (session) =>
-          !(
-            session.court === court &&
-            session.startTime === cell.startTime &&
-            session.status === "selected"
-          )
-      );
-      return;
-    }
+  if (cell && cell.status === "selected") {
+    scheduleStore.removeslotByTimeAndCourt(cell.startTime, court);
+    filteredslots.value = filteredslots.value.filter(
+      (slot) =>
+        !(
+          slot.court === court &&
+          slot.startTime === cell.startTime &&
+          slot.status === "selected"
+        )
+    );
     return;
   }
+
+  if (cell) return;
 
   isDragging.value = true;
   dragStartCell.value = { time: startTime, court: court };
   selectedCells.value = [{ time: startTime, court: court }];
-  updateSession(startTime, court, true);
+  updateslot(startTime, court, true);
 };
 
 const showPopup = ref(false);
-const hoveredSession = ref(null);
+const hoveredslot = ref(null);
 const popupPosition = ref({ x: 0, y: 0 });
 
 const handleMouseEnter = (time, court, event) => {
@@ -228,19 +236,19 @@ const handleMouseEnter = (time, court, event) => {
         startTotalMinutes +
         (currentTotalMinutes > startTotalMinutes ? i : -i) * 30;
       selectedCells.value.push({ time: formatTime(newTime), court: court });
-      updateSession(formatTime(newTime), court, false);
+      updateslot(formatTime(newTime), court, false);
     }
   } else {
-    const session = filteredSessions.value.find(
-      (session) =>
-        session.court === court &&
-        session.startTime <= formatTime(time) &&
-        formatTime(time) < session.endTime &&
-        (session.status === "bookedByUser" || session.status === "selected")
+    const slot = filteredslots.value.find(
+      (slot) =>
+        slot.court === court &&
+        slot.startTime <= formatTime(time) &&
+        formatTime(time) < slot.endTime &&
+        (slot.status === "bookedByUser" || slot.status === "selected")
     );
-    if (session) {
+    if (slot) {
       showPopup.value = true;
-      hoveredSession.value = session;
+      hoveredslot.value = slot;
       const cellRect = event.currentTarget.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       const popupHeight = 80; // Chiều cao ước tính của popup
@@ -267,48 +275,77 @@ const handleMouseEnter = (time, court, event) => {
 };
 const hidePopup = () => {
   showPopup.value = false;
-  hoveredSession.value = null;
+  hoveredslot.value = null;
 };
 const handleMouseUp = () => {
+  if (!isDragging.value) return;
+
   isDragging.value = false;
-  const sessionStart = selectedCells.value[0].time;
-  const sessionEnd = selectedCells.value[selectedCells.value.length - 1].time;
+  let slotStart = selectedCells.value[0].time;
+  let slotEnd = selectedCells.value[selectedCells.value.length - 1].time;
   const court = selectedCells.value[0].court;
-  scheduleStore.addSession(sessionStart, sessionEnd, court);
+
+  // Ensure start time is always before end time
+  if (slotStart > slotEnd) {
+    [slotStart, slotEnd] = [slotEnd, slotStart];
+  }
+
+  const existingslotIndex = scheduleStore.slots.findIndex(
+    (slot) => slot.startTime === slotStart && slot.court === court
+  );
+
+  if (existingslotIndex === -1) {
+    scheduleStore.addslot(slotStart, slotEnd, court);
+  } else {
+    scheduleStore.updateslotEndTime(existingslotIndex, slotEnd);
+  }
+
+  // Recalculate hours and price
+  const startMinutes = timeToMinutes(slotStart);
+  const endMinutes = timeToMinutes(slotEnd);
+  const hours = Math.abs(endMinutes - startMinutes) / 60;
+  const price = hours * scheduleStore.hourlyRate;
+
+  // Update the slot with correct values
+  scheduleStore.updateslot({
+    startTime: slotStart,
+    endTime: slotEnd,
+    court,
+    hours,
+    price,
+  });
+
   selectedCells.value = [];
 };
-
-const removeSession = (time, court) => {
-  const sessionIndex = scheduleStore.sessions.findIndex(
-    (session) => session.startTime === time && session.court === court
+const removeslot = (time, court) => {
+  const slotIndex = scheduleStore.slots.findIndex(
+    (slot) => slot.startTime === time && slot.court === court
   );
-  if (sessionIndex !== -1) {
-    scheduleStore.removeSession(sessionIndex);
+  if (slotIndex !== -1) {
+    scheduleStore.removeslot(slotIndex);
   }
 };
 
-const updateSession = (time, court, isStart) => {
-  const cell = filteredSessions.value.find(
-    (session) =>
-      session.court === court &&
-      time >= session.startTime &&
-      time < session.endTime
+const updateslot = (time, court, isStart) => {
+  const cell = filteredslots.value.find(
+    (slot) =>
+      slot.court === court && time >= slot.startTime && time < slot.endTime
   );
   if (cell) {
     return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
   }
-  const existingSession = filteredSessions.value.find(
-    (session) =>
-      session.court === court &&
-      session.endTime === time &&
-      session.status === "selected"
+  const existingslot = filteredslots.value.find(
+    (slot) =>
+      slot.court === court &&
+      slot.endTime === time &&
+      slot.status === "selected"
   );
-  if (existingSession && !isStart) {
-    existingSession.endTime = formatTime(
+  if (existingslot && !isStart) {
+    existingslot.endTime = formatTime(
       parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
     );
   } else if (isStart) {
-    filteredSessions.value.push({
+    filteredslots.value.push({
       startTime: time,
       endTime: formatTime(
         parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
@@ -320,18 +357,18 @@ const updateSession = (time, court, isStart) => {
 };
 const getCellClass = (time, court) => {
   const formattedTime = formatTime(time);
-  const session = filteredSessions.value.find(
-    (session) =>
-      session.court === court &&
-      formattedTime >= session.startTime &&
-      formattedTime < session.endTime
+  const slot = filteredslots.value.find(
+    (slot) =>
+      slot.court === court &&
+      formattedTime >= slot.startTime &&
+      formattedTime < slot.endTime
   );
-  if (session) {
-    if (session.status === "booked") {
+  if (slot) {
+    if (slot.status === "booked") {
       return "booked";
-    } else if (session.status === "bookedByUser") {
+    } else if (slot.status === "bookedByUser") {
       return "bookedByUser";
-    } else if (session.status === "selected") {
+    } else if (slot.status === "selected") {
       return "selected";
     }
   }
