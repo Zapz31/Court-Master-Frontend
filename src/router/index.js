@@ -54,6 +54,11 @@ const routes = [
         name: 'ConfirmPaymentScreen',
         component: () => import('../views/ConfirmPaymentScreen.vue') ,  
     },
+    {
+        path: '/booking-slot',
+        name: 'BookingSlotScreen',
+        component: () => import('../views/BookingSlotScreen.vue') ,  
+    },
 ]
 
 const router = createRouter({

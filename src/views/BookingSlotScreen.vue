@@ -9,7 +9,7 @@
             <filter-search ref="filterSearchRef" />
         </div>
         <div class="content">
-            <history-detail/>
+            
         </div>
         <div class="footer">
             <h2>Developed by Court Master team</h2>
@@ -19,11 +19,10 @@
 
 <script setup>
 import { ref } from "vue";
-import FilterSearch from "../components/History/FilerSearch.vue";
-import Logo from "../components/History/Logo.vue";
-import UserAvatar from "../components/History/UserAvatar.vue";
-import HistoryDetail from "../components/History/HistoryDetail.vue";
-import PageName from "../components/History/PageName.vue";
+import FilterSearch from "../components/BookingSlot/FilerSearch.vue";
+import Logo from "../components/BookingSlot/Logo.vue";
+import UserAvatar from "../components/BookingSlot/UserAvatar.vue";
+import PageName from "../components/BookingSlot/PageName.vue";
 
 const filterSearchRef = ref(null);
 

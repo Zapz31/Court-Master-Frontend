@@ -1,6 +1,8 @@
 <template>
   <div class="container">
-    <div class="logo"><logo /><user-avatar /></div>
+    <div class="logo">
+      <logo /><user-avatar />
+    </div>
 
     <div class="content">
       <!-- Nội dung của trang ở đây -->
@@ -12,7 +14,7 @@
     </div>
   </div>
 </template>
-    
+
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
@@ -27,7 +29,7 @@ onMounted(() => {
   console.log("Club ID:", clubId.value);
 });
 </script>
-  
+
 <style>
 .container {
   display: flex;
@@ -54,6 +56,7 @@ onMounted(() => {
   background-color: lightgray;
   padding: 1rem;
   text-align: center;
-  margin-top: auto; /* Đẩy footer xuống cuối trang */
+  margin-top: auto;
+  /* Đẩy footer xuống cuối trang */
 }
 </style>
