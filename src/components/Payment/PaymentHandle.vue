@@ -17,8 +17,13 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { usePaymentStore } from '../../stores/PaymentStore';
+import { useClubStore } from '../../stores/clubMng';
+import { storeToRefs } from 'pinia'
 import axios from 'axios';
+import { computed } from 'vue';
 
+const useClubStr = useClubStore();
+const { currentClub } = storeToRefs(useClubStr)
 const paymentStore = usePaymentStore()
 const responseCode = ref('');
 const amountString = ref(''); // 
@@ -39,7 +44,8 @@ onMounted(async () => {
     payDate.value = paymentData.vnp_PayDate;
     transationNo.value = paymentData.vnp_TransactionNo;
     vnpCardType.value = paymentData.vnp_CardType;
-    console.log("aaaa");
+    currentClub.value = currentClub.value ?? {}
+    currentClub.value.courtManagerPhone = "012345678"
 
     if(responseCode.value === "00"){
         
@@ -49,11 +55,13 @@ onMounted(async () => {
             amount: amountString.value,
             paymentTime: parseDateTimeString(payDate.value) ,
             paymentMethod: vnpCardType.value,
-            userId:"SFT0000002"
         };
         const payload = {
             bookingSchedule: bookingSchedule,
-            paymentDetail: paymentDetail
+            paymentDetail: paymentDetail,
+            courtManagerPhone: currentClub.value.courtManagerPhone,
+            clubId:"C0000002",
+            clubName:"Cho Nhannnnn"
         };
         
             const response = await axios.post(`http://localhost:8080/courtmaster/booking/payment-handle`,payload);
@@ -62,21 +70,6 @@ onMounted(async () => {
     }catch (error) {
             console.error('Error sending payment data:', error);
         }
-    
-
-    
-    // try {
-    //     const response = await axios.post('http://localhost:8080/courtmaster/payment/payment-handle', paymentData);
-    //     responseCode.value = response.data.responseCode;
-    //     amountString.value = response.data.amount;
-    //     bankCode.value = response.data.bankCode;
-    //     payDate.value = response.data.payDate;
-    //     transationNo.value = response.data.transactionNo;
-    //     vnpCardType.value = response.data.vnpCardType;
-    // } catch (error) {
-    //     console.error('Error sending payment data to server:', error);
-    //     paymentStatus.value = 'Error processing payment';
-    // }
 });
 
 function parseDateTimeString(dateTimeString) {

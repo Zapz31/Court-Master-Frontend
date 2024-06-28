@@ -20,6 +20,7 @@ export const useClubStore = defineStore('club', {
       try {
         const response = await axios.get(`http://localhost:8080/courtmaster/clubs/detail/${clubId}`)
         this.currentClub = response.data
+        console.log(response.data);
       } catch (error) {
         console.error("Failed to fetch club details:", error)
       }

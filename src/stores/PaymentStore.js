@@ -5,16 +5,18 @@ import { ref } from 'vue'
 export const usePaymentStore = defineStore("paymentStore", ()=> {
     const bookingSchedule = ref({
         customerFullName:"Giap",
-        customerPhoneNumber:"010101010",
-        bookingScheduleStatus:"yessir",
-        startDate:"2024-06-12",
+        customerPhoneNumber:"0867901057",
+        bookingScheduleStatus:"Deposited 25%",
+        startDate:"2024-06-25",
         endDate:"2024-06-25",
-        scheduleType:"oneTime",
-        customerId:"STF0000002",
-        pricePerSlotRequestDTOList:[
-            { courtId: "CO000001", startBooking: "18:30", endBooking:"22:00", bookingDate:"2024-06-15", bookingType:"one_time_play"},
-            { courtId: "CO000001", startBooking: "18:00", endBooking:"22:00", bookingDate:"2024-06-15", bookingType:"one_time_play"},
-        ]
+        scheduleType:"One-time play",
+        customerId:"STF000002",
+        bookingSlotResponseDTOs:[
+            { courtId: "CO000005", startBooking: "13:30", endBooking:"14:00", bookingDate:"2024-06-18", bookingType:"One-time play", price:32},
+            //{ courtId: "CO000011", startBooking: "08:00", endBooking:"09:30", bookingDate:"2024-06-18", bookingType:"One-time play", price:32},
+            //{ courtId: "CO000012", startBooking: "07:00", endBooking:"12:30", bookingDate:"2024-06-18", bookingType:"One-time play", price:32}
+        ],
+        totalPrice: 320000
     });
 
     // private String courtId;
