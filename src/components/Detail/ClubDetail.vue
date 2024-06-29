@@ -205,6 +205,7 @@ import { storeToRefs } from "pinia";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useClubStore } from "../../stores/clubMng";
 
+
 const props = defineProps({
   clubId: {
     type: String,
@@ -220,8 +221,15 @@ const currentImageIndex = ref(0);
 let autoSlideInterval = null;
 
 const fetchClubData = async () => {
+
   try {
-    await clubStore.fetchClubById(props.clubId);
+    const userId = ref('');
+    const userString = localStorage.getItem('user');
+    if(userString){
+      const user = JSON.parse(userString)
+      userId.value = user.userId || ''
+    }
+    await clubStore.fetchClubById(props.clubId, userId.value);
     // Start auto slide after data is fetched
     startAutoSlide();
   } catch (error) {

@@ -16,9 +16,9 @@ export const useClubStore = defineStore('club', {
         console.error("Failed to fetch clubs:", error)
       }
     },
-    async fetchClubById(clubId) {
+    async fetchClubById(clubId, userId) {
       try {
-        const response = await axios.get(`http://localhost:8080/courtmaster/clubs/detail/${clubId}`)
+        const response = await axios.get(`http://localhost:8080/courtmaster/clubs/detail/${clubId}/${userId}`)
         this.currentClub = response.data
         console.log(response.data);
       } catch (error) {
@@ -27,6 +27,17 @@ export const useClubStore = defineStore('club', {
     },
     setCurrentClub(club) {
       this.currentClub = club
-    }
+    },
+     async getFilteredClubs(dataFilter){
+      const response = await axios.post("http://localhost:8080/courtmaster/filter/getClubs", dataFilter)
+      this.clubs = response.data
+     }
   }
 })
+
+// try {
+//   const response = await axios.get("http://localhost:8080/courtmaster/filter/getClubs")
+  
+//  } catch (error) {
+  
+//  }

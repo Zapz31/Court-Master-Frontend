@@ -139,13 +139,25 @@
           Search
         </button>
       </div>
+
+      <!-- ===================================clear filterSearch BUTTON ===========================================-->
+      <div class="button">
+        <button @click="clearFilterSearch" type="button">
+          Clear all filter
+        </button>
+      </div>
     </div>
+  </div>
+
+  <div>
+
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useAddressFilter } from "../../stores/addressFilter";
+import { useClubStore } from "../../stores/clubMng";
 
 const searchQuery = ref("");
 const selectedCity = ref("");
@@ -339,13 +351,29 @@ const performSearch = async () => {
   // console.log(`Hours Expect: ${hoursExpect.value}`);
   const dataFilter = {
     nameOrUnitNumber: searchQuery.value,
-    province: selectCity.value,
+    province: selectedCity.value,
     district: selectedDistrict.value,
     ward: selectedWard.value,
     openedTime: openTime.value,
     hoursOfExpect: hoursExpect.value,
   };
+  console.log(dataFilter);
+  useClubStore().getFilteredClubs(dataFilter);
 };
+
+const clearFilterSearch = async() => {
+  searchQuery.value = "";
+  selectedCity.value = "";
+  cityLabel.value = "City/Province";
+  selectedDistrict.value = "";
+  districtLabel.value = "District";
+  selectedWard.value = "";
+  wardLabel.value = "Ward";
+  openTime.value = "";
+  openTimeLabel.value = "Opened time";
+  hoursExpect.value = "";
+  hoursExpectLabel.value = "Hours of expect";
+}
 
 const searchResults = ref([
   { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
