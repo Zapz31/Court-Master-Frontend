@@ -39,7 +39,7 @@ const routes = [
 
 
     {
-        path: '/history',
+        path: '/customer/booking',
         name: 'BookingHistoryScreen',
         component: () => import('../views/BookingHistoryScreen.vue') ,
     },
