@@ -1,6 +1,7 @@
 // src/stores/clubStore.js
-import axios from 'axios'
-import { defineStore } from 'pinia'
+import axios from 'axios';
+import { defineStore } from 'pinia';
+axios.defaults.withCredentials = true;
 
 export const useClubStore = defineStore('club', {
   state: () => ({

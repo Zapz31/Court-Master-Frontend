@@ -1,6 +1,7 @@
-import axios from 'axios'
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import axios from 'axios';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+axios.defaults.withCredentials = true;
 
 export const usePaymentStore = defineStore("paymentStore", ()=> {
     const bookingSchedule = ref({

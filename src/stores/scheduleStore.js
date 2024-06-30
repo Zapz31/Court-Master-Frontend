@@ -20,6 +20,7 @@ export const useScheduleStore = defineStore('schedule', {
         price: price,
       });
     },
+
     removeSlot(startTime, court) {
       const index = this.slots.findIndex(
         slot => slot.startTime === startTime && slot.court === court && slot.status === "selected"

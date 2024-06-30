@@ -7,16 +7,17 @@
     <div class="schedule-information" ref="infoPanel">
       <h3>Booking Information</h3>
       <div class="info-scroll">
-        <div v-if="scheduleslots.length > 0">
+        <div v-if="selectedSlots.length > 0">
           <div
-            v-for="(slot, index) in scheduleslots"
+            v-for="(slot, index) in selectedSlots"
             :key="index"
             class="info-item"
           >
-            <label> Time: {{ slot.startTime }} - {{ slot.endTime }} </label>
-            <label>
-              Hours: {{ calculateHours(slot.startTime, slot.endTime) }} h
-            </label>
+            <label>Time: {{ slot.startTime }} - {{ slot.endTime }}</label>
+            <label
+              >Hours:
+              {{ calculateHours(slot.startTime, slot.endTime) }} h</label
+            >
             <label>Price: {{ slot.price }} VNĐ</label>
             <label>Court: {{ slot.court }}</label>
           </div>
@@ -30,18 +31,19 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { useScheduleStore } from "../../stores/scheduleStore";
 
 const scheduleStore = useScheduleStore();
 const isOpen = ref(false);
-const infoPanel = ref(null);
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const scheduleslots = computed(() => scheduleStore.slots);
+const selectedSlots = computed(() => {
+  return scheduleStore.slots.filter((slot) => slot.status === "selected");
+});
 
 const calculateHours = (startTime, endTime) => {
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -51,38 +53,22 @@ const calculateHours = (startTime, endTime) => {
   const totalMinutes = endTotalMinutes - startTotalMinutes;
   return (totalMinutes / 60).toFixed(1);
 };
-
-const updateHeight = () => {
-  const table = document.querySelector(".schedule-table-wrapper table");
-  const tbody = table ? table.querySelector("tbody") : null;
-  if (tbody && infoPanel.value) {
-    const tbodyRect = tbody.getBoundingClientRect();
-    infoPanel.value.style.height = `${tbodyRect.height}px`;
-    infoPanel.value.style.top = `${tbodyRect.top}px`;
-  }
-};
-
-onMounted(() => {
-  updateHeight();
-  window.addEventListener("resize", updateHeight);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("resize", updateHeight);
-});
 </script>
+
 
 <style scoped>
 .schedule-information-wrapper {
   position: fixed;
   right: -33.33%;
-  top: 0;
-  height: 100%;
+  top: 100px;
+  height: calc(
+    100% - 100px
+  ); /* Adjusted to fit within the screen, accounting for the top offset */
   width: 33.33%;
   transition: right 0.3s ease;
   z-index: 1000;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 .schedule-information-wrapper.is-open {
@@ -115,9 +101,7 @@ onUnmounted(() => {
   padding: 16px;
   box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  position: absolute;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -126,9 +110,6 @@ onUnmounted(() => {
   flex-grow: 1;
   overflow-y: auto;
   padding-right: 10px;
-  max-height: calc(
-    3 * (80px + 4 * 8px + 38px)
-  ); /* Adjust based on your info-item structure */
 }
 
 h3 {

@@ -1,6 +1,7 @@
+import axios from "axios";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import axios from "axios";
+axios.defaults.withCredentials = true;
 export const useAddressFilter = defineStore("address", ()=> {
     const citiesList = ref([]);
     const districtsList = ref([]);
