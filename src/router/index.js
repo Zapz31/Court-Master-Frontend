@@ -26,8 +26,9 @@ const routes = [
     },
 
     {
-        path: '/schedule',
+        path: '/schedule/:clubId',
         name: 'ScheduleScreen',
+        props: true,
         component: () => import('../views/ScheduleScreen.vue') ,
     },
     {

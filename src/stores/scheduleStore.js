@@ -4,54 +4,56 @@ export const useScheduleStore = defineStore('schedule', {
   state: () => ({
     selectedDate: '',
     slots: [],
+    hourlyRate: 80000, // Default rate of 80,000 VND/hour
   }),
   actions: {
-    addslot(start, end, courtNumber) {
-      const price = this.calculatePrice(start, end);
+    addSlot(start, end, courtNumber, status, date) {
+      const hours = this.calculateHours(start, end);
+      const price = this.calculatePrice(hours);
       this.slots.push({
         startTime: start,
         endTime: end,
         court: courtNumber,
+        status: status,
+        date: date,
+        hours: hours,
         price: price,
       });
     },
-    removeslot(startTime, court) {
+    removeSlot(startTime, court) {
       const index = this.slots.findIndex(
-        slot => slot.startTime === startTime && slot.court === court
+        slot => slot.startTime === startTime && slot.court === court && slot.status === "selected"
       );
       if (index !== -1) {
         this.slots.splice(index, 1);
       }
     },
-
-    removeslotByTimeAndCourt(startTime, court) {
+    updateSlot(updatedSlot) {
       const index = this.slots.findIndex(
-        slot => slot.startTime === startTime && slot.court === court
+        slot => slot.startTime === updatedSlot.startTime && slot.court === updatedSlot.court
       );
       if (index !== -1) {
-        this.slots.splice(index, 1);
+        this.slots[index] = { ...this.slots[index], ...updatedSlot };
       }
     },
-
-    updateslotEndTime(startTime, court, newEndTime) {
-      const slotIndex = this.slots.findIndex(
-        slot => slot.startTime === startTime && slot.court === court
-      );
-      if (slotIndex !== -1) {
-        const slot = this.slots[slotIndex];
+    updateSlotEndTime(index, newEndTime) {
+      if (index !== -1 && index < this.slots.length) {
+        const slot = this.slots[index];
         slot.endTime = newEndTime;
-        slot.price = this.calculatePrice(slot.startTime, newEndTime);
+        slot.hours = this.calculateHours(slot.startTime, newEndTime);
+        slot.price = this.calculatePrice(slot.hours);
       }
     },
-
-    calculatePrice(start, end) {
+    calculateHours(start, end) {
       const [startHour, startMinute] = start.split(':').map(Number);
       const [endHour, endMinute] = end.split(':').map(Number);
       const startTotalMinutes = startHour * 60 + startMinute;
       const endTotalMinutes = endHour * 60 + endMinute;
       const totalMinutes = endTotalMinutes - startTotalMinutes;
-      const hours = totalMinutes / 60;
-      return hours * 80000; // Giá mặc định 80.000 VNĐ/giờ
+      return totalMinutes / 60;
+    },
+    calculatePrice(hours) {
+      return hours * this.hourlyRate;
     },
     initializeSelectedDate() {
       const today = new Date().toISOString().split('T')[0];
@@ -60,7 +62,7 @@ export const useScheduleStore = defineStore('schedule', {
     updateSelectedDate(date) {
       this.selectedDate = date;
     },
-    clearslots() {
+    clearSlots() {
       this.slots = [];
     },
   },

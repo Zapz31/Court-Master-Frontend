@@ -134,24 +134,22 @@
           />
         </div>
       </div>
+      <!-- ===================================clear filterSearch BUTTON ===========================================-->
+      <div class="button">
+        <button @click="clearFilterSearch" type="button" class="button">
+          Clear all filter
+        </button>
+      </div>
+
       <div class="button">
         <button @click="performSearch" type="submit" class="button">
           Search
         </button>
       </div>
-
-      <!-- ===================================clear filterSearch BUTTON ===========================================-->
-      <div class="button">
-        <button @click="clearFilterSearch" type="button">
-          Clear all filter
-        </button>
-      </div>
     </div>
   </div>
 
-  <div>
-
-  </div>
+  <div></div>
 </template>
 
 <script setup>
@@ -361,7 +359,7 @@ const performSearch = async () => {
   useClubStore().getFilteredClubs(dataFilter);
 };
 
-const clearFilterSearch = async() => {
+const clearFilterSearch = async () => {
   searchQuery.value = "";
   selectedCity.value = "";
   cityLabel.value = "City/Province";
@@ -373,7 +371,7 @@ const clearFilterSearch = async() => {
   openTimeLabel.value = "Opened time";
   hoursExpect.value = "";
   hoursExpectLabel.value = "Hours of expect";
-}
+};
 
 const searchResults = ref([
   { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
@@ -414,6 +412,23 @@ const searchResults = ref([
   outline: none;
 }
 
+.button button[type="button"] {
+  background-color: #6babf4;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 12px 20px;
+  border-radius: 0px;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+  transition: 0.3s ease;
+}
+
+.button button[type="button"]:hover {
+  transform: scale(1.05);
+  color: white;
+  background-color: rgb(28, 144, 183);
+}
+
 .button button[type="submit"] {
   background-color: #6babf4;
   border: none;
@@ -428,7 +443,7 @@ const searchResults = ref([
 .button button[type="submit"]:hover {
   transform: scale(1.05);
   color: white;
-  background-color: blue;
+  background-color: rgb(28, 144, 183);
 }
 
 .filter {

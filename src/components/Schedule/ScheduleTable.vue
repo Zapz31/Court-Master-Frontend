@@ -8,130 +8,90 @@
       <thead>
         <tr>
           <th class="time-column">Time</th>
-          <th v-for="court in courtCount" :key="court">Court {{ court }}</th>
+          <th v-for="court in sortedCourts" :key="court.courtId">
+            {{ court.courtName }}
+          </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(time, timeIndex) in times" :key="time">
           <td class="time-column">{{ formatTime(time) }}</td>
           <td
-            v-for="court in courtCount"
-            :key="court"
-            :class="getCellClass(time, court)"
-            @mousedown.prevent="handleMouseDown(time, court)"
-            @mouseenter="handleMouseEnter(time, court, $event)"
+            v-for="court in sortedCourts"
+            :key="court.courtId"
+            :class="[
+              getCellClass(time, court.courtId),
+              {
+                dragging:
+                  isDragging &&
+                  selectedCells.some(
+                    (cell) =>
+                      cell.time === formatTime(time) &&
+                      cell.court === court.courtId
+                  ),
+              },
+            ]"
+            @mousedown.prevent="handleMouseDown(time, court.courtId)"
+            @mouseenter="handleMouseEnter(time, court.courtId, $event)"
             @mouseup="handleMouseUp"
             @mouseleave="hidePopup"
           >
-            <!-- <slot-popup
-              v-if="showPopup"
-              :show="true"
-              :style="{
-                left: popupPosition.x + 'px',
-                top: popupPosition.y + 'px',
-              }"
-              class="slot-popup"
-            /> -->
+            <!-- Popup content here -->
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-</template> 
+</template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import axios from "axios";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, ref, watch } from "vue";
+import { useAuthStore } from "../../stores/auth";
+import { useClubStore } from "../../stores/clubMng";
 import { useScheduleStore } from "../../stores/scheduleStore";
 
-const scheduleStore = useScheduleStore();
+const props = defineProps({
+  clubId: {
+    type: String,
+    required: true,
+  },
+});
 
-const courtCount = 10;
+const scheduleStore = useScheduleStore();
+const clubStore = useClubStore();
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+const { currentClub } = storeToRefs(clubStore);
+
+const sortedCourts = computed(() => {
+  if (currentClub.value && currentClub.value.courtList) {
+    return [...currentClub.value.courtList].sort((a, b) =>
+      a.courtId.localeCompare(b.courtId)
+    );
+  }
+  return [];
+});
 
 const times = computed(() => {
   const times = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      times.push(hour * 60 + minute);
-    }
+  for (let minutes = 0; minutes <= 24 * 60; minutes += 30) {
+    times.push(minutes);
   }
   return times;
 });
 
 const formatTime = (time) => {
-  const hours = Math.floor(time / 60);
-  const minutes = time % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
+  if (typeof time === "number") {
+    const hours = Math.floor(time / 60);
+    const minutes = time % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+  }
+  return time;
 };
-
-const slots = ref([]);
-
-const initializeslots = () => {
-  slots.value = [
-    {
-      startTime: "16:30",
-      endTime: "18:30",
-      court: 9,
-      status: "booked",
-      date: "18/06/2024",
-    },
-
-    {
-      startTime: "16:30",
-      endTime: "18:30",
-      court: 1,
-      status: "booked",
-      date: "18/06/2024",
-    },
-
-    {
-      startTime: "18:30",
-      endTime: "20:30",
-      court: 1,
-      status: "booked",
-      date: "18/06/2024",
-    },
-
-    {
-      startTime: "14:30",
-      endTime: "16:00",
-      court: 5,
-      status: "booked",
-      date: "19/06/2024",
-    },
-    {
-      startTime: "14:30",
-      endTime: "16:00",
-      court: 8,
-      status: "booked",
-      date: "20/06/2024",
-    },
-    {
-      startTime: "06:30",
-      endTime: "08:00",
-      court: 1,
-      status: "booked",
-      date: "21/06/2024",
-    },
-    {
-      startTime: "12:30",
-      endTime: "15:00",
-      court: 3,
-      status: "booked",
-      date: "22/06/2024",
-    },
-    {
-      startTime: "15:00",
-      endTime: "20:00",
-      court: 3,
-      status: "bookedByUser",
-      date: "23/06/2024",
-    },
-  ];
-};
-
-initializeslots();
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -141,26 +101,74 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
-const filteredslots = ref([]);
-
-watch(
-  () => scheduleStore.selectedDate,
-  (newDate) => {
-    filterslotsByDate(newDate);
-  },
-  { immediate: true }
-);
-
-function filterslotsByDate(date) {
-  if (date === "") {
-    filteredslots.value = [];
-  } else {
-    const formattedDate = formatDate(date);
-    filteredslots.value = slots.value.filter(
-      (slot) => slot.date === formattedDate
-    );
+const normalizeEndTime = (time) => {
+  if (time === "23:59:59" || time === "23:59") {
+    return "24:00";
   }
-}
+  return time.slice(0, 5);
+};
+
+const bookings = ref([]);
+
+const fetchBookings = async () => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/courtmaster/api/test/get-all-bookedlist-${props.clubId}`
+    );
+    const formattedBookings = formatBookings(response.data);
+    bookings.value = formattedBookings;
+
+    scheduleStore.clearSlots();
+    formattedBookings.forEach((booking) => {
+      scheduleStore.addSlot(
+        booking.startTime,
+        booking.endTime,
+        booking.court,
+        booking.status,
+        booking.date,
+        user.value?.userId
+      );
+    });
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+  }
+};
+
+const formatBookings = (bookings) => {
+  if (!user.value || !user.value.userId) {
+    console.error("User is not logged in or user ID is not set.");
+    return bookings.map((booking) => ({
+      startTime: formatTime(booking.startTime.split(":").slice(0, 2).join(":")),
+      endTime: normalizeEndTime(booking.endTime),
+      date: formatDate(booking.bookingDate),
+      court: booking.courtId,
+      status: "booked",
+    }));
+  }
+
+  return bookings.map((booking) => ({
+    startTime: formatTime(booking.startTime.split(":").slice(0, 2).join(":")),
+    endTime: normalizeEndTime(booking.endTime),
+    date: formatDate(booking.bookingDate),
+    court: booking.courtId,
+    status:
+      booking.userId.trim() === user.value.userId.trim()
+        ? "bookedByUser"
+        : "booked",
+  }));
+};
+
+const filteredSlots = computed(() => {
+  if (scheduleStore.selectedDate === "") {
+    return [];
+  }
+  const formattedDate = formatDate(scheduleStore.selectedDate);
+  return scheduleStore.slots.filter((slot) => slot.date === formattedDate);
+});
+
+onMounted(fetchBookings);
+
+watch(() => props.clubId, fetchBookings);
 
 let isDragging = ref(false);
 let dragStartCell = ref(null);
@@ -182,9 +190,50 @@ const handleTableMouseLeave = () => {
   }
 };
 
+const updateSlot = (time, court, isStart) => {
+  const formattedDate = formatDate(scheduleStore.selectedDate);
+  const cell = filteredSlots.value.find(
+    (slot) =>
+      slot.court === court &&
+      slot.date === formattedDate &&
+      time >= slot.startTime &&
+      time <= slot.endTime
+  );
+  if (cell) {
+    return;
+  }
+  const existingSlot = filteredSlots.value.find(
+    (slot) =>
+      slot.court === court &&
+      slot.date === formattedDate &&
+      slot.endTime === time &&
+      slot.status === "selected"
+  );
+  if (existingSlot && !isStart) {
+    const newEndTime = formatTime(
+      Math.min(
+        24 * 60,
+        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
+      )
+    );
+    scheduleStore.updateSlot({
+      ...existingSlot,
+      endTime: newEndTime,
+    });
+  } else if (isStart) {
+    const endTime = formatTime(
+      Math.min(
+        24 * 60,
+        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
+      )
+    );
+    scheduleStore.addSlot(time, endTime, court, "selected", formattedDate);
+  }
+};
+
 const handleMouseDown = (time, court) => {
   const startTime = formatTime(time);
-  const cell = filteredslots.value.find(
+  const cell = filteredSlots.value.find(
     (slot) =>
       slot.court === court &&
       startTime >= slot.startTime &&
@@ -192,15 +241,7 @@ const handleMouseDown = (time, court) => {
   );
 
   if (cell && cell.status === "selected") {
-    scheduleStore.removeslotByTimeAndCourt(cell.startTime, court);
-    filteredslots.value = filteredslots.value.filter(
-      (slot) =>
-        !(
-          slot.court === court &&
-          slot.startTime === cell.startTime &&
-          slot.status === "selected"
-        )
-    );
+    scheduleStore.removeSlot(cell.startTime, court);
     return;
   }
 
@@ -208,12 +249,12 @@ const handleMouseDown = (time, court) => {
 
   isDragging.value = true;
   dragStartCell.value = { time: startTime, court: court };
-  selectedCells.value = [{ time: startTime, court: court }];
-  updateslot(startTime, court, true);
+  selectedCells.value = [{ time: endTime, court: court }];
+  updateSlot(startTime, court, true);
 };
 
 const showPopup = ref(false);
-const hoveredslot = ref(null);
+const hoveredSlot = ref(null);
 const popupPosition = ref({ x: 0, y: 0 });
 
 const handleMouseEnter = (time, court, event) => {
@@ -227,19 +268,32 @@ const handleMouseEnter = (time, court, event) => {
     const currentTotalMinutes = currentHour * 60 + currentMinute;
 
     const timeDiff = Math.abs(currentTotalMinutes - startTotalMinutes);
-    const steps = timeDiff / 30;
+    const steps = Math.floor(timeDiff / 30);
 
     selectedCells.value = [];
+
+    const formattedDate = formatDate(scheduleStore.selectedDate);
 
     for (let i = 0; i <= steps; i++) {
       const newTime =
         startTotalMinutes +
-        (currentTotalMinutes > startTotalMinutes ? i : -i) * 30;
-      selectedCells.value.push({ time: formatTime(newTime), court: court });
-      updateslot(formatTime(newTime), court, false);
+        (currentTotalMinutes >= startTotalMinutes ? i : -i) * 30;
+      const formattedNewTime = formatTime(newTime);
+      selectedCells.value.push({ time: formattedNewTime, court: court });
+      updateSlot(formattedNewTime, court, i === 0);
     }
+
+    // Thêm ô cuối cùng
+    const lastTime = formatTime(currentTotalMinutes);
+    if (lastTime !== selectedCells.value[selectedCells.value.length - 1].time) {
+      selectedCells.value.push({ time: lastTime, court: court });
+      updateSlot(lastTime, court, false);
+    }
+
+    // Đảm bảo cập nhật UI
+    scheduleStore.$patch({});
   } else {
-    const slot = filteredslots.value.find(
+    const slot = filteredSlots.value.find(
       (slot) =>
         slot.court === court &&
         slot.startTime <= formatTime(time) &&
@@ -248,21 +302,18 @@ const handleMouseEnter = (time, court, event) => {
     );
     if (slot) {
       showPopup.value = true;
-      hoveredslot.value = slot;
+      hoveredSlot.value = slot;
       const cellRect = event.currentTarget.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      const popupHeight = 80; // Chiều cao ước tính của popup
+      const popupHeight = 80;
 
-      // Kiểm tra xem popup có bị che bởi thanh thông tin hay không
       const bottomOffset = windowHeight - cellRect.bottom;
       if (bottomOffset < popupHeight) {
-        // Nếu có, hiển thị popup ở phía trên ô
         popupPosition.value = {
           x: cellRect.right,
           y: cellRect.top - popupHeight,
         };
       } else {
-        // Nếu không, hiển thị popup bên cạnh ô
         popupPosition.value = {
           x: cellRect.right,
           y: cellRect.top,
@@ -273,10 +324,12 @@ const handleMouseEnter = (time, court, event) => {
     }
   }
 };
+
 const hidePopup = () => {
   showPopup.value = false;
-  hoveredslot.value = null;
+  hoveredSlot.value = null;
 };
+
 const handleMouseUp = () => {
   if (!isDragging.value) return;
 
@@ -285,97 +338,76 @@ const handleMouseUp = () => {
   let slotEnd = selectedCells.value[selectedCells.value.length - 1].time;
   const court = selectedCells.value[0].court;
 
-  // Ensure start time is always before end time
   if (slotStart > slotEnd) {
     [slotStart, slotEnd] = [slotEnd, slotStart];
   }
 
-  const existingslotIndex = scheduleStore.slots.findIndex(
-    (slot) => slot.startTime === slotStart && slot.court === court
-  );
+  const formattedDate = formatDate(scheduleStore.selectedDate);
 
-  if (existingslotIndex === -1) {
-    scheduleStore.addslot(slotStart, slotEnd, court);
-  } else {
-    scheduleStore.updateslotEndTime(existingslotIndex, slotEnd);
+  // Đảm bảo slotEnd không vượt quá 24:00
+  if (slotEnd === "24:00") {
+    slotEnd = "23:59";
   }
 
-  // Recalculate hours and price
+  const existingSlotIndex = scheduleStore.slots.findIndex(
+    (slot) =>
+      slot.startTime === slotStart &&
+      slot.court === court &&
+      slot.date === formattedDate
+  );
+
+  if (existingSlotIndex === -1) {
+    scheduleStore.addSlot(slotStart, slotEnd, court, "selected", formattedDate);
+  } else {
+    scheduleStore.updateSlotEndTime(existingSlotIndex, slotEnd);
+  }
+
   const startMinutes = timeToMinutes(slotStart);
   const endMinutes = timeToMinutes(slotEnd);
   const hours = Math.abs(endMinutes - startMinutes) / 60;
   const price = hours * scheduleStore.hourlyRate;
 
-  // Update the slot with correct values
-  scheduleStore.updateslot({
+  scheduleStore.updateSlot({
     startTime: slotStart,
     endTime: slotEnd,
     court,
     hours,
     price,
+    date: formattedDate,
+    status: "selected",
   });
 
   selectedCells.value = [];
 };
-const removeslot = (time, court) => {
-  const slotIndex = scheduleStore.slots.findIndex(
-    (slot) => slot.startTime === time && slot.court === court
-  );
-  if (slotIndex !== -1) {
-    scheduleStore.removeslot(slotIndex);
-  }
-};
 
-const updateslot = (time, court, isStart) => {
-  const cell = filteredslots.value.find(
-    (slot) =>
-      slot.court === court && time >= slot.startTime && time < slot.endTime
-  );
-  if (cell) {
-    return; // Không làm gì nếu ô đã được đặt chỗ hoặc đã được đặt bởi người dùng
-  }
-  const existingslot = filteredslots.value.find(
-    (slot) =>
-      slot.court === court &&
-      slot.endTime === time &&
-      slot.status === "selected"
-  );
-  if (existingslot && !isStart) {
-    existingslot.endTime = formatTime(
-      parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
-    );
-  } else if (isStart) {
-    filteredslots.value.push({
-      startTime: time,
-      endTime: formatTime(
-        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
-      ),
-      court: court,
-      status: "selected",
-    });
-  }
-};
 const getCellClass = (time, court) => {
   const formattedTime = formatTime(time);
-  const slot = filteredslots.value.find(
+  const slot = filteredSlots.value.find(
     (slot) =>
       slot.court === court &&
       formattedTime >= slot.startTime &&
-      formattedTime < slot.endTime
+      (formattedTime < slot.endTime || formattedTime === slot.endTime)
   );
   if (slot) {
-    if (slot.status === "booked") {
-      return "booked";
-    } else if (slot.status === "bookedByUser") {
-      return "bookedByUser";
-    } else if (slot.status === "selected") {
-      return "selected";
-    }
+    return slot.status;
+  }
+  // Kiểm tra xem ô có đang được chọn trong quá trình kéo chuột không
+  if (
+    isDragging.value &&
+    selectedCells.value.some(
+      (cell) => cell.time === formattedTime && cell.court === court
+    )
+  ) {
+    return "selected";
   }
   return "";
 };
-</script>
 
+const timeToMinutes = (time) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+</script>
 
 <style>
 table {
@@ -397,7 +429,7 @@ th {
   position: sticky;
   top: 64px;
   z-index: 5;
-  border-bottom: 2px solid #ddd; /* Thêm viền ngăn cách phía dưới các thẻ <th> */
+  border-bottom: 2px solid #ddd;
 }
 
 .time-column {
@@ -429,10 +461,10 @@ td.bookedByUser {
 }
 
 td.selected {
-  background-color: #32cd32; /* Màu xanh lá */
+  background-color: #32cd32 !important;
 }
 
 tbody tr:first-child td {
-  border-top: 2px solid #ddd; /* Thêm viền ngăn cách phía trên hàng đầu tiên của bảng */
+  border-top: 2px solid #ddd;
 }
 </style>

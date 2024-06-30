@@ -1,18 +1,38 @@
 <template>
   <div class="schedule-controller-wrapper">
-    <schedule-controller />
+    <ScheduleController />
   </div>
   <div class="schedule-table-wrapper">
-    <schedule-table />
+    <!-- <h1>
+      Schedule for {{ currentClub ? currentClub.clubName : "Loading..." }}
+    </h1> -->
+    <ScheduleTable :clubId="clubId" />
   </div>
-  <schedule-information />
+  <ScheduleInformation />
 </template>
 
 <script setup>
 import ScheduleController from "../components/Schedule/ScheduleController.vue";
 import ScheduleInformation from "../components/Schedule/ScheduleInformation.vue";
 import ScheduleTable from "../components/Schedule/ScheduleTable.vue";
+
+import { onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useClubStore } from "../stores/clubMng";
+
+const route = useRoute();
+const clubStore = useClubStore();
+const clubId = ref(route.params.clubId);
+
+const fetchClubData = async () => {
+  await clubStore.fetchClubById(clubId.value);
+};
+
+onMounted(fetchClubData);
+
+watch(() => route.params.clubId, fetchClubData);
 </script>
+
 
 <style>
 .schedule-table-wrapper {
