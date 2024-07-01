@@ -174,46 +174,6 @@ let isDragging = ref(false);
 let dragStartCell = ref(null);
 let selectedCells = ref([]);
 
-// Thêm hàm gửi request POST
-const postBookingData = async (
-  courtId,
-  startBooking,
-  endBooking,
-  bookingDate,
-  bookingType
-) => {
-  const data = {
-    courtId,
-    startBooking,
-    endBooking,
-    bookingDate,
-    bookingType,
-  };
-
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/courtmaster/booking/unpaidbookings",
-      data
-    );
-    const responseData = response.data;
-    // Xử lý dữ liệu response từ backend
-    console.log(responseData);
-
-    // Cập nhật store với dữ liệu mới nhận được
-    scheduleStore.updateSlot({
-      startTime: responseData.unpaidBookingList[0].startBooking,
-      endTime: responseData.unpaidBookingList[0].endBooking,
-      court: responseData.unpaidBookingList[0].courtId,
-      hours: responseData.totalHour,
-      price: responseData.totalPrice,
-      date: responseData.unpaidBookingList[0].bookingDate,
-      status: "selected",
-    });
-  } catch (error) {
-    console.error("Error posting booking data:", error);
-  }
-};
-
 const handleTableMouseDown = (event) => {
   event.preventDefault();
 };
@@ -227,47 +187,6 @@ const handleTableMouseUp = () => {
 const handleTableMouseLeave = () => {
   if (isDragging.value) {
     handleMouseUp();
-  }
-};
-
-const updateSlot = (time, court, isStart) => {
-  const formattedDate = formatDate(scheduleStore.selectedDate);
-  const cell = filteredSlots.value.find(
-    (slot) =>
-      slot.court === court &&
-      slot.date === formattedDate &&
-      time >= slot.startTime &&
-      time <= slot.endTime
-  );
-  if (cell) {
-    return;
-  }
-  const existingSlot = filteredSlots.value.find(
-    (slot) =>
-      slot.court === court &&
-      slot.date === formattedDate &&
-      slot.endTime === time &&
-      slot.status === "selected"
-  );
-  if (existingSlot && !isStart) {
-    const newEndTime = formatTime(
-      Math.min(
-        24 * 60,
-        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
-      )
-    );
-    scheduleStore.updateSlot({
-      ...existingSlot,
-      endTime: newEndTime,
-    });
-  } else if (isStart) {
-    const endTime = formatTime(
-      Math.min(
-        24 * 60,
-        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
-      )
-    );
-    scheduleStore.addSlot(time, endTime, court, "selected", formattedDate);
   }
 };
 
@@ -289,8 +208,64 @@ const handleMouseDown = (time, court) => {
 
   isDragging.value = true;
   dragStartCell.value = { time: startTime, court: court };
-  selectedCells.value = [{ time: endTime, court: court }];
-  updateSlot(startTime, court, true);
+  selectedCells.value = [{ time: startTime, court: court }];
+};
+
+const updateSlot = async (time, court, isStart) => {
+  const formattedDate = formatDate(scheduleStore.selectedDate);
+  const cell = filteredSlots.value.find(
+    (slot) =>
+      slot.court === court &&
+      slot.date === formattedDate &&
+      time >= slot.startTime &&
+      time <= slot.endTime
+  );
+  if (cell) {
+    return;
+  }
+  const existingSlot = filteredSlots.value.find(
+    (slot) =>
+      slot.court === court &&
+      slot.date === formattedDate &&
+      slot.endTime === time &&
+      slot.status === "selected"
+  );
+
+  if (existingSlot && !isStart) {
+    const newEndTime = formatTime(
+      Math.min(
+        24 * 60,
+        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
+      )
+    );
+    try {
+      await scheduleStore.updateSlot({
+        ...existingSlot,
+        endTime: newEndTime,
+        status: "selected", // Đảm bảo trạng thái là 'selected'
+      });
+    } catch (error) {
+      console.error("Error updating slot:", error);
+    }
+  } else if (isStart) {
+    const endTime = formatTime(
+      Math.min(
+        24 * 60,
+        parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]) + 30
+      )
+    );
+    try {
+      await scheduleStore.addSlot(
+        time,
+        endTime,
+        court,
+        "selected",
+        formattedDate
+      );
+    } catch (error) {
+      console.error("Error adding slot:", error);
+    }
+  }
 };
 
 const showPopup = ref(false);
@@ -312,26 +287,13 @@ const handleMouseEnter = (time, court, event) => {
 
     selectedCells.value = [];
 
-    const formattedDate = formatDate(scheduleStore.selectedDate);
-
     for (let i = 0; i <= steps; i++) {
       const newTime =
         startTotalMinutes +
         (currentTotalMinutes >= startTotalMinutes ? i : -i) * 30;
       const formattedNewTime = formatTime(newTime);
       selectedCells.value.push({ time: formattedNewTime, court: court });
-      updateSlot(formattedNewTime, court, i === 0);
     }
-
-    // Thêm ô cuối cùng
-    const lastTime = formatTime(currentTotalMinutes);
-    if (lastTime !== selectedCells.value[selectedCells.value.length - 1].time) {
-      selectedCells.value.push({ time: lastTime, court: court });
-      updateSlot(lastTime, court, false);
-    }
-
-    // Đảm bảo cập nhật UI
-    scheduleStore.$patch({});
   } else {
     const slot = filteredSlots.value.find(
       (slot) =>
@@ -340,28 +302,6 @@ const handleMouseEnter = (time, court, event) => {
         formatTime(time) < slot.endTime &&
         (slot.status === "bookedByUser" || slot.status === "selected")
     );
-    if (slot) {
-      showPopup.value = true;
-      hoveredSlot.value = slot;
-      const cellRect = event.currentTarget.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const popupHeight = 80;
-
-      const bottomOffset = windowHeight - cellRect.bottom;
-      if (bottomOffset < popupHeight) {
-        popupPosition.value = {
-          x: cellRect.right,
-          y: cellRect.top - popupHeight,
-        };
-      } else {
-        popupPosition.value = {
-          x: cellRect.right,
-          y: cellRect.top,
-        };
-      }
-    } else {
-      hidePopup();
-    }
   }
 };
 
@@ -384,9 +324,16 @@ const handleMouseUp = () => {
 
   const formattedDate = formatDate(scheduleStore.selectedDate);
 
-  // Đảm bảo slotEnd không vượt quá 24:00
+  // Ensure the slotEnd does not exceed 24:00
   if (slotEnd === "24:00") {
     slotEnd = "23:59";
+  }
+
+  // Check if the start and end times are the same
+  if (slotStart === slotEnd) {
+    // Do not add or update slot
+    selectedCells.value = [];
+    return;
   }
 
   const existingSlotIndex = scheduleStore.slots.findIndex(
@@ -418,9 +365,6 @@ const handleMouseUp = () => {
   });
 
   selectedCells.value = [];
-
-  // Gọi hàm gửi request POST sau khi người dùng chọn xong giờ chơi
-  postBookingData(court, slotStart, slotEnd, formattedDate, "SINGLE");
 };
 
 const getCellClass = (time, court) => {
@@ -434,7 +378,7 @@ const getCellClass = (time, court) => {
   if (slot) {
     return slot.status;
   }
-  // Kiểm tra xem ô có đang được chọn trong quá trình kéo chuột không
+
   if (
     isDragging.value &&
     selectedCells.value.some(
