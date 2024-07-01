@@ -1,6 +1,6 @@
 <template>
     <div class="name">
-        <h2><font-awesome-icon :icon="['fas', 'calendar-days']" size="lg" style="color: #007dfa;" /> Booking History</h2>
+        <h2><font-awesome-icon :icon="['fas', 'calendar-days']" size="lg" style="color: #007dfa;" /> Booking Schedule</h2>
     </div>
 
 </template>

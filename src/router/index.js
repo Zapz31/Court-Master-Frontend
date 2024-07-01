@@ -56,7 +56,7 @@ const routes = [
         component: () => import('../views/ConfirmPaymentScreen.vue') ,  
     },
     {
-        path: '/booking-slot',
+        path: '/booking-slot/:scheduleId',
         name: 'BookingSlotScreen',
         component: () => import('../views/BookingSlotScreen.vue') ,  
     },

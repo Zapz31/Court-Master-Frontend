@@ -9,7 +9,7 @@
             <filter-search ref="filterSearchRef" />
         </div>
         <div class="content">
-            
+            <slot-detail/>
         </div>
         <div class="footer">
             <h2>Developed by Court Master team</h2>
@@ -23,6 +23,7 @@ import FilterSearch from "../components/BookingSlot/FilerSearch.vue";
 import Logo from "../components/BookingSlot/Logo.vue";
 import UserAvatar from "../components/BookingSlot/UserAvatar.vue";
 import PageName from "../components/BookingSlot/PageName.vue";
+import SlotDetail from "../components/BookingSlot/SlotDetail.vue";
 
 const filterSearchRef = ref(null);
 
