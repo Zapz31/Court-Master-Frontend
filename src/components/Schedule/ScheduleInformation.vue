@@ -13,13 +13,18 @@
             :key="index"
             class="info-item"
           >
+            <label>Date: {{ slot.date }}</label>
             <label>Time: {{ slot.startTime }} - {{ slot.endTime }}</label>
             <label
-              >Hours:
+              >Duration:
               {{ calculateHours(slot.startTime, slot.endTime) }} h</label
             >
             <label>Price: {{ slot.price }} VNĐ</label>
-            <label>Court: {{ slot.court }}</label>
+            <label>
+              Booking Type:
+              {{ capitalizeFirstLetter(slot.bookingType) }}
+            </label>
+            <label>Court: {{ getCourtName(slot.court) }}</label>
           </div>
         </div>
         <div v-else class="info-item">
@@ -32,9 +37,11 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { useClubStore } from "../../stores/clubMng";
 import { useScheduleStore } from "../../stores/scheduleStore";
 
 const scheduleStore = useScheduleStore();
+const clubStore = useClubStore();
 const isOpen = ref(false);
 
 const toggleDropdown = () => {
@@ -45,6 +52,10 @@ const selectedSlots = computed(() => {
   return scheduleStore.slots.filter((slot) => slot.status === "selected");
 });
 
+const capitalizeFirstLetter = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 const calculateHours = (startTime, endTime) => {
   const [startHour, startMinute] = startTime.split(":").map(Number);
   const [endHour, endMinute] = endTime.split(":").map(Number);
@@ -52,6 +63,13 @@ const calculateHours = (startTime, endTime) => {
   const endTotalMinutes = endHour * 60 + endMinute;
   const totalMinutes = endTotalMinutes - startTotalMinutes;
   return (totalMinutes / 60).toFixed(1);
+};
+
+const getCourtName = (courtId) => {
+  const court = clubStore.currentClub?.courtList.find(
+    (c) => c.courtId === courtId
+  );
+  return court ? court.courtName : courtId;
 };
 </script>
 

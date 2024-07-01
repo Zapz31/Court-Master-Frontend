@@ -413,9 +413,10 @@ const searchResults = ref([
 }
 
 .button button[type="button"] {
-  background-color: #6babf4;
+  background-color: grey;
   border: none;
   color: white;
+  font-style: bold;
   cursor: pointer;
   padding: 12px 20px;
   border-radius: 0px;
@@ -426,13 +427,14 @@ const searchResults = ref([
 .button button[type="button"]:hover {
   transform: scale(1.05);
   color: white;
-  background-color: rgb(28, 144, 183);
+  background-color: lightslategrey;
 }
 
 .button button[type="submit"] {
   background-color: #6babf4;
   border: none;
   color: white;
+  font-style: bold;
   cursor: pointer;
   padding: 12px 20px;
   border-radius: 0 20px 20px 0;

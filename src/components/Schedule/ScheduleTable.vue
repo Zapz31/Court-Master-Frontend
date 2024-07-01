@@ -174,6 +174,46 @@ let isDragging = ref(false);
 let dragStartCell = ref(null);
 let selectedCells = ref([]);
 
+// Thêm hàm gửi request POST
+const postBookingData = async (
+  courtId,
+  startBooking,
+  endBooking,
+  bookingDate,
+  bookingType
+) => {
+  const data = {
+    courtId,
+    startBooking,
+    endBooking,
+    bookingDate,
+    bookingType,
+  };
+
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/courtmaster/booking/unpaidbookings",
+      data
+    );
+    const responseData = response.data;
+    // Xử lý dữ liệu response từ backend
+    console.log(responseData);
+
+    // Cập nhật store với dữ liệu mới nhận được
+    scheduleStore.updateSlot({
+      startTime: responseData.unpaidBookingList[0].startBooking,
+      endTime: responseData.unpaidBookingList[0].endBooking,
+      court: responseData.unpaidBookingList[0].courtId,
+      hours: responseData.totalHour,
+      price: responseData.totalPrice,
+      date: responseData.unpaidBookingList[0].bookingDate,
+      status: "selected",
+    });
+  } catch (error) {
+    console.error("Error posting booking data:", error);
+  }
+};
+
 const handleTableMouseDown = (event) => {
   event.preventDefault();
 };
@@ -378,6 +418,9 @@ const handleMouseUp = () => {
   });
 
   selectedCells.value = [];
+
+  // Gọi hàm gửi request POST sau khi người dùng chọn xong giờ chơi
+  postBookingData(court, slotStart, slotEnd, formattedDate, "SINGLE");
 };
 
 const getCellClass = (time, court) => {

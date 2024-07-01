@@ -8,7 +8,7 @@
     </div>
     <div class="type-dropdown">
       <label>Type:</label>
-      <select v-model="selectedType">
+      <select v-model="selectedType" @change="updateCurrentBookingType">
         <option value="one-time">One Time</option>
         <option value="flexible">Flexible</option>
         <option value="fixed">Fixed</option>
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useScheduleStore } from "../../stores/scheduleStore";
 
 const selectedDate = ref("");
@@ -27,17 +27,22 @@ const selectedType = ref("one-time");
 const scheduleStore = useScheduleStore();
 
 onMounted(() => {
-  // Khởi tạo giá trị mặc định cho selectedDate là ngày hiện tại
   const currentDate = new Date().toISOString().split("T")[0];
   selectedDate.value = currentDate;
   handleDateChange();
+  updateCurrentBookingType();
 });
+
+const updateCurrentBookingType = () => {
+  scheduleStore.setCurrentBookingType(selectedType.value);
+};
 
 const handleDateChange = () => {
   scheduleStore.updateSelectedDate(selectedDate.value);
 };
+
+watch(selectedType, updateCurrentBookingType);
 </script>
-  
   <style scoped>
 .controller {
   display: flex;
