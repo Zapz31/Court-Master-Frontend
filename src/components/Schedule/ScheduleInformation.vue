@@ -17,7 +17,7 @@
             <label>Time: {{ slot.startTime }} - {{ slot.endTime }}</label>
             <label
               >Duration:
-              {{ calculateHours(slot.startTime, slot.endTime) }} h</label
+              {{ calculateHours(slot.startTime, slot.endTime) }}</label
             >
             <label>Price: {{ slot.price }} VNĐ</label>
             <label>
@@ -62,7 +62,11 @@ const calculateHours = (startTime, endTime) => {
   const startTotalMinutes = startHour * 60 + startMinute;
   const endTotalMinutes = endHour * 60 + endMinute;
   const totalMinutes = endTotalMinutes - startTotalMinutes;
-  return (totalMinutes / 60).toFixed(1);
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${hours}:${minutes.toString().padStart(2, "0")}`;
 };
 
 const getCourtName = (courtId) => {

@@ -1,6 +1,7 @@
 <template>
   <div>
     <table
+      ref="scheduleTable"
       @mousedown.prevent="handleTableMouseDown"
       @mouseup="handleTableMouseUp"
       @mouseleave="handleTableMouseLeave"
@@ -44,10 +45,11 @@
   </div>
 </template>
 
+
 <script setup>
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useAuthStore } from "../../stores/auth";
 import { useClubStore } from "../../stores/clubMng";
 import { useScheduleStore } from "../../stores/scheduleStore";
@@ -129,6 +131,10 @@ const fetchBookings = async () => {
         user.value?.userId
       );
     });
+
+    // Wait for the DOM to update before scrolling
+    await nextTick();
+    scrollToCurrentTime();
   } catch (error) {
     console.error("Error fetching bookings:", error);
   }
@@ -305,11 +311,6 @@ const handleMouseEnter = (time, court, event) => {
   }
 };
 
-const hidePopup = () => {
-  showPopup.value = false;
-  hoveredSlot.value = null;
-};
-
 const handleMouseUp = () => {
   if (!isDragging.value) return;
 
@@ -325,8 +326,8 @@ const handleMouseUp = () => {
   const formattedDate = formatDate(scheduleStore.selectedDate);
 
   // Ensure the slotEnd does not exceed 24:00
-  if (slotEnd === "24:00") {
-    slotEnd = "23:59";
+  if (slotEnd === "23:59") {
+    slotEnd = "24:00";
   }
 
   // Check if the start and end times are the same
@@ -394,7 +395,21 @@ const timeToMinutes = (time) => {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
 };
+
+const scrollToCurrentTime = () => {
+  const now = new Date();
+  const currentTime = formatTime(now.getHours() * 60 + now.getMinutes());
+
+  const rows = document.querySelectorAll("td.time-column");
+  for (const row of rows) {
+    if (row.textContent.trim() === currentTime) {
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      break;
+    }
+  }
+};
 </script>
+
 
 <style>
 table {
