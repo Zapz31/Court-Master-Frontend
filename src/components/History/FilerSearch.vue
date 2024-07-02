@@ -47,22 +47,28 @@
       <div class="filter-item">
         <div
           class="dropdown-toggle"
-          @click="toggleDropdown('status')"
-          :class="{ active: dropdowns.status }"
+          @click="toggleDropdown('type')"
+          :class="{ active: dropdowns.type }"
         >
-          <span>{{ selectedStatus || statusLabel }}</span>
+          <span>{{ selectedType || typeLabel }}</span>
           <i class="fas fa-chevron-down"></i>
         </div>
-        <div v-if="dropdowns.status" class="dropdown-content" @click.stop>
+        <div v-if="dropdowns.type" class="dropdown-content" @click.stop>
           <div
-            v-for="status in statuses"
-            :key="status"
-            @click="selectStatus(status)"
+            v-for="type in types"
+            :key="type"
+            @click="selectType(type)"
           >
-            {{ status }}
+            {{ type }}
           </div>
         </div>
       </div>
+      <div class="button">
+        <button @click="clearFilterSearch" type="button" class="button">
+          Clear all filter
+        </button>
+      </div>
+
       <div class="button">
         <button @click="performSearch" type="submit" class="button">
           Search
@@ -71,25 +77,26 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
 
 const searchQuery = ref("");
 const startDate = ref("");
 const endDate = ref("");
-const selectedStatus = ref("");
+const selectedType = ref("");
 
 const dropdowns = ref({
   startDate: false,
   endDate: false,
-  status: false,
+  type: false,
 });
 
 const startDateLabel = ref("Start Date");
 const endDateLabel = ref("End Date");
-const statusLabel = ref("Status");
+const typeLabel = ref("Type");
 
-const statuses = ["Status", "Not Started", "Ongoing", "Finished"];
+const types = ["One-time play", "Fixed"];
 
 const toggleDropdown = (dropdown) => {
   // Close all other dropdowns
@@ -132,10 +139,10 @@ const selectEndDate = () => {
   dropdowns.value.endDate = false;
 };
 
-const selectStatus = (status) => {
-  selectedStatus.value = status;
-  statusLabel.value = status;
-  dropdowns.value.status = false;
+const selectType = (type) => {
+  selectedType.value = type;
+  typeLabel.value = type;
+  dropdowns.value.type = false;
 };
 
 const performSearch = async () => {
@@ -143,10 +150,20 @@ const performSearch = async () => {
     name: searchQuery.value,
     startDate: startDate.value,
     endDate: endDate.value,
-    status: selectedStatus.value
+    type: selectedType.value
   };
   console.log("Searching with:", dataFilter);
   // Implement your search logic here
+};
+
+const clearFilterSearch = () => {
+  searchQuery.value = '';
+  startDate.value = '';
+  endDate.value = '';
+  selectedType.value = '';
+  startDateLabel.value = 'Start Date';
+  endDateLabel.value = 'End Date';
+  typeLabel.value = 'Type';
 };
 </script>
 
@@ -244,13 +261,32 @@ const performSearch = async () => {
   background-color: #ddd;
 }
 
+.button button[type="button"] {
+  background-color: grey;
+  border: none;
+  color: white;
+  font-style: bold;
+  cursor: pointer;
+  padding: 12px 20px;
+  border-radius: 0px;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+  transition: 0.3s ease;
+}
+
+.button button[type="button"]:hover {
+  transform: scale(1.05);
+  color: white;
+  background-color: lightslategrey;
+}
+
 .button button[type="submit"] {
   background-color: #6babf4;
   border: none;
   color: white;
+  font-style: bold;
   cursor: pointer;
   padding: 12px 20px;
-  border-radius: 20px;
+  border-radius: 0 20px 20px 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
 }
@@ -258,7 +294,7 @@ const performSearch = async () => {
 .button button[type="submit"]:hover {
   transform: scale(1.05);
   color: white;
-  background-color: blue;
+  background-color: rgb(28, 144, 183);
 }
 
 .date-input {

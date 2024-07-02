@@ -7,21 +7,27 @@
       <div class="filter-item">
         <div class="dropdown-toggle" @click="toggleDropdown('startTime')" :class="{ active: dropdowns.startTime }">
           <span>{{ startTime || startTimeLabel }}</span>
-          <i class="fas fa-calendar"></i>
+          <i class="fas fa-clock"></i>
         </div>
         <div v-if="dropdowns.startTime" class="dropdown-content" @click.stop>
-          <input type="date" v-model="startTime" @change="selectStartTime" class="date-input" />
+          <input type="time" v-model="startTime" @change="selectStartTime" class="time-input" />
         </div>
       </div>
       <div class="filter-item">
         <div class="dropdown-toggle" @click="toggleDropdown('endTime')" :class="{ active: dropdowns.endTime }">
           <span>{{ endTime || endTimeLabel }}</span>
-          <i class="fas fa-calendar"></i>
+          <i class="fas fa-clock"></i>
         </div>
         <div v-if="dropdowns.endTime" class="dropdown-content" @click.stop>
-          <input type="date" v-model="endTime" @change="selectEndTime" class="date-input" />
+          <input type="time" v-model="endTime" @change="selectEndTime" class="time-input" />
         </div>
       </div>
+      <div class="button">
+        <button @click="clearFilterSearch" type="button" class="button">
+          Clear all filter
+        </button>
+      </div>
+
       <div class="button">
         <button @click="performSearch" type="submit" class="button">
           Search
@@ -37,24 +43,19 @@ import { onMounted, onUnmounted, ref } from "vue";
 const searchQuery = ref("");
 const startTime = ref("");
 const endTime = ref("");
-
 const dropdowns = ref({
   startTime: false,
   endTime: false,
 });
-
-const startTimeLabel = ref("Start Date");
-const endTimeLabel = ref("End Date");
+const startTimeLabel = ref("Start Time");
+const endTimeLabel = ref("End Time");
 
 const toggleDropdown = (dropdown) => {
-  // Close all other dropdowns
   Object.keys(dropdowns.value).forEach(key => {
     if (key !== dropdown) {
       dropdowns.value[key] = false;
     }
   });
-
-  // Toggle the clicked dropdown
   dropdowns.value[dropdown] = !dropdowns.value[dropdown];
 };
 
@@ -96,9 +97,43 @@ const performSearch = async () => {
   console.log("Searching with:", dataFilter);
   // Implement your search logic here
 };
+
+const clearFilterSearch = () => {
+  searchQuery.value = "";
+  startTime.value = "";
+  endTime.value = "";
+  startTimeLabel.value = "Start Time";
+  endTimeLabel.value = "End Time";
+};
 </script>
 
 <style scoped>
+.button button[type="button"].clear-button {
+  background-color: grey;
+  border: none;
+  color: white;
+  font-style: bold;
+  cursor: pointer;
+  padding: 12px 20px;
+  border-radius: 20px;
+  margin-right: 10px;
+  transition: 0.3s ease;
+}
+
+.button button[type="button"].clear-button:hover {
+  transform: scale(1.05);
+  color: white;
+  background-color: lightslategrey;
+}
+
+.time-input {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  border-radius: 10px;
+  width: 100%;
+}
+
 .search {
   display: flex;
   align-items: center;
@@ -192,13 +227,32 @@ const performSearch = async () => {
   background-color: #ddd;
 }
 
+.button button[type="button"] {
+  background-color: grey;
+  border: none;
+  color: white;
+  font-style: bold;
+  cursor: pointer;
+  padding: 12px 20px;
+  border-radius: 0px;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+  transition: 0.3s ease;
+}
+
+.button button[type="button"]:hover {
+  transform: scale(1.05);
+  color: white;
+  background-color: lightslategrey;
+}
+
 .button button[type="submit"] {
   background-color: #6babf4;
   border: none;
   color: white;
+  font-style: bold;
   cursor: pointer;
   padding: 12px 20px;
-  border-radius: 20px;
+  border-radius: 0 20px 20px 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
 }
@@ -206,7 +260,7 @@ const performSearch = async () => {
 .button button[type="submit"]:hover {
   transform: scale(1.05);
   color: white;
-  background-color: blue;
+  background-color: rgb(28, 144, 183);
 }
 
 .date-input {
