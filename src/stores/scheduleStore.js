@@ -3,44 +3,17 @@ import { defineStore } from 'pinia';
 axios.defaults.withCredentials = true;
 
 export const useScheduleStore = defineStore('schedule', {
-    state: () => ({
-      selectedDate: '',
-      slots: [],
-      slotsToPost: [],
-      bookingResponse: null,
-      currentBookingType: 'one-time',
-    }),
-  
+  state: () => ({
+    selectedDate: '',
+    slots: [],
+    slotsToPost: [],
+    bookingResponse: null,
+    currentBookingType: 'one-time',
+  }),
   actions: {
     setCurrentBookingType(type) {
       this.currentBookingType = type;
     },
-
-    async postSlotsToBackend() {
-      if (this.slotsToPost.length === 0) {
-        console.log('No slots to post');
-        this.bookingResponse = null;
-        return;
-      }
-    
-      const slotsToPost = this.slotsToPost.map(slot => ({
-        courtId: slot.court,
-        startBooking: slot.startTime,
-        endBooking: slot.endTime,
-        bookingDate: this.formatDateForBackend(slot.date),
-        bookingType: this.formatBookingType(slot.bookingType || this.currentBookingType),
-      }));
-    
-      try {
-        const response = await axios.post('http://localhost:8080/courtmaster/booking/unpaidbookings', slotsToPost);
-        console.log('Bookings posted successfully:', response.data);
-        this.bookingResponse = response.data;
-      } catch (error) {
-        console.error('Error posting bookings:', error);
-        throw error;
-      }
-    },
-
 
 
     async addSlot(start, end, courtNumber, status, date) {
@@ -63,6 +36,7 @@ export const useScheduleStore = defineStore('schedule', {
         await this.postSlotsToBackend();
       }
     },
+
     async updateSlot(updatedSlot) {
       const index = this.slots.findIndex(
         slot => slot.startTime === updatedSlot.startTime && slot.court === updatedSlot.court
@@ -100,6 +74,32 @@ export const useScheduleStore = defineStore('schedule', {
         await this.postSlotsToBackend();
       }
     },
+
+    async postSlotsToBackend() {
+      if (this.slotsToPost.length === 0) {
+        console.log('No slots to post');
+        this.bookingResponse = null;
+        return;
+      }
+    
+      const slotsToPost = this.slotsToPost.map(slot => ({
+        courtId: slot.court,
+        startBooking: slot.startTime,
+        endBooking: slot.endTime,
+        bookingDate: this.formatDateForBackend(slot.date),
+        bookingType: this.formatBookingType(slot.bookingType || this.currentBookingType),
+      }));
+    
+      try {
+        const response = await axios.post('http://localhost:8080/courtmaster/booking/unpaidbookings', slotsToPost);
+        console.log('Bookings posted successfully:', response.data);
+        this.bookingResponse = response.data;
+      } catch (error) {
+        console.error('Error posting bookings:', error);
+        throw error;
+      }
+    },
+
 
     calculateHours(start, end) {
       start = String(start);
@@ -149,19 +149,14 @@ export const useScheduleStore = defineStore('schedule', {
       this.selectedDate = today;
     },
 
+
     updateSelectedDate(date) {
       this.selectedDate = date;
     },
 
-    clearAllSlots() {
+//DAY LA VAN DEEEEEEEEEEEEEEE
+    clearSlots() {
       this.slots = [];
-      this.slotsToPost = [];
-      this.bookingResponse = null;
-    },
-
-
-    setBookingType(type) {
-      this.bookingType = type;
     },
 
     formatDateFromBackend(date) {
@@ -173,6 +168,9 @@ export const useScheduleStore = defineStore('schedule', {
       return time.slice(0, 5);
     },
 
+    setBookingType(type) {
+      this.bookingType = type;
+    },
     formatBookingTypeFromBackend(type) {
       switch (type) {
         case 'one_time_play':

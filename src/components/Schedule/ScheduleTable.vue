@@ -111,7 +111,6 @@ const normalizeEndTime = (time) => {
 };
 
 const bookings = ref([]);
-
 const fetchBookings = async () => {
   try {
     const response = await axios.get(
@@ -273,10 +272,6 @@ const updateSlot = async (time, court, isStart) => {
     }
   }
 };
-
-const showPopup = ref(false);
-const hoveredSlot = ref(null);
-const popupPosition = ref({ x: 0, y: 0 });
 
 const handleMouseEnter = (time, court, event) => {
   if (isDragging.value) {
