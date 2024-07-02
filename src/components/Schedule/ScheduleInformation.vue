@@ -16,7 +16,7 @@
             <label>Date: {{ booking.date }}</label>
             <label>Time: {{ booking.startTime }} - {{ booking.endTime }}</label>
             <label>Duration: {{ booking.playTime }}</label>
-            <label>Price: {{ formatPrice(booking.price) }} VNĐ</label>
+            <label>Price: {{ formatPrice(booking.price) }}₫</label>
             <label>Booking Type: {{ booking.bookingType }}</label>
             <label>Court: {{ booking.courtName }}</label>
           </div>
@@ -28,7 +28,7 @@
       <div v-if="scheduleStore.bookingResponse" class="total-info">
         <label
           >Total Price:
-          {{ formatPrice(scheduleStore.bookingResponse.totalPrice) }} VNĐ</label
+          {{ formatPrice(scheduleStore.bookingResponse.totalPrice) }}₫</label
         >
         <label
           >Total Hours: {{ scheduleStore.bookingResponse.totalHour }}</label

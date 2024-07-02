@@ -90,6 +90,35 @@ const times = computed(() => {
   return times;
 });
 
+const currentTime = ref(new Date());
+
+const currentTimeInMinutes = computed(() => {
+  const hours = currentTime.value.getHours();
+  const minutes = currentTime.value.getMinutes();
+  return hours * 60 + minutes;
+});
+
+const updateCurrentTime = () => {
+  currentTime.value = new Date();
+};
+
+onMounted(() => {
+  fetchBookings();
+  updateCurrentTime();
+  setInterval(updateCurrentTime, 60000); // Cập nhật mỗi phút
+  scrollToCurrentTime();
+});
+
+const isCurrentDate = computed(() => {
+  const today = new Date();
+  const selectedDate = new Date(scheduleStore.selectedDate);
+  return (
+    today.getDate() === selectedDate.getDate() &&
+    today.getMonth() === selectedDate.getMonth() &&
+    today.getFullYear() === selectedDate.getFullYear()
+  );
+});
+
 const formatTime = (time) => {
   if (typeof time === "number") {
     const hours = Math.floor(time / 60);
@@ -201,6 +230,13 @@ const handleTableMouseLeave = () => {
   }
 };
 
+const isPastTime = (date, time) => {
+  const selectedDateTime = new Date(date);
+  const [hours, minutes] = time.split(":").map(Number);
+  selectedDateTime.setHours(hours, minutes, 0, 0);
+  return selectedDateTime < new Date();
+};
+
 // New function to check if a given time is within any of the club's timeframes
 const isTimeWithinTimeframes = (time) => {
   if (!currentClub.value || !currentClub.value.timeFrame) return false;
@@ -223,6 +259,16 @@ const isTimeWithinTimeframes = (time) => {
 const handleMouseDown = (time, court) => {
   const startTime = formatTime(time);
   if (!isTimeWithinTimeframes(startTime)) return;
+
+  // Kiểm tra thời gian quá khứ cho tất cả các ngày
+  if (isPastTime(scheduleStore.selectedDate, startTime)) return;
+
+  // Chỉ kiểm tra thời gian trong quá khứ nếu là ngày hiện tại
+  if (
+    isCurrentDate.value &&
+    timeToMinutes(startTime) < currentTimeInMinutes.value
+  )
+    return;
 
   const cell = filteredSlots.value.find(
     (slot) =>
@@ -301,6 +347,11 @@ const updateSlot = async (time, court, isStart) => {
 };
 
 const handleMouseEnter = (time, court, event) => {
+  const currentTime = formatTime(time);
+  if (!isTimeWithinTimeframes(currentTime)) return;
+
+  // Kiểm tra thời gian quá khứ
+  if (isPastTime(scheduleStore.selectedDate, currentTime)) return;
   if (isDragging.value && isTimeWithinTimeframes(formatTime(time))) {
     if (isDragging.value) {
       const startTime = dragStartCell.value.time;
@@ -345,6 +396,11 @@ const handleMouseUp = async () => {
 
   if (slotStart > slotEnd) {
     [slotStart, slotEnd] = [slotEnd, slotStart];
+  }
+  // Kiểm tra xem thời gian bắt đầu có nằm trong quá khứ không
+  if (isPastTime(scheduleStore.selectedDate, slotStart)) {
+    selectedCells.value = [];
+    return;
   }
 
   const formattedDate = formatDate(scheduleStore.selectedDate);
@@ -399,6 +455,7 @@ const handleMouseUp = async () => {
 };
 const getCellClass = (time, court) => {
   const formattedTime = formatTime(time);
+  const cellTimeInMinutes = timeToMinutes(formattedTime);
   const slot = filteredSlots.value.find(
     (slot) =>
       slot.court === court &&
@@ -406,8 +463,10 @@ const getCellClass = (time, court) => {
       (formattedTime < slot.endTime || formattedTime === slot.endTime)
   );
 
+  const classes = [];
+
   if (slot) {
-    return slot.status;
+    classes.push(slot.status);
   }
 
   if (
@@ -416,14 +475,32 @@ const getCellClass = (time, court) => {
       (cell) => cell.time === formattedTime && cell.court === court
     )
   ) {
-    return "selected";
+    classes.push("selected");
   }
 
   if (!isTimeWithinTimeframes(formattedTime)) {
-    return "disabled-cell";
+    classes.push("disabled-cell");
   }
 
-  return "";
+  if (isCurrentDate.value) {
+    // Thêm lớp cho ô hiện tại
+    if (
+      cellTimeInMinutes <= currentTimeInMinutes.value &&
+      cellTimeInMinutes + 30 > currentTimeInMinutes.value
+    ) {
+      classes.push("current-time");
+    }
+
+    // Vô hiệu hóa các ô trong quá khứ chỉ cho ngày hiện tại
+    if (cellTimeInMinutes < currentTimeInMinutes.value) {
+      classes.push("past-time");
+    }
+  }
+  if (isPastTime(scheduleStore.selectedDate, formattedTime)) {
+    classes.push("past-time");
+  }
+
+  return classes.join(" ");
 };
 
 const timeToMinutes = (time) => {
@@ -432,12 +509,13 @@ const timeToMinutes = (time) => {
 };
 
 const scrollToCurrentTime = () => {
-  const now = new Date();
-  const currentTime = formatTime(now.getHours() * 60 + now.getMinutes());
+  if (!isCurrentDate.value) return;
+
+  const currentTimeStr = formatTime(currentTimeInMinutes.value);
 
   const rows = document.querySelectorAll("td.time-column");
   for (const row of rows) {
-    if (row.textContent.trim() === currentTime) {
+    if (row.textContent.trim() === currentTimeStr) {
       row.scrollIntoView({ behavior: "smooth", block: "center" });
       break;
     }
@@ -477,6 +555,25 @@ th {
 
 tr:nth-child(even) {
   background-color: #f2f2f2;
+}
+
+.current-time {
+  position: relative;
+}
+
+.current-time::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ff00ae3d;
+  pointer-events: none;
+}
+
+.past-time {
+  cursor: not-allowed;
 }
 
 tr:hover {

@@ -149,6 +149,11 @@ export const useScheduleStore = defineStore('schedule', {
       this.selectedDate = today;
     },
 
+    updateSelectedDateRange({ start, end }) {
+      this.startDate = start;
+      this.endDate = end;
+    },
+
 
     updateSelectedDate(date) {
       this.selectedDate = date;
