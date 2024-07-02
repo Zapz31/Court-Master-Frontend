@@ -16,7 +16,7 @@
             <label>Date: {{ booking.date }}</label>
             <label>Time: {{ booking.startTime }} - {{ booking.endTime }}</label>
             <label>Duration: {{ booking.playTime }}</label>
-            <label>Price: {{ booking.price }} VNĐ</label>
+            <label>Price: {{ formatPrice(booking.price) }} VNĐ</label>
             <label>Booking Type: {{ booking.bookingType }}</label>
             <label>Court: {{ booking.courtName }}</label>
           </div>
@@ -28,7 +28,7 @@
       <div v-if="scheduleStore.bookingResponse" class="total-info">
         <label
           >Total Price:
-          {{ scheduleStore.bookingResponse.totalPrice }} VNĐ</label
+          {{ formatPrice(scheduleStore.bookingResponse.totalPrice) }} VNĐ</label
         >
         <label
           >Total Hours: {{ scheduleStore.bookingResponse.totalHour }}</label
@@ -49,6 +49,10 @@ const isOpen = ref(false);
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
+};
+
+const formatPrice = (price) => {
+  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 const formattedBookings = computed(() => {

@@ -75,7 +75,7 @@
               v-for="pricing in frame.pricingServiceList"
               :key="pricing.dateOfWeek"
             >
-              {{ pricing[mode] }} ₫
+              {{ formatPrice(pricing[mode]) }} ₫
             </td>
           </tr>
         </tbody>
@@ -238,7 +238,9 @@ const fetchClubData = async () => {
     // You might want to set an error state here and display it in the template
   }
 };
-
+const formatPrice = (price) => {
+  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
 onMounted(fetchClubData);
 
 watch(

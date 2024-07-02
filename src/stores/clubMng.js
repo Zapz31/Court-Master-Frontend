@@ -36,9 +36,3 @@ export const useClubStore = defineStore('club', {
   }
 })
 
-// try {
-//   const response = await axios.get("http://localhost:8080/courtmaster/filter/getClubs")
-  
-//  } catch (error) {
-  
-//  }

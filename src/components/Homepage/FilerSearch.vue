@@ -135,16 +135,18 @@
         </div>
       </div>
       <!-- ===================================clear filterSearch BUTTON ===========================================-->
-      <div class="button">
-        <button @click="clearFilterSearch" type="button" class="button">
-          Clear all filter
-        </button>
-      </div>
+      <div class="button-func">
+        <div class="button">
+          <button @click="clearFilterSearch" type="button" class="button">
+            Clear all filter
+          </button>
+        </div>
 
-      <div class="button">
-        <button @click="performSearch" type="submit" class="button">
-          Search
-        </button>
+        <div class="button">
+          <button @click="performSearch" type="submit" class="button">
+            Search
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -412,6 +414,10 @@ const searchResults = ref([
   outline: none;
 }
 
+.button-func {
+  display: flex;
+}
+
 .button button[type="button"] {
   background-color: grey;
   border: none;
@@ -419,13 +425,14 @@ const searchResults = ref([
   font-style: bold;
   cursor: pointer;
   padding: 12px 20px;
-  border-radius: 0px;
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+  border-radius: 20px 0px 0px 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
 }
 
 .button button[type="button"]:hover {
   transform: scale(1.05);
+  border-radius: 20px 5px 5px 20px;
   color: white;
   background-color: lightslategrey;
 }
@@ -438,11 +445,13 @@ const searchResults = ref([
   cursor: pointer;
   padding: 12px 20px;
   border-radius: 0 20px 20px 0;
+
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
 }
 
 .button button[type="submit"]:hover {
+  border-radius: 5px 20px 20px 5px;
   transform: scale(1.05);
   color: white;
   background-color: royalblue;

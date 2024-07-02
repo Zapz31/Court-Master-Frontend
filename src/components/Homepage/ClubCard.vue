@@ -15,7 +15,7 @@
         />
         <h3>{{ club.clubName }}</h3>
         <p>Address: {{ club.clubAddress }}</p>
-        <p>Average price: {{ club.averagePrice }}₫/h</p>
+        <p>Average price: {{ formatPrice(club.averagePrice) }}₫/h</p>
       </router-link>
     </div>
   </div>
@@ -37,6 +37,10 @@ const getImageUrl = (base64String) => {
   return `data:image/png;base64,${base64String}`;
 };
 
+const formatPrice = (price) => {
+  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
 const setCurrentClub = (club) => {
   clubStore.setCurrentClub(club);
 };
@@ -51,7 +55,7 @@ const setCurrentClub = (club) => {
 }
 
 .club-card {
-  padding: 15px;
+  padding: 20px;
   width: 250px;
   height: 350px;
   text-align: center;

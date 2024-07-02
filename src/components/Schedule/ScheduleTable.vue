@@ -16,7 +16,14 @@
       </thead>
       <tbody>
         <tr v-for="(time, timeIndex) in times" :key="time">
-          <td class="time-column">{{ formatTime(time) }}</td>
+          <td
+            class="time-column"
+            :class="{
+              'disabled-time': !isTimeWithinTimeframes(formatTime(time)),
+            }"
+          >
+            {{ formatTime(time) }}
+          </td>
           <td
             v-for="court in sortedCourts"
             :key="court.courtId"
@@ -30,15 +37,14 @@
                       cell.time === formatTime(time) &&
                       cell.court === court.courtId
                   ),
+                'disabled-cell': !isTimeWithinTimeframes(formatTime(time)),
               },
             ]"
             @mousedown.prevent="handleMouseDown(time, court.courtId)"
             @mouseenter="handleMouseEnter(time, court.courtId, $event)"
             @mouseup="handleMouseUp"
             @mouseleave="hidePopup"
-          >
-            <!-- Popup content here -->
-          </td>
+          ></td>
         </tr>
       </tbody>
     </table>
@@ -195,8 +201,29 @@ const handleTableMouseLeave = () => {
   }
 };
 
+// New function to check if a given time is within any of the club's timeframes
+const isTimeWithinTimeframes = (time) => {
+  if (!currentClub.value || !currentClub.value.timeFrame) return false;
+
+  const [hours, minutes] = time.split(":").map(Number);
+  const currentMinutes = hours * 60 + minutes;
+
+  return currentClub.value.timeFrame.some((frame) => {
+    const [startHours, startMinutes] = frame.starTime.split(":").map(Number);
+    const [endHours, endMinutes] = frame.endTime.split(":").map(Number);
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = endHours * 60 + endMinutes;
+
+    return (
+      currentMinutes >= startTotalMinutes && currentMinutes < endTotalMinutes
+    );
+  });
+};
+
 const handleMouseDown = (time, court) => {
   const startTime = formatTime(time);
+  if (!isTimeWithinTimeframes(startTime)) return;
+
   const cell = filteredSlots.value.find(
     (slot) =>
       slot.court === court &&
@@ -274,26 +301,28 @@ const updateSlot = async (time, court, isStart) => {
 };
 
 const handleMouseEnter = (time, court, event) => {
-  if (isDragging.value) {
-    const startTime = dragStartCell.value.time;
-    const currentTime = formatTime(time);
-    const [startHour, startMinute] = startTime.split(":").map(Number);
-    const [currentHour, currentMinute] = currentTime.split(":").map(Number);
+  if (isDragging.value && isTimeWithinTimeframes(formatTime(time))) {
+    if (isDragging.value) {
+      const startTime = dragStartCell.value.time;
+      const currentTime = formatTime(time);
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      const [currentHour, currentMinute] = currentTime.split(":").map(Number);
 
-    const startTotalMinutes = startHour * 60 + startMinute;
-    const currentTotalMinutes = currentHour * 60 + currentMinute;
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const currentTotalMinutes = currentHour * 60 + currentMinute;
 
-    const timeDiff = Math.abs(currentTotalMinutes - startTotalMinutes);
-    const steps = Math.floor(timeDiff / 30);
+      const timeDiff = Math.abs(currentTotalMinutes - startTotalMinutes);
+      const steps = Math.floor(timeDiff / 30);
 
-    selectedCells.value = [];
+      selectedCells.value = [];
 
-    for (let i = 0; i <= steps; i++) {
-      const newTime =
-        startTotalMinutes +
-        (currentTotalMinutes >= startTotalMinutes ? i : -i) * 30;
-      const formattedNewTime = formatTime(newTime);
-      selectedCells.value.push({ time: formattedNewTime, court: court });
+      for (let i = 0; i <= steps; i++) {
+        const newTime =
+          startTotalMinutes +
+          (currentTotalMinutes >= startTotalMinutes ? i : -i) * 30;
+        const formattedNewTime = formatTime(newTime);
+        selectedCells.value.push({ time: formattedNewTime, court: court });
+      }
     }
   } else {
     const slot = filteredSlots.value.find(
@@ -376,6 +405,7 @@ const getCellClass = (time, court) => {
       formattedTime >= slot.startTime &&
       (formattedTime < slot.endTime || formattedTime === slot.endTime)
   );
+
   if (slot) {
     return slot.status;
   }
@@ -388,6 +418,11 @@ const getCellClass = (time, court) => {
   ) {
     return "selected";
   }
+
+  if (!isTimeWithinTimeframes(formattedTime)) {
+    return "disabled-cell";
+  }
+
   return "";
 };
 
@@ -454,6 +489,11 @@ td {
 
 td.booked {
   background-color: cornflowerblue;
+  cursor: not-allowed;
+}
+
+.disabled-cell {
+  background-color: lightgrey;
   cursor: not-allowed;
 }
 
