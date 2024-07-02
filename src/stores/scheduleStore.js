@@ -3,19 +3,26 @@ import { defineStore } from 'pinia';
 axios.defaults.withCredentials = true;
 
 export const useScheduleStore = defineStore('schedule', {
-  state: () => ({
-    selectedDate: '',
-    slots: [],
-    slotsToPost: [],
-    hourlyRate: 80000,
-    currentBookingType: 'one-time',
-  }),
+    state: () => ({
+      selectedDate: '',
+      slots: [],
+      slotsToPost: [],
+      bookingResponse: null,
+      currentBookingType: 'one-time',
+    }),
+  
   actions: {
     setCurrentBookingType(type) {
       this.currentBookingType = type;
     },
 
     async postSlotsToBackend() {
+      if (this.slotsToPost.length === 0) {
+        console.log('No slots to post');
+        this.bookingResponse = null;
+        return;
+      }
+    
       const slotsToPost = this.slotsToPost.map(slot => ({
         courtId: slot.court,
         startBooking: slot.startTime,
@@ -23,18 +30,20 @@ export const useScheduleStore = defineStore('schedule', {
         bookingDate: this.formatDateForBackend(slot.date),
         bookingType: this.formatBookingType(slot.bookingType || this.currentBookingType),
       }));
-
+    
       try {
         const response = await axios.post('http://localhost:8080/courtmaster/booking/unpaidbookings', slotsToPost);
         console.log('Bookings posted successfully:', response.data);
-        this.slotsToPost = []; // Clear the array after successful post
+        this.bookingResponse = response.data;
       } catch (error) {
         console.error('Error posting bookings:', error);
         throw error;
       }
     },
 
-    addSlot(start, end, courtNumber, status, date) {
+
+
+    async addSlot(start, end, courtNumber, status, date) {
       const hours = this.calculateHours(start, end);
       const price = this.calculatePrice(hours);
       const newSlot = {
@@ -48,13 +57,13 @@ export const useScheduleStore = defineStore('schedule', {
         bookingType: this.currentBookingType,
       };
       this.slots.push(newSlot);
-
+    
       if (status === 'selected') {
         this.slotsToPost.push(newSlot);
+        await this.postSlotsToBackend();
       }
     },
-
-    updateSlot(updatedSlot) {
+    async updateSlot(updatedSlot) {
       const index = this.slots.findIndex(
         slot => slot.startTime === updatedSlot.startTime && slot.court === updatedSlot.court
       );
@@ -75,10 +84,11 @@ export const useScheduleStore = defineStore('schedule', {
             slot => slot.startTime !== updatedSlot.startTime || slot.court !== updatedSlot.court
           );
         }
+        await this.postSlotsToBackend();
       }
     },
 
-    removeSlot(startTime, court) {
+    async removeSlot(startTime, court) {
       const index = this.slots.findIndex(
         slot => slot.startTime === startTime && slot.court === court && slot.status === "selected"
       );
@@ -87,6 +97,7 @@ export const useScheduleStore = defineStore('schedule', {
         this.slotsToPost = this.slotsToPost.filter(
           slot => slot.startTime !== startTime || slot.court !== court
         );
+        await this.postSlotsToBackend();
       }
     },
 
@@ -142,12 +153,37 @@ export const useScheduleStore = defineStore('schedule', {
       this.selectedDate = date;
     },
 
-    clearSlots() {
+    clearAllSlots() {
       this.slots = [];
+      this.slotsToPost = [];
+      this.bookingResponse = null;
     },
+
 
     setBookingType(type) {
       this.bookingType = type;
+    },
+
+    formatDateFromBackend(date) {
+      const [year, month, day] = date.split('-');
+      return `${day}/${month}/${year}`;
+    },
+
+    formatTimeFromBackend(time) {
+      return time.slice(0, 5);
+    },
+
+    formatBookingTypeFromBackend(type) {
+      switch (type) {
+        case 'one_time_play':
+          return 'One time';
+        case 'flexible':
+          return 'Flexible';
+        case 'fixed':
+          return 'Fixed';
+        default:
+          return type;
+      }
     },
   },
 });

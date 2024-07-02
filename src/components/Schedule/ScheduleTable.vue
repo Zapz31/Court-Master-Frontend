@@ -311,7 +311,7 @@ const handleMouseEnter = (time, court, event) => {
   }
 };
 
-const handleMouseUp = () => {
+const handleMouseUp = async () => {
   if (!isDragging.value) return;
 
   isDragging.value = false;
@@ -345,9 +345,15 @@ const handleMouseUp = () => {
   );
 
   if (existingSlotIndex === -1) {
-    scheduleStore.addSlot(slotStart, slotEnd, court, "selected", formattedDate);
+    await scheduleStore.addSlot(
+      slotStart,
+      slotEnd,
+      court,
+      "selected",
+      formattedDate
+    );
   } else {
-    scheduleStore.updateSlotEndTime(existingSlotIndex, slotEnd);
+    await scheduleStore.updateSlotEndTime(existingSlotIndex, slotEnd);
   }
 
   const startMinutes = timeToMinutes(slotStart);
@@ -355,7 +361,7 @@ const handleMouseUp = () => {
   const hours = Math.abs(endMinutes - startMinutes) / 60;
   const price = hours * scheduleStore.hourlyRate;
 
-  scheduleStore.updateSlot({
+  await scheduleStore.updateSlot({
     startTime: slotStart,
     endTime: slotEnd,
     court,
@@ -367,7 +373,6 @@ const handleMouseUp = () => {
 
   selectedCells.value = [];
 };
-
 const getCellClass = (time, court) => {
   const formattedTime = formatTime(time);
   const slot = filteredSlots.value.find(

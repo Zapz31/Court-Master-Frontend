@@ -445,7 +445,7 @@ const searchResults = ref([
 .button button[type="submit"]:hover {
   transform: scale(1.05);
   color: white;
-  background-color: rgb(28, 144, 183);
+  background-color: royalblue;
 }
 
 .filter {

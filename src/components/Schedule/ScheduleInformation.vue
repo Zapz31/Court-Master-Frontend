@@ -7,29 +7,32 @@
     <div class="schedule-information" ref="infoPanel">
       <h3>Booking Information</h3>
       <div class="info-scroll">
-        <div v-if="selectedSlots.length > 0">
+        <div v-if="formattedBookings.length > 0">
           <div
-            v-for="(slot, index) in selectedSlots"
+            v-for="(booking, index) in formattedBookings"
             :key="index"
             class="info-item"
           >
-            <label>Date: {{ slot.date }}</label>
-            <label>Time: {{ slot.startTime }} - {{ slot.endTime }}</label>
-            <label
-              >Duration:
-              {{ calculateHours(slot.startTime, slot.endTime) }}</label
-            >
-            <label>Price: {{ slot.price }} VNĐ</label>
-            <label>
-              Booking Type:
-              {{ capitalizeFirstLetter(slot.bookingType) }}
-            </label>
-            <label>Court: {{ getCourtName(slot.court) }}</label>
+            <label>Date: {{ booking.date }}</label>
+            <label>Time: {{ booking.startTime }} - {{ booking.endTime }}</label>
+            <label>Duration: {{ booking.playTime }}</label>
+            <label>Price: {{ booking.price }} VNĐ</label>
+            <label>Booking Type: {{ booking.bookingType }}</label>
+            <label>Court: {{ booking.courtName }}</label>
           </div>
         </div>
         <div v-else class="info-item">
           <label>Not selected time yet</label>
         </div>
+      </div>
+      <div v-if="scheduleStore.bookingResponse" class="total-info">
+        <label
+          >Total Price:
+          {{ scheduleStore.bookingResponse.totalPrice }} VNĐ</label
+        >
+        <label
+          >Total Hours: {{ scheduleStore.bookingResponse.totalHour }}</label
+        >
       </div>
     </div>
   </div>
@@ -48,26 +51,21 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const selectedSlots = computed(() => {
-  return scheduleStore.slots.filter((slot) => slot.status === "selected");
+const formattedBookings = computed(() => {
+  if (!scheduleStore.bookingResponse) return [];
+
+  return scheduleStore.bookingResponse.unpaidBookingList.map((booking) => ({
+    date: scheduleStore.formatDateFromBackend(booking.bookingDate),
+    startTime: scheduleStore.formatTimeFromBackend(booking.startBooking),
+    endTime: scheduleStore.formatTimeFromBackend(booking.endBooking),
+    playTime: booking.playTime,
+    price: booking.price,
+    bookingType: scheduleStore.formatBookingTypeFromBackend(
+      booking.bookingType
+    ),
+    courtName: getCourtName(booking.courtId),
+  }));
 });
-
-const capitalizeFirstLetter = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-const calculateHours = (startTime, endTime) => {
-  const [startHour, startMinute] = startTime.split(":").map(Number);
-  const [endHour, endMinute] = endTime.split(":").map(Number);
-  const startTotalMinutes = startHour * 60 + startMinute;
-  const endTotalMinutes = endHour * 60 + endMinute;
-  const totalMinutes = endTotalMinutes - startTotalMinutes;
-
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  return `${hours}:${minutes.toString().padStart(2, "0")}`;
-};
 
 const getCourtName = (courtId) => {
   const court = clubStore.currentClub?.courtList.find(
@@ -170,6 +168,15 @@ h3 {
 
 .info-scroll::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.total-info {
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-style: bold;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 22px;
 }
 
 @media (max-width: 1200px) {
