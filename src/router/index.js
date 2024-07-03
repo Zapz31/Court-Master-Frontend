@@ -60,6 +60,11 @@ const routes = [
         name: 'BookingSlotScreen',
         component: () => import('../views/BookingSlotScreen.vue') ,  
     },
+    {
+        path: '/clubregister',
+        name: 'ClubRegisterScreen',
+        component: () => import('../views/ClubRegisterScreen.vue') , 
+    },
 ]
 
 const router = createRouter({
