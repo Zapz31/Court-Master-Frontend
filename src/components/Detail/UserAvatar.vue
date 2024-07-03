@@ -79,9 +79,9 @@ const toggleMenu = () => {
     menuVisible.value = !menuVisible.value;
   }
 };
-const getImageUrl = (base64String) => {
-  return `data:image/png;base64,${base64String}`;
-};
+// const getImageUrl = (base64String) => {
+//   return `data:image/png;base64,${base64String}`;
+// };
 //handle outside click
 const handleOutsideClick = (event) => {
   const dropdown = event.target.closest(".dropdown");
