@@ -3,7 +3,7 @@
     <div class="search">
       <input
         v-model="searchQuery"
-        placeholder="Type a name..."
+        placeholder="Type club name or manager phone..."
         type="text"
       />
     </div>
@@ -80,6 +80,10 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
+import { useFilterHistoryStore } from "../../stores/FilterHistory";
+import { useAuthStore } from "../../stores/auth";
+
+const authStore = useAuthStore();
 
 const searchQuery = ref("");
 const startDate = ref("");
@@ -96,7 +100,7 @@ const startDateLabel = ref("Start Date");
 const endDateLabel = ref("End Date");
 const typeLabel = ref("Type");
 
-const types = ["One-time play", "Fixed"];
+const types = ["One-time play", "Fixed", "Flexible"];
 
 const toggleDropdown = (dropdown) => {
   // Close all other dropdowns
@@ -125,6 +129,7 @@ const handleOutsideClick = (event) => {
 
 onMounted(() => {
   document.addEventListener("click", handleOutsideClick);
+
 });
 
 onUnmounted(() => {
@@ -146,14 +151,26 @@ const selectType = (type) => {
 };
 
 const performSearch = async () => {
-  const dataFilter = {
-    name: searchQuery.value,
-    startDate: startDate.value,
-    endDate: endDate.value,
-    type: selectedType.value
-  };
-  console.log("Searching with:", dataFilter);
-  // Implement your search logic here
+  // const dataFilter = {
+  //   name: searchQuery.value,
+  //   startDate: startDate.value,
+  //   endDate: endDate.value,
+  //   type: selectedType.value
+  // };
+  // console.log("Searching with:", dataFilter);
+  // // Implement your search logic here
+
+  // clubNameOrCMPhone: "",
+  //       customerId: "STF000002",
+  //       startDate: "",
+  //       endDate: "",
+  //       scheduleType: ""
+  useFilterHistoryStore().payload.clubNameOrCMPhone = searchQuery.value
+  useFilterHistoryStore().payload.customerId = authStore.user.userId
+  useFilterHistoryStore().payload.startDate = startDate.value
+  useFilterHistoryStore().payload.endDate = endDate.value
+  useFilterHistoryStore().payload.scheduleType = selectedType.value
+  await useFilterHistoryStore().getBookingScheduleHitories();
 };
 
 const clearFilterSearch = () => {
@@ -193,6 +210,7 @@ const clearFilterSearch = () => {
   max-width: 100%;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  z-index: 20;
 }
 
 .box:hover {

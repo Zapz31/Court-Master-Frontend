@@ -30,22 +30,23 @@
                   <input type="checkbox" v-model="item.checked">
                 </div>
               </td>
-              <td>{{ item.col2 }}</td>
-              <td>{{ item.col3 }}</td>
-              <td>{{ item.col4 }}</td>
-              <td>{{ item.col5 }}</td>
-              <td>{{ item.col6 }}</td>
-              <td>{{ item.col7 }}</td>
-              <td>{{ item.col8 }}</td>
-              <td>{{ item.col9 }}</td>
-              <td>{{ item.col10 }}</td>             
+              <td>{{ index + 1 }}</td>
+              <td>{{ item.bookingScheduleId }}</td>
+              <td>{{ item.clubName }}</td>
+              <td>{{ item.scheduleType }}</td>
+              <td>{{ item.bookingScheduleStatus }}</td>
+              <td>{{ item.startDate }}</td>
+              <td>{{ item.endDate }}</td>
+              <td v-if="item.scheduleType === 'Flexible'">{{ item.totalPlayingTimeString }}</td>
+              <td v-else>{{ item.totalPrice }}</td>
+              <td>{{ item.courtManagerPhone }}</td>
               <td>
                 <div class="center-content">
-                  <router-link :to="{ name: 'BookingSlotScreen', params: { scheduleId: item.col3 } }">
+                  <router-link :to="{ name: 'BookingSlotScreen', params: { scheduleId: item.bookingScheduleId } }">
                     <font-awesome-icon icon="eye" />
                   </router-link>
                 </div>
-              </td>             
+              </td>
             </tr>
           </tbody>
         </table>
@@ -55,41 +56,61 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useRouter } from 'vue-router';
+import { useFilterHistoryStore } from '../../stores/FilterHistory';
+import { useAuthStore } from '../../stores/auth';
+import axios from 'axios';
 
+const filterHistoryStore = useFilterHistoryStore();
+const authStore = useAuthStore()
 const router = useRouter();
+const items = ref([]);
 
-const items = ref([
-  { checked: false, col2: '1', col3: 'SD0000001', col4: 'BadmintonSpace Arena', col5: 'One-time play', col6: 'Deposited 50%', col7: '20/05/2024', col8: '25/05/2024', col9: '900.000 VNĐ', col10: '0123456789' },
-  { checked: false, col2: '2', col3: 'SD0000002', col4: 'San cua Tien', col5: 'Fixed', col6: 'Deposited 25%', col7: '15/10/2024', col8: '20/10/2024', col9: '1.000.000 VNĐ', col10: '9876543210' },
-  { checked: false, col2: '3', col3: 'SD0000003', col4: 'San khong ten', col5: 'Fixed', col6: 'Paid', col7: '16/07/2024', col8: '20/07/2024', col9: '1.237.000 VNĐ', col10: '0246813579' },
-  // Add other items as necessary
-]);
+const deleteSelected = async() => {
+  const selectedBookings = items.value.filter(item => item.checked).map(item => item.bookingScheduleId);
+  try {
+    const response = await axios.post(`http://localhost:8080/courtmaster/filter/history/remove/booking-schedule`,{
+      bookingScheduleIds: selectedBookings
+    });
+    await filterHistoryStore.getBookingScheduleHitories();
+    items.value = response.data
+  } catch (error) {
+    console.log(error)
+  }
+  items.value = items.value.filter(item => !item.checked);
+};
 
 const hasSelection = computed(() => {
   return items.value.some(item => item.checked);
 });
 
-const deleteSelected = () => {
-  items.value = items.value.filter(item => !item.checked);
-};
-
 const navigateToBookingSlot = (scheduleId) => {
   router.push({ name: 'BookingSlotScreen', params: { scheduleId } });
 };
 
-// Registering the component
 const components = {
   FontAwesomeIcon
 };
+
+onMounted(async () => {
+  filterHistoryStore.payload.customerId = authStore.user.userId
+  await filterHistoryStore.getBookingScheduleHitories();
+  items.value = filterHistoryStore.bookingScheduleHistoies;
+  console.log('Items:', items.value); // Ensure items are being set correctly
+});
+
+watch(() => useFilterHistoryStore().bookingScheduleHistoies, (newHistories) => {
+  items.value = newHistories;
+}, { immediate: true });
 </script>
 
 <style scoped>
 .table-container {
   position: relative;
   width: 100%;
+  z-index: 15;
 }
 
 .button-container {
@@ -126,8 +147,7 @@ table {
   width: 100%;
 }
 
-th,
-td {
+th, td {
   border: none;
   padding: 8px;
   text-align: center;

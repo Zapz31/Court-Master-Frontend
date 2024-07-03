@@ -12,10 +12,11 @@ export const usePaymentStore = defineStore("paymentStore", ()=> {
         endDate:"2024-06-25",
         scheduleType:"One-time play",
         customerId:"STF000002",
+        totalPlayingTime:"08:00",
         bookingSlotResponseDTOs:[
-            { courtId: "CO000005", startBooking: "13:30", endBooking:"14:00", bookingDate:"2024-06-18", bookingType:"One-time play", price:32},
-            //{ courtId: "CO000011", startBooking: "08:00", endBooking:"09:30", bookingDate:"2024-06-18", bookingType:"One-time play", price:32},
-            //{ courtId: "CO000012", startBooking: "07:00", endBooking:"12:30", bookingDate:"2024-06-18", bookingType:"One-time play", price:32}
+            { courtId: "CO000005", startBooking: "13:30", endBooking:"14:00", bookingDate:"2024-06-19", bookingType:"One-time play", price:32},
+            { courtId: "CO000011", startBooking: "08:00", endBooking:"09:30", bookingDate:"2024-06-19", bookingType:"One-time play", price:32},
+            { courtId: "CO000012", startBooking: "07:00", endBooking:"12:30", bookingDate:"2024-06-19", bookingType:"One-time play", price:32}
         ],
         totalPrice: 320000
     });
