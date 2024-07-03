@@ -4,12 +4,22 @@
       <img src="../../../public/img/mono_blue_crop.png" class="logo" alt="" />
     </a>
     <div class="date-picker" v-if="selectedType !== 'fixed'">
-      <input type="date" :value="selectedDate" @input="handleDateChange" />
+      <input
+        type="date"
+        :value="selectedDate"
+        @input="handleDateChange"
+        pattern="\d{2}/\d{2}/\d{4}"
+      />
     </div>
     <div v-else class="date-range-picker">
       <div class="date-picker">
         <label>Start Date:</label>
-        <input type="date" :value="selectedDate" @input="handleDateChange" />
+        <input
+          type="date"
+          :value="selectedDate"
+          @input="handleDateChange"
+          pattern="\d{2}/\d{2}/\d{4}"
+        />
       </div>
       <div class="date-picker">
         <label>End Date:</label>
@@ -18,6 +28,7 @@
           :value="endDate"
           @input="handleEndDateChange"
           :min="minEndDate"
+          pattern="\d{2}/\d{2}/\d{4}"
         />
       </div>
     </div>
