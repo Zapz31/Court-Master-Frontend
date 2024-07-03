@@ -384,6 +384,7 @@ const searchResults = ref([
 
 <style scoped>
 .box {
+  font-style: bold;
   background-color: white;
   display: flex;
   padding: 10px;

@@ -102,6 +102,10 @@ const updateCurrentTime = () => {
   currentTime.value = new Date();
 };
 
+const updateDateRange = (startDate, endDate) => {
+  scheduleStore.setDateRange(startDate, endDate);
+};
+
 onMounted(() => {
   fetchBookings();
   updateCurrentTime();
@@ -259,11 +263,7 @@ const isTimeWithinTimeframes = (time) => {
 const handleMouseDown = (time, court) => {
   const startTime = formatTime(time);
   if (!isTimeWithinTimeframes(startTime)) return;
-
-  // Kiểm tra thời gian quá khứ cho tất cả các ngày
   if (isPastTime(scheduleStore.selectedDate, startTime)) return;
-
-  // Chỉ kiểm tra thời gian trong quá khứ nếu là ngày hiện tại
   if (
     isCurrentDate.value &&
     timeToMinutes(startTime) < currentTimeInMinutes.value
@@ -397,7 +397,7 @@ const handleMouseUp = async () => {
   if (slotStart > slotEnd) {
     [slotStart, slotEnd] = [slotEnd, slotStart];
   }
-  // Kiểm tra xem thời gian bắt đầu có nằm trong quá khứ không
+
   if (isPastTime(scheduleStore.selectedDate, slotStart)) {
     selectedCells.value = [];
     return;
@@ -405,27 +405,17 @@ const handleMouseUp = async () => {
 
   const formattedDate = formatDate(scheduleStore.selectedDate);
 
-  // Ensure the slotEnd does not exceed 24:00
   if (slotEnd === "23:59") {
     slotEnd = "24:00";
   }
 
-  // Check if the start and end times are the same
   if (slotStart === slotEnd) {
-    // Do not add or update slot
     selectedCells.value = [];
     return;
   }
 
-  const existingSlotIndex = scheduleStore.slots.findIndex(
-    (slot) =>
-      slot.startTime === slotStart &&
-      slot.court === court &&
-      slot.date === formattedDate
-  );
-
-  if (existingSlotIndex === -1) {
-    await scheduleStore.addSlot(
+  if (scheduleStore.currentBookingType === "fixed") {
+    await scheduleStore.addFixedSlots(
       slotStart,
       slotEnd,
       court,
@@ -433,26 +423,18 @@ const handleMouseUp = async () => {
       formattedDate
     );
   } else {
-    await scheduleStore.updateSlotEndTime(existingSlotIndex, slotEnd);
+    await scheduleStore.addSlot(
+      slotStart,
+      slotEnd,
+      court,
+      "selected",
+      formattedDate
+    );
   }
-
-  const startMinutes = timeToMinutes(slotStart);
-  const endMinutes = timeToMinutes(slotEnd);
-  const hours = Math.abs(endMinutes - startMinutes) / 60;
-  const price = hours * scheduleStore.hourlyRate;
-
-  await scheduleStore.updateSlot({
-    startTime: slotStart,
-    endTime: slotEnd,
-    court,
-    hours,
-    price,
-    date: formattedDate,
-    status: "selected",
-  });
 
   selectedCells.value = [];
 };
+
 const getCellClass = (time, court) => {
   const formattedTime = formatTime(time);
   const cellTimeInMinutes = timeToMinutes(formattedTime);

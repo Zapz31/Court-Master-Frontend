@@ -9,7 +9,7 @@
         <h4>{{ authStore.user.firstName }} {{ authStore.user.lastName }}</h4>
       </div>
       <div class="avatar">
-        <img :src="authStore.user.imageURL" :alt="userName" />
+        <img :src="getImageUrl(authStore.user.imageURL)" :alt="userName" />
       </div>
       <div v-if="menuVisible" class="dropdown-content">
         <template v-if="userRole === 'customer'">
@@ -43,19 +43,15 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
-import router from "../../router";
 import { useAuthStore } from "../../stores/auth";
-import { storeToRefs } from 'pinia';
-
 
 const authStore = useAuthStore();
 
 // const { user } = storeToRefs(authStore);
- const link = ref("");
- const userName = ref("");
+const link = ref("");
+const userName = ref("");
 //  link.value = user.value.imageURL;
 //  userName.value = user.value.firstName;
-
 
 // ===========================================DATA TEST==============================================
 const props = defineProps({
@@ -83,7 +79,9 @@ const toggleMenu = () => {
     menuVisible.value = !menuVisible.value;
   }
 };
-
+const getImageUrl = (base64String) => {
+  return `data:image/png;base64,${base64String}`;
+};
 //handle outside click
 const handleOutsideClick = (event) => {
   const dropdown = event.target.closest(".dropdown");
@@ -101,7 +99,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
-  
 });
 
 const signout = async () => {
@@ -115,7 +112,7 @@ const signout = async () => {
     console.log(response.data);
     authStore.logout();
     // router.push("/login");
-    window.location.replace("/login")
+    window.location.replace("/login");
   } catch (error) {
     console.error("Đã xảy ra lỗi:", error);
   }

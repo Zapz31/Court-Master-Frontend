@@ -4,23 +4,19 @@
       <img src="../../../public/img/mono_blue_crop.png" class="logo" alt="" />
     </a>
     <div class="date-picker" v-if="selectedType !== 'fixed'">
-      <input type="date" v-model="selectedDate" @change="handleDateChange" />
+      <input type="date" :value="selectedDate" @input="handleDateChange" />
     </div>
     <div v-else class="date-range-picker">
       <div class="date-picker">
         <label>Start Date:</label>
-        <input
-          type="date"
-          v-model="startDate"
-          @change="handleStartDateChange"
-        />
+        <input type="date" :value="selectedDate" @input="handleDateChange" />
       </div>
       <div class="date-picker">
         <label>End Date:</label>
         <input
           type="date"
-          v-model="endDate"
-          @change="handleEndDateChange"
+          :value="endDate"
+          @input="handleEndDateChange"
           :min="minEndDate"
         />
       </div>
@@ -43,15 +39,14 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useScheduleStore } from "../../stores/scheduleStore";
 
 const selectedDate = ref("");
-const startDate = ref("");
 const endDate = ref("");
 const selectedType = ref("one-time");
 const dateRangeError = ref("");
 const scheduleStore = useScheduleStore();
 
 const minEndDate = computed(() => {
-  if (!startDate.value) return "";
-  const minDate = new Date(startDate.value);
+  if (!selectedDate.value) return "";
+  const minDate = new Date(selectedDate.value);
   minDate.setMonth(minDate.getMonth() + 1);
   return minDate.toISOString().split("T")[0];
 });
@@ -59,8 +54,6 @@ const minEndDate = computed(() => {
 onMounted(() => {
   const currentDate = new Date().toISOString().split("T")[0];
   selectedDate.value = currentDate;
-  startDate.value = currentDate;
-  handleDateChange();
   updateCurrentBookingType();
 });
 
@@ -68,49 +61,28 @@ const updateCurrentBookingType = () => {
   scheduleStore.setCurrentBookingType(selectedType.value);
   if (selectedType.value === "fixed") {
     scheduleStore.updateSelectedDateRange({
-      start: startDate.value,
+      start: selectedDate.value,
       end: endDate.value,
     });
   } else {
     scheduleStore.updateSelectedDate(selectedDate.value);
   }
-  dateRangeError.value = ""; // Clear any existing error when changing booking type
+  dateRangeError.value = "";
 };
 
-const handleDateChange = () => {
+const handleDateChange = (e) => {
+  selectedDate.value = e.target.value;
   scheduleStore.updateSelectedDate(selectedDate.value);
 };
 
-const handleStartDateChange = () => {
-  endDate.value = ""; // Reset end date when start date changes
-  dateRangeError.value = ""; // Clear any existing error
-  scheduleStore.updateSelectedDateRange({
-    start: startDate.value,
-    end: endDate.value,
-  });
-};
-
-const handleEndDateChange = () => {
-  const start = new Date(startDate.value);
-  const end = new Date(endDate.value);
-  const minEndDate = new Date(start);
-  minEndDate.setMonth(minEndDate.getMonth() + 1);
-
-  if (end < minEndDate) {
-    dateRangeError.value =
-      "End date must be at least one month after the start date.";
-    endDate.value = ""; // Reset invalid end date
-  } else {
-    dateRangeError.value = "";
-    scheduleStore.updateSelectedDateRange({
-      start: startDate.value,
-      end: endDate.value,
-    });
-  }
+const handleEndDateChange = (e) => {
+  endDate.value = e.target.value;
+  scheduleStore.updateEndDate(endDate.value);
 };
 
 watch(selectedType, updateCurrentBookingType);
 </script>
+
 
 <style scoped>
 .controller {
