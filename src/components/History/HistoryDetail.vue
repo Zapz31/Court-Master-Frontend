@@ -42,7 +42,9 @@
               <td>{{ item.courtManagerPhone }}</td>
               <td>
                 <div class="center-content">
-                  <router-link :to="{ name: 'BookingSlotScreen', params: { scheduleId: item.bookingScheduleId } }">
+                  <router-link :to="{ name: 'BookingSlotScreen', params: { scheduleId: item.bookingScheduleId } }"
+                  @click.native.prevent="setCurrentBooking(item)"
+                  >
                     <font-awesome-icon icon="eye" />
                   </router-link>
                 </div>
@@ -92,6 +94,11 @@ const navigateToBookingSlot = (scheduleId) => {
 
 const components = {
   FontAwesomeIcon
+};
+
+// Lay du lieu ve booking schedule khi bam vao icon router link de set no vaof cho mot thuoc tinh pinia
+const setCurrentBooking = (item) => {
+  filterHistoryStore.currentClubName = item.clubName;
 };
 
 onMounted(async () => {

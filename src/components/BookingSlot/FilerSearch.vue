@@ -1,8 +1,8 @@
 <template>
   <div class="box" @click.self="closeAllDropdowns">
-    <div class="search">
+    <!-- <div class="search">
       <input v-model="searchQuery" placeholder="Type a name..." type="text" />
-    </div>
+    </div> -->
     <div class="filter">
       <div class="filter-item">
         <div class="dropdown-toggle" @click="toggleDropdown('startTime')" :class="{ active: dropdowns.startTime }">
@@ -38,11 +38,14 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
-
-const searchQuery = ref("");
+import { onMounted, onUnmounted, ref, reactive} from "vue";
+import { useFilterHistoryStore } from "../../stores/FilterHistory";
+const filterHistoryStore = useFilterHistoryStore()
+const scheduleId = ref("");
+const bookingDate = ref("");
 const startTime = ref("");
 const endTime = ref("");
+const isCheckin = ref(2);
 const dropdowns = ref({
   startTime: false,
   endTime: false,
@@ -89,19 +92,24 @@ const selectEndTime = () => {
 };
 
 const performSearch = async () => {
-  const dataFilter = {
-    name: searchQuery.value,
+  const dataFilter = reactive({
     startTime: startTime.value,
     endTime: endTime.value,
-  };
+    bookingDate: bookingDate.value,
+    isCheckIn: isCheckin
+  });
+  await filterHistoryStore.getFilterBookingSlots(dataFilter);
+
+
   console.log("Searching with:", dataFilter);
   // Implement your search logic here
 };
 
 const clearFilterSearch = () => {
-  searchQuery.value = "";
+  isCheckin.value = 2;
   startTime.value = "";
   endTime.value = "";
+  bookingDate.value = "",
   startTimeLabel.value = "Start Time";
   endTimeLabel.value = "End Time";
 };

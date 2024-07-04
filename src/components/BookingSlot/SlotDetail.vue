@@ -1,7 +1,7 @@
 <template>
   <div class="slot">
     <div class="clubName">
-      <h2>{{ clubName }}</h2>
+      <h2>Club: {{ clubName }}</h2>
     </div>
     <div class="table">
       <table>
@@ -12,18 +12,22 @@
             <th>Date</th>
             <th>Start Time</th>
             <th>End Time</th>
-            <th>Price</th>
+            <th>Price/Hours</th>
             <th>Check in</th>
+            <th>Court name</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(item, index) in items" :key="index">
-            <td>{{ item.col2 }}</td>
-            <td>{{ item.col3 }}</td>
-            <td>{{ item.col4 }}</td>
-            <td>{{ item.col5 }}</td>
-            <td>{{ item.col6 }}</td>
-            <td>{{ item.col7 }}</td>
+            <td>{{ index + 1 }}</td>
+            <td>{{ item.courtId }}</td>
+            <td>{{ item.bookingDate }}</td>
+            <td>{{ item.startTime }}</td>
+            <td>{{ item.endTime }}</td>
+            <td>{{ item.price }}</td>
+            <td v-if="item.isCheckIn === 0">Not checked in</td>
+            <td v-else>Checked in</td>
+            <td>{{ item.courtName }}</td>
             <td>
               <span class="status" :class="item.status">
                 {{ item.status }}
@@ -36,23 +40,29 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script setup> 
+import { ref, onMounted, computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { useFilterHistoryStore } from '../../stores/FilterHistory';
+const filterHistoryStore = useFilterHistoryStore()
 
-const clubName = ref('BadmintonSpace Arena');
+const urlParams = new URLSearchParams(window.location.search);
+const paymentData = Object.fromEntries(urlParams.entries());
 
-const items = ref([
-  { col2: '1', col3: 'BS000001', col4: '16/05/2024', col5: '8:50', col6: '11:00', col7: '150.000 VNĐ', status: 'Checked in' },
-  { col2: '2', col3: 'BS000002', col4: '17/05/2024', col5: '13:00', col6: '15:00', col7: '140.000 VNĐ', status: 'Not checked in' },
-  { col2: '3', col3: 'BS000003', col4: '18/05/2024', col5: '11:00', col6: '13:00', col7: '160.000 VNĐ', status: 'Not checked in' },
-  // Add other items as necessary
-]);
+const clubName = filterHistoryStore.currentClubName;
+
+const items = computed(() => filterHistoryStore.bookingSlots);
 
 // Registering the component
 const components = {
   FontAwesomeIcon
 };
+
+onMounted(async() => {
+  filterHistoryStore.currentBookingScheduleId = paymentData.scheduleId
+  await filterHistoryStore.getBookingSlots(paymentData.scheduleId)
+  items.value = filterHistoryStore.bookingSlots
+});
 </script>
 
 <style scoped>

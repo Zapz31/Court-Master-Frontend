@@ -18,20 +18,23 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import FilterSearch from "../components/BookingSlot/FilerSearch.vue";
 import Logo from "../components/BookingSlot/Logo.vue";
 import UserAvatar from "../components/BookingSlot/UserAvatar.vue";
 import PageName from "../components/BookingSlot/PageName.vue";
 import SlotDetail from "../components/BookingSlot/SlotDetail.vue";
 
+
 const filterSearchRef = ref(null);
+
 
 const closeDropdowns = () => {
     if (filterSearchRef.value) {
         filterSearchRef.value.closeAllDropdowns();
     }
 };
+
 </script>
 
 <style>
