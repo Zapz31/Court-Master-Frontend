@@ -44,14 +44,14 @@ const routes = [
         component: () => import('../views/BookingHistoryScreen.vue') ,
     },
 
-    {
-        path: '/payment-handle',
-        name: 'PaymentHandle',
-        component: () => import('../views/PaymentHandle.vue') ,  
-    },
+        {
+            path: '/confirm-payment/:clubId',
+            name: 'ConfirmPaymentScreen',
+            component: () => import('../views/ConfirmPaymentScreen.vue') ,
+          },
 
     {
-        path: '/payment-confirm',
+        path: '/payment-confirm/:clubId',
         name: 'ConfirmPaymentScreen',
         component: () => import('../views/ConfirmPaymentScreen.vue') ,  
     },

@@ -40,21 +40,47 @@
         <option value="fixed">Fixed</option>
       </select>
     </div>
-    <button class="book-btn">Book</button>
+
+    <router-link
+      v-if="currentClub"
+      :to="{
+        name: 'ConfirmPaymentScreen',
+        params: { clubId: currentClub.clubId },
+      }"
+      @click.native="prepareBookingData"
+    >
+      <button class="book-btn">Book</button>
+    </router-link>
+    <button v-else class="book-btn" disabled>Please choose your slot</button>
+
     <p v-if="dateRangeError" class="error-message">{{ dateRangeError }}</p>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useClubStore } from "../../stores/clubMng"; // import useClubStore
+import { usePaymentStore } from "../../stores/PaymentStore";
 import { useScheduleStore } from "../../stores/scheduleStore";
-
 const selectedDate = ref("");
 const endDate = ref("");
 const selectedType = ref("one-time");
 const dateRangeError = ref("");
 const scheduleStore = useScheduleStore();
+const clubStore = useClubStore();
+const paymentStore = usePaymentStore();
+const currentClub = computed(() => clubStore.currentClub);
+const route = useRoute();
 
+const handleBooking = () => {
+  const bookingInfo = scheduleStore.getFormattedBookings();
+  paymentStore.setBookingSchedule(bookingInfo);
+  router.push({
+    name: "ConfirmPaymentScreen",
+    params: { clubId: currentClub.value.clubId },
+  });
+};
 const minEndDate = computed(() => {
   if (!selectedDate.value) return "";
   const minDate = new Date(selectedDate.value);
@@ -62,10 +88,14 @@ const minEndDate = computed(() => {
   return minDate.toISOString().split("T")[0];
 });
 
-onMounted(() => {
+onMounted(async () => {
   const currentDate = new Date().toISOString().split("T")[0];
   selectedDate.value = currentDate;
   updateCurrentBookingType();
+  // Fetch club data if not already loaded
+  if (!currentClub.value) {
+    await clubStore.fetchClubById(route.params.clubId);
+  }
 });
 
 const updateCurrentBookingType = () => {

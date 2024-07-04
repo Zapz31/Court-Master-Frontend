@@ -3,16 +3,19 @@
     <ScheduleController />
   </div>
   <div class="schedule-table-wrapper">
-    <!-- <h1>
-      Schedule for {{ currentClub ? currentClub.clubName : "Loading..." }}
-    </h1> -->
     <ScheduleTable :clubId="clubId" />
   </div>
   <ScheduleInformation />
+  <schedule-error-message
+    v-if="errorVisible"
+    :message="errorMessage"
+    :visible="errorVisible"
+  />
 </template>
 
 <script setup>
 import ScheduleController from "../components/Schedule/ScheduleController.vue";
+import ScheduleErrorMessage from "../components/Schedule/ScheduleErrorMessage.vue";
 import ScheduleInformation from "../components/Schedule/ScheduleInformation.vue";
 import ScheduleTable from "../components/Schedule/ScheduleTable.vue";
 
@@ -32,7 +35,6 @@ onMounted(fetchClubData);
 
 watch(() => route.params.clubId, fetchClubData);
 </script>
-
 
 <style>
 .schedule-table-wrapper {

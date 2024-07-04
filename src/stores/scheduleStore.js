@@ -28,6 +28,8 @@ export const useScheduleStore = defineStore('schedule', {
       return `${day}/${month}/${year}`;
     },
 
+    // Trong scheduleStore
+
     
 
     setDateRange(startDate, endDate) {
