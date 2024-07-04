@@ -22,6 +22,35 @@
           <input type="time" v-model="endTime" @change="selectEndTime" class="time-input" />
         </div>
       </div>
+
+      <!-- filter booking date -->
+      <div class="filter-item">
+        <div class="dropdown-toggle" @click="toggleDropdown('bookingDate')" :class="{ active: dropdowns.bookingDate }">
+          <span>{{ bookingDate || bookingDateLabel }}</span>
+          <i class="fas fa-calendar"></i>
+        </div>
+        <div v-if="dropdowns.bookingDate" class="dropdown-content" @click.stop>
+          <input type="date" v-model="bookingDate" @change="selectBookingDate" class="date-input" />
+        </div>
+      </div>
+
+      <!-- filter Check in status -->
+      <div class="filter-item">
+        <div class="dropdown-toggle" @click="toggleDropdown('checkInStatus')"
+          :class="{ active: dropdowns.checkInStatus }">
+          <span>{{ checkInStatus || checkInStatusLabel }}</span>
+          <i class="fas fa-check"></i>
+        </div>
+        <div v-if="dropdowns.checkInStatus" class="dropdown-content" @click.stop>
+          <select v-model="checkInStatus" @change="selectCheckInStatus" class="status-select">
+            <option value="">Select Status</option>
+            <option value="Checked in">Checked in</option>
+            <option value="Not checked in">Not checked in</option>
+          </select>
+        </div>
+      </div>
+
+
       <div class="button">
         <button @click="clearFilterSearch" type="button" class="button">
           Clear all filter
@@ -38,20 +67,24 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, reactive} from "vue";
+import { onMounted, onUnmounted, ref, reactive, watch } from "vue";
 import { useFilterHistoryStore } from "../../stores/FilterHistory";
-const filterHistoryStore = useFilterHistoryStore()
-const scheduleId = ref("");
+const filterHistoryStore = useFilterHistoryStore();
 const bookingDate = ref("");
 const startTime = ref("");
 const endTime = ref("");
 const isCheckin = ref(2);
+const checkInStatus = ref("");
 const dropdowns = ref({
   startTime: false,
   endTime: false,
+  bookingDate: false,
+  checkInStatus: false
 });
 const startTimeLabel = ref("Start Time");
 const endTimeLabel = ref("End Time");
+const bookingDateLabel = ref("Booking Date");
+const checkInStatusLabel = 'Check In Status';
 
 const toggleDropdown = (dropdown) => {
   Object.keys(dropdowns.value).forEach(key => {
@@ -91,12 +124,30 @@ const selectEndTime = () => {
   dropdowns.value.endTime = false;
 };
 
+const selectBookingDate = () => {
+  dropdowns.value.bookingDate = false;
+};
+
+const selectCheckInStatus = () => {
+  dropdowns.value.checkInStatus = false;
+};
+
+watch(checkInStatus, (newStatus) => {
+  if (newStatus === 'Checked in') {
+    isCheckin.value = 1;
+  } else if (newStatus === 'Not checked in') {
+    isCheckin.value = 0;
+  } else {
+    isCheckin.value = 2; // Default value if no status is selected
+  }
+});
+
 const performSearch = async () => {
   const dataFilter = reactive({
     startTime: startTime.value,
     endTime: endTime.value,
     bookingDate: bookingDate.value,
-    isCheckIn: isCheckin
+    isCheckIn: isCheckin.value
   });
   await filterHistoryStore.getFilterBookingSlots(dataFilter);
 
@@ -110,8 +161,9 @@ const clearFilterSearch = () => {
   startTime.value = "";
   endTime.value = "";
   bookingDate.value = "",
-  startTimeLabel.value = "Start Time";
+    startTimeLabel.value = "Start Time";
   endTimeLabel.value = "End Time";
+  checkInStatusLabel.value = "Check in status";
 };
 </script>
 

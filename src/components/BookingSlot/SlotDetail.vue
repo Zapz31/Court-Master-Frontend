@@ -20,7 +20,7 @@
         <tbody>
           <tr v-for="(item, index) in items" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ item.courtId }}</td>
+            <td>{{ item.bookingSlotId }}</td>
             <td>{{ item.bookingDate }}</td>
             <td>{{ item.startTime }}</td>
             <td>{{ item.endTime }}</td>
