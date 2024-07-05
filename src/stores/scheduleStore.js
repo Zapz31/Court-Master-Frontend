@@ -8,27 +8,16 @@ export const useScheduleStore = defineStore('schedule', {
     endDate: '', // Thêm endDate vào state
     slots: [],
     slotsToPost: [],
+    selectedSlots: [],
     bookingResponse: null,
+    errorMessage: "",
+    errorMessageVisible: false,
     currentBookingType: 'one-time',
   }),
   actions: {
     setCurrentBookingType(type) {
       this.currentBookingType = type;
     },
-
-    formatDateToDDMMYYYY(date) {
-      if (date instanceof Date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-      }
-      // Nếu đã là chuỗi, giả định nó đã ở định dạng YYYY-MM-DD
-      const [year, month, day] = date.split('-');
-      return `${day}/${month}/${year}`;
-    },
-
-    // Trong scheduleStore
 
     
 
@@ -61,6 +50,32 @@ export const useScheduleStore = defineStore('schedule', {
         await this.postSlotsToBackend();
       }
     },
+
+
+    saveSelectedSlots() {
+      this.selectedSlots = this.slots.filter(slot => slot.status === 'selected');
+    },
+  
+    restoreSelectedSlots() {
+      this.selectedSlots.forEach(slot => {
+        const existingSlot = this.slots.find(s => 
+          s.startTime === slot.startTime && 
+          s.court === slot.court && 
+          s.date === slot.date
+        );
+        if (existingSlot) {
+          existingSlot.status = 'selected';
+        } else {
+          this.slots.push({...slot, status: 'selected'});
+        }
+      });
+      this.slotsToPost = [...this.selectedSlots];
+    },
+  
+    clearSelectedSlots() {
+      this.selectedSlots = [];
+    },
+
 
     parseDate(dateString) {
       const [day, month, year] = dateString.split('/');
@@ -166,6 +181,42 @@ export const useScheduleStore = defineStore('schedule', {
         throw error;
       }
     },
+
+    setBookingResponse(response) {
+      this.bookingResponse = response;
+    },
+    setErrorMessage(message) {
+      this.errorMessage = message;
+      this.errorMessageVisible = true;
+    },
+    clearErrorMessage() {
+      this.errorMessage = "";
+      this.errorMessageVisible = false;
+    },
+    setCurrentBookingType(type) {
+      this.currentBookingType = type;
+    },
+    updateSelectedDate(date) {
+      this.selectedDate = date;
+    },
+    updateEndDate(date) {
+      this.endDate = date;
+    },
+    updateSelectedDateRange(dateRange) {
+      this.selectedDate = dateRange.start;
+      this.endDate = dateRange.end;
+    },
+    getFormattedBookings() {
+      if (!this.bookingResponse) return [];
+      return this.bookingResponse.unpaidBookingList.map((booking) => {
+        return {
+          id: booking.id,
+          date: booking.date,
+          type: booking.bookingType,
+        };
+      });
+    },
+
 
     calculateHours(start, end) {
       start = String(start);

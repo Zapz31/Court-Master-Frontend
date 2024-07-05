@@ -8,7 +8,7 @@
         type="date"
         :value="selectedDate"
         @input="handleDateChange"
-        pattern="\d{2}/\d{2}/\d{4}"
+        pattern="\d{4}-\d{2}-\d{2}"
       />
     </div>
     <div v-else class="date-range-picker">
@@ -18,7 +18,7 @@
           type="date"
           :value="selectedDate"
           @input="handleDateChange"
-          pattern="\d{2}/\d{2}/\d{4}"
+          pattern="\d{4}-\d{2}-\d{2}"
         />
       </div>
       <div class="date-picker">
@@ -28,7 +28,7 @@
           :value="endDate"
           @input="handleEndDateChange"
           :min="minEndDate"
-          pattern="\d{2}/\d{2}/\d{4}"
+          pattern="\d{4}-\d{2}-\d{2}"
         />
       </div>
     </div>
@@ -41,45 +41,73 @@
       </select>
     </div>
 
-    <router-link
-      v-if="currentClub"
-      :to="{
-        name: 'ConfirmPaymentScreen',
-        params: { clubId: currentClub.clubId },
-      }"
-      @click.native="prepareBookingData"
-    >
-      <button class="book-btn">Book</button>
-    </router-link>
+    <button v-if="currentClub" class="book-btn" @click="prepareBookingData">
+      Book
+    </button>
     <button v-else class="book-btn" disabled>Please choose your slot</button>
 
-    <p v-if="dateRangeError" class="error-message">{{ dateRangeError }}</p>
+    <ScheduleErrorMessage
+      :message="scheduleStore.errorMessage"
+      :visible="scheduleStore.errorMessageVisible"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import { useClubStore } from "../../stores/clubMng"; // import useClubStore
+import { useRoute, useRouter } from "vue-router";
+import { useClubStore } from "../../stores/clubMng";
 import { usePaymentStore } from "../../stores/PaymentStore";
 import { useScheduleStore } from "../../stores/scheduleStore";
+import ScheduleErrorMessage from "./ScheduleErrorMessage.vue";
+
 const selectedDate = ref("");
 const endDate = ref("");
 const selectedType = ref("one-time");
-const dateRangeError = ref("");
 const scheduleStore = useScheduleStore();
 const clubStore = useClubStore();
 const paymentStore = usePaymentStore();
 const currentClub = computed(() => clubStore.currentClub);
 const route = useRoute();
+const router = useRouter();
 
 const handleBooking = () => {
   const bookingInfo = scheduleStore.getFormattedBookings();
   paymentStore.setBookingSchedule(bookingInfo);
+};
+
+const goToConfirmPayment = () => {
+  scheduleStore.saveSelectedSlots();
   router.push({
     name: "ConfirmPaymentScreen",
     params: { clubId: currentClub.value.clubId },
   });
+};
+
+const prepareBookingData = () => {
+  if (
+    !scheduleStore.bookingResponse ||
+    !scheduleStore.bookingResponse.unpaidBookingList.length
+  ) {
+    scheduleStore.setErrorMessage("Please select at least one slot.");
+    return;
+  }
+
+  const allSameType = scheduleStore.bookingResponse.unpaidBookingList.every(
+    (booking) =>
+      booking.bookingType ===
+      scheduleStore.bookingResponse.unpaidBookingList[0].bookingType
+  );
+
+  if (!allSameType) {
+    scheduleStore.setErrorMessage(
+      "All selected slots must have the same booking type."
+    );
+    return;
+  }
+
+  handleBooking();
+  goToConfirmPayment();
 };
 const minEndDate = computed(() => {
   if (!selectedDate.value) return "";
@@ -92,7 +120,7 @@ onMounted(async () => {
   const currentDate = new Date().toISOString().split("T")[0];
   selectedDate.value = currentDate;
   updateCurrentBookingType();
-  // Fetch club data if not already loaded
+
   if (!currentClub.value) {
     await clubStore.fetchClubById(route.params.clubId);
   }
@@ -108,7 +136,6 @@ const updateCurrentBookingType = () => {
   } else {
     scheduleStore.updateSelectedDate(selectedDate.value);
   }
-  dateRangeError.value = "";
 };
 
 const handleDateChange = (e) => {
@@ -122,8 +149,24 @@ const handleEndDateChange = (e) => {
 };
 
 watch(selectedType, updateCurrentBookingType);
+watch(
+  () => scheduleStore.bookingResponse,
+  (newBookingResponse) => {
+    if (
+      newBookingResponse &&
+      newBookingResponse.unpaidBookingList.length > 0 &&
+      newBookingResponse.unpaidBookingList.every(
+        (booking) =>
+          booking.bookingType ===
+          newBookingResponse.unpaidBookingList[0].bookingType
+      )
+    ) {
+      scheduleStore.clearErrorMessage();
+    }
+  },
+  { deep: true }
+);
 </script>
-
 
 <style scoped>
 .controller {
