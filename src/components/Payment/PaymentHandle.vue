@@ -45,7 +45,6 @@ onMounted(async () => {
     transationNo.value = paymentData.vnp_TransactionNo;
     vnpCardType.value = paymentData.vnp_CardType;
     currentClub.value = currentClub.value ?? {}
-    currentClub.value.courtManagerPhone = "012345678"
 
     if(responseCode.value === "00"){
         
@@ -60,8 +59,8 @@ onMounted(async () => {
             bookingSchedule: bookingSchedule,
             paymentDetail: paymentDetail,
             courtManagerPhone: currentClub.value.courtManagerPhone,
-            clubId:"C0000002",
-            clubName:"Cho Nhannnnn"
+            clubId: currentClub.value.clubId,
+            clubName: currentClub.value.clubName
         };
         
             const response = await axios.post(`http://localhost:8080/courtmaster/booking/payment-handle`,payload);

@@ -163,7 +163,6 @@ const clearFilterSearch = () => {
   bookingDate.value = "",
     startTimeLabel.value = "Start Time";
   endTimeLabel.value = "End Time";
-  checkInStatusLabel.value = "Check in status";
 };
 </script>
 

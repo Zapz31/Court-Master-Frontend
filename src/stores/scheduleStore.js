@@ -205,11 +205,11 @@ export const useScheduleStore = defineStore('schedule', {
     formatBookingType(type) {
       switch (type) {
         case 'one-time':
-          return 'one_time_play';
+          return 'One-time play';
         case 'flexible':
-          return 'flexible';
+          return 'Flexible';
         case 'fixed':
-          return 'fixed';
+          return 'Fixed';
         default:
           return type;
       }

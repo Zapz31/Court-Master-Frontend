@@ -65,6 +65,11 @@ const routes = [
         name: 'ClubRegisterScreen',
         component: () => import('../views/ClubRegisterScreen.vue') , 
     },
+    {
+        path: '/payment-handle',
+        name: 'PaymentHandle.vue',
+        component: () => import('../views/PaymentHandle.vue')
+    }
 ]
 
 const router = createRouter({
