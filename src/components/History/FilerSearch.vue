@@ -286,13 +286,14 @@ const clearFilterSearch = () => {
   font-style: bold;
   cursor: pointer;
   padding: 12px 20px;
-  border-radius: 0px;
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+  border-radius: 20px 0px 0px 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
 }
 
 .button button[type="button"]:hover {
   transform: scale(1.05);
+  border-radius: 20px 5px 5px 20px;
   color: white;
   background-color: lightslategrey;
 }
@@ -310,6 +311,7 @@ const clearFilterSearch = () => {
 }
 
 .button button[type="submit"]:hover {
+  border-radius: 5px 20px 20px 5px;
   transform: scale(1.05);
   color: white;
   background-color: rgb(28, 144, 183);
