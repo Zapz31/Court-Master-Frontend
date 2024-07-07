@@ -42,44 +42,23 @@
       <h2>Payment Information</h2>
       <div class="info-item">
         <span class="label">Total Price:</span>
-        <span class="value">{{ formatPrice(totalPrice) }} đ</span>
+        <span class="value">{{ formatPrice(calculatedTotalPrice) }} đ</span>
       </div>
       <div class="wrapper">
         <div class="option">
-          <input
-            id="fullyPay"
-            v-model="paymentOption"
-            value="fullyPay"
-            name="btn"
-            type="radio"
-            class="input"
-          />
+          <input id="fullyPay" v-model="paymentOption" value="Paid" name="btn" type="radio" class="input" />
           <label for="fullyPay" class="btn">
             <span class="span">Fully Pay</span>
           </label>
         </div>
         <div class="option">
-          <input
-            id="deposit50"
-            v-model="paymentOption"
-            value="deposit50"
-            name="btn"
-            type="radio"
-            class="input"
-          />
+          <input id="deposit50" v-model="paymentOption" value="Deposited 50%" name="btn" type="radio" class="input" />
           <label for="deposit50" class="btn">
             <span class="span">Deposited 50%</span>
           </label>
         </div>
         <div class="option">
-          <input
-            id="deposit25"
-            v-model="paymentOption"
-            value="deposit25"
-            name="btn"
-            type="radio"
-            class="input"
-          />
+          <input id="deposit25" v-model="paymentOption" value="Deposited 25%" name="btn" type="radio" class="input" />
           <label for="deposit25" class="btn">
             <span class="span">Deposited 25%</span>
           </label>
@@ -114,7 +93,7 @@
     </section>
 
     <div class="actions">
-      <button @click="confirmPayment" class="confirm-btn">Confirm</button>
+      <button @click="confirmPayment(calculatedTotalPrice)" class="confirm-btn">Confirm</button>
       <button @click="goBack" class="back-btn">Go Back</button>
     </div>
   </div>
@@ -123,20 +102,26 @@
 <script setup>
 // import axios from "axios";
 import { storeToRefs } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../../stores/auth";
 import { useClubStore } from "../../stores/clubMng";
 import { useScheduleStore } from "../../stores/scheduleStore";
+import { usePaymentStore } from "../../stores/PaymentStore";
+import axios from "axios";
+axios.defaults.withCredentials = true;
 
+const paymentStore = usePaymentStore();
 const clubStore = useClubStore();
 const scheduleStore = useScheduleStore();
 const { bookingResponse } = storeToRefs(scheduleStore);
 const router = useRouter();
 const authStore = useAuthStore();
 
+const { bookingSchedule } = storeToRefs(paymentStore);
+
 const user = computed(() => authStore.user);
-const paymentOption = ref("fullyPay");
+const paymentOption = ref("Paid");
 
 const fullName = computed(() => {
   return `${user.value.firstName} ${user.value.lastName}`.trim();
@@ -149,6 +134,10 @@ const formatPrice = (price) => {
 const clubName = computed(() => clubStore.currentClub?.clubName || "");
 const courtManagerPhone = computed(
   () => clubStore.currentClub?.courtManagerPhone || ""
+);
+
+const clubId = computed(
+  () => clubStore.currentClub?.clubId || ""
 );
 
 const totalPlayingTime = computed(() => {
@@ -176,94 +165,83 @@ const formattedBookings = computed(() => {
     bookingDate: scheduleStore.formatDateFromBackend(slot.bookingDate),
     bookingType: slot.bookingType,
     price: slot.price,
+    courtId: slot.courtId
   }));
 });
 
-// const getScheduleType = () => {
-//   const bookingTypes = new Set(
-//     bookingResponse.value.unpaidBookingList.map((slot) => slot.bookingType)
-//   );
-//   if (bookingTypes.has("one_time_play")) return "One-time play";
-//   if (bookingTypes.has("flexible")) return "Flexible";
-//   if (bookingTypes.has("fixed")) return "Fixed";
-//   return "Unknown";
-// };
+onMounted(() => {
+  paymentStore.currentClubInfo.courtManagerPhone = courtManagerPhone.value;
+  paymentStore.currentClubInfo.clubId = clubId.value;
+  paymentStore.currentClubInfo.clubName = clubName.value;
 
-//format DateTime
-// const formatDateTimeForAPI = (date) => {
-//   const offset = date.getTimezoneOffset();
-//   const localDate = new Date(date.getTime() - offset * 60 * 1000);
-//   return localDate.toISOString().slice(0, 19);
-// };
+  bookingSchedule.value = {
+    ...bookingSchedule.value,
+    customerFullName: fullName.value,
+    customerPhoneNumber: user.value.phoneNumber,
+    bookingScheduleStatus: paymentOption.value, // This will be "fullyPay" by default
+    scheduleType: bookingResponse.value?.scheduleType || 'One-time play',
+    customerId: user.value.userId,
+    totalPlayingTime: totalPlayingTime.value,
+    bookingSlotResponseDTOs: formattedBookings.value.map(booking => ({
+      courtId: booking.courtId, // Assuming courtName is actually the courtId
+      startBooking: booking.startBooking,
+      endBooking: booking.endBooking,
+      bookingDate: convertDateFormat(booking.bookingDate),
+      bookingType: booking.bookingType,
+      price: booking.price
+    })),
+    totalPrice: calculatedTotalPrice.value
+  };
+  console.log('Start date of booking schedule in paymentStore: ',bookingSchedule.value.startDate);
+  console.log('End date of booking schedule in paymentStore: ',bookingSchedule.value.endDate);
+  paymentStore.paymentPayload.bookingSchedule = paymentStore.bookingSchedule
+  paymentStore.paymentPayload.currentClubInfo = paymentStore.currentClubInfo
 
-// const confirmPayment = async () => {
-//   try {
-//     const paymentStatus =
-//       paymentOption.value === "fullyPay"
-//         ? "Paid"
-//         : `Deposited ${paymentOption.value.slice(-2)}%`;
+})
 
-//     const payload = {
-//       courtManagerPhone: courtManagerPhone.value,
-//       clubId: clubStore.currentClub.clubId,
-//       clubName: clubName.value,
-//       bookingSchedule: {
-//         customerFullName: fullName.value,
-//         bookingScheduleStatus: paymentStatus,
-//         customerId: user.value.userId,
-//         customerPhoneNumber: user.value.phoneNumber,
-//         startDate: bookingResponse.value.unpaidBookingList[0].bookingDate,
-//         endDate:
-//           bookingResponse.value.unpaidBookingList[
-//             bookingResponse.value.unpaidBookingList.length - 1
-//           ].bookingDate,
-//         totalPrice: totalPrice.value.toString(),
-//         scheduleType: getScheduleType(),
-//         totalPlayingTime: totalPlayingTime.value,
-//         bookingSlotResponseDTOs: bookingResponse.value.unpaidBookingList.map(
-//           (slot) => ({
-//             courtId: slot.courtId,
-//             startBooking: slot.startBooking,
-//             endBooking: slot.endBooking,
-//             bookingDate: slot.bookingDate,
-//             bookingType: slot.bookingType,
-//             price: slot.price,
-//           })
-//         ),
-//       },
-//       paymentDetail: {
-//         amount: totalPrice.value,
-//         paymentMethod: "ATM",
-//         paymentTime: formatDateTimeForAPI(new Date()),
-//       },
-//     };
+// Computed property for the recalculated total price
+const calculatedTotalPrice = computed(() => {
+  switch (paymentOption.value) {
+    case 'Deposited 50%':
+      return totalPrice.value * 0.5;
+    case 'Deposited 25%':
+      return totalPrice.value * 0.25;
+    case 'Paid':
+    default:
+      return totalPrice.value;
+  }
+});
 
-//     console.log("Payload being sent:", JSON.stringify(payload, null, 2));
+watch([paymentOption, calculatedTotalPrice], ([newPaymentOption, newTotalPrice]) => {
+  bookingSchedule.value = {
+    ...bookingSchedule.value,
+    bookingScheduleStatus: newPaymentOption,
+    totalPrice: newTotalPrice
+  };
+});
 
-//     const response = await axios.post(
-//       "http://localhost:8080/courtmaster/booking/payment-handle",
-//       payload
-//     );
-//     console.log("Payment confirmed:", response.data);
-//     // Xử lý phản hồi thành công (ví dụ: hiển thị thông báo thành công, chuyển hướng)
-//   } catch (error) {
-//     console.error("Error confirming payment:", error);
-//     if (error.response) {
-//       // Lỗi phản hồi từ server
-//       console.error("Server responded with error:", error.response.data);
-//       console.error("Status code:", error.response.status);
-//       console.error("Headers:", error.response.headers);
-//     } else if (error.request) {
-//       // Yêu cầu được gửi nhưng không nhận được phản hồi
-//       console.error("No response received:", error.request);
-//     } else {
-//       // Lỗi khi thiết lập yêu cầu
-//       console.error("Error setting up request:", error.message);
-//     }
-//     // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi)
-//   }
-// };
+function convertDateFormat(dateString) {
+  const [day, month, year] = dateString.split('/');
+  return `${year}-${month}-${day}`;
+}
 
+const confirmPayment = async (totalPrice) => {
+  paymentStore.savePaymentPayloadToSessionStorage();
+  try {
+    const getPaymentUrlResponse = await axios.get(`http://localhost:8080/courtmaster/payment/vn-pay?amount=${totalPrice}`, { withCredentials: true })
+    console.log('Day la data cua getPaymentUrlResponse: ', getPaymentUrlResponse.data);
+    const paymentUrl = getPaymentUrlResponse.data.data.paymentUrl
+    if (paymentUrl) {
+      // Second API call using the extracted payment URL
+      window.location.href = paymentUrl;
+      console.log('This is the data of paymentResponse: ', paymentResponse.data);
+    } else {
+      console.log('Payment URL not found in the response.');
+    }
+  } catch (error) {
+    console.log('Error at confirmPayment function in ConfirmPayment.vue: ', error)
+  }
+}
 const goBack = () => {
   router.go(-1);
 };
@@ -395,7 +373,7 @@ h2 {
   cursor: pointer;
 }
 
-.input:checked + .btn {
+.input:checked+.btn {
   background-color: #6babf4;
   color: white;
 }

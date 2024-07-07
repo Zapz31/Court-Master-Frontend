@@ -106,7 +106,7 @@ const prepareBookingData = () => {
     return;
   }
 
-  handleBooking();
+  //handleBooking();
   goToConfirmPayment();
 };
 const minEndDate = computed(() => {
@@ -119,6 +119,7 @@ const minEndDate = computed(() => {
 onMounted(async () => {
   const currentDate = new Date().toISOString().split("T")[0];
   selectedDate.value = currentDate;
+  paymentStore.bookingSchedule.startDate = selectedDate.value;
   updateCurrentBookingType();
 
   if (!currentClub.value) {
@@ -146,6 +147,7 @@ const handleDateChange = (e) => {
 const handleEndDateChange = (e) => {
   endDate.value = e.target.value;
   scheduleStore.updateEndDate(endDate.value);
+  paymentStore.bookingSchedule.endDate = endDate.value;
 };
 
 watch(selectedType, updateCurrentBookingType);
@@ -166,6 +168,8 @@ watch(
   },
   { deep: true }
 );
+
+
 </script>
 
 <style scoped>

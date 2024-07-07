@@ -21,6 +21,7 @@ import { useClubStore } from '../../stores/clubMng';
 import { storeToRefs } from 'pinia'
 import axios from 'axios';
 import { computed } from 'vue';
+axios.defaults.withCredentials = true;
 
 const useClubStr = useClubStore();
 const { currentClub } = storeToRefs(useClubStr)
@@ -45,22 +46,21 @@ onMounted(async () => {
     transationNo.value = paymentData.vnp_TransactionNo;
     vnpCardType.value = paymentData.vnp_CardType;
     currentClub.value = currentClub.value ?? {}
-
+    paymentStore.loadPaymentPayloadSessionStorage();
+    console.log(paymentStore.paymentPayload)
     if(responseCode.value === "00"){
-        
-        console.log("aaaa");
-        const bookingSchedule = paymentStore.bookingSchedule;
+        console.log('Day la court manager phone', currentClub.value.courtManagerPhone)
         const paymentDetail = {
             amount: amountString.value,
             paymentTime: parseDateTimeString(payDate.value) ,
             paymentMethod: vnpCardType.value,
         };
         const payload = {
-            bookingSchedule: bookingSchedule,
+            bookingSchedule: paymentStore.paymentPayload.bookingSchedule,
             paymentDetail: paymentDetail,
-            courtManagerPhone: currentClub.value.courtManagerPhone,
-            clubId: currentClub.value.clubId,
-            clubName: currentClub.value.clubName
+            courtManagerPhone: paymentStore.paymentPayload.currentClubInfo.courtManagerPhone,
+            clubId: paymentStore.paymentPayload.currentClubInfo.clubId,
+            clubName: paymentStore.paymentPayload.currentClubInfo.clubName
         };
         
             const response = await axios.post(`http://localhost:8080/courtmaster/booking/payment-handle`,payload);
