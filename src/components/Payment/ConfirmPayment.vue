@@ -121,7 +121,7 @@ const authStore = useAuthStore();
 const { bookingSchedule } = storeToRefs(paymentStore);
 
 const user = computed(() => authStore.user);
-const paymentOption = ref("Paid");
+const paymentOption = ref("Deposited 25%");
 
 const fullName = computed(() => {
   return `${user.value.firstName} ${user.value.lastName}`.trim();
@@ -178,7 +178,6 @@ onMounted(() => {
     ...bookingSchedule.value,
     customerFullName: fullName.value,
     customerPhoneNumber: user.value.phoneNumber,
-    bookingScheduleStatus: paymentOption.value, // This will be "fullyPay" by default
     scheduleType: bookingResponse.value?.scheduleType || 'One-time play',
     customerId: user.value.userId,
     totalPlayingTime: totalPlayingTime.value,
@@ -190,7 +189,7 @@ onMounted(() => {
       bookingType: booking.bookingType,
       price: booking.price
     })),
-    totalPrice: calculatedTotalPrice.value
+    totalPrice: totalPrice
   };
   console.log('Start date of booking schedule in paymentStore: ',bookingSchedule.value.startDate);
   console.log('End date of booking schedule in paymentStore: ',bookingSchedule.value.endDate);
@@ -212,12 +211,16 @@ const calculatedTotalPrice = computed(() => {
   }
 });
 
-watch([paymentOption, calculatedTotalPrice], ([newPaymentOption, newTotalPrice]) => {
-  bookingSchedule.value = {
-    ...bookingSchedule.value,
-    bookingScheduleStatus: newPaymentOption,
-    totalPrice: newTotalPrice
-  };
+// LUU GIU GIA TRI THAY DOI CUA BOOKINGSCHEDULE STATUS
+// watch([paymentOption, calculatedTotalPrice], ([newPaymentOption, newTotalPrice]) => {
+//   bookingSchedule.value = {
+//     ...bookingSchedule.value,
+//     bookingScheduleStatus: newPaymentOption,
+//     totalPrice: newTotalPrice
+//   };
+// });
+watch([paymentOption], ([newPaymentOption]) => {
+  paymentStore.paymentPayload.bookingSchedule.bookingScheduleStatus = newPaymentOption;
 });
 
 function convertDateFormat(dateString) {
