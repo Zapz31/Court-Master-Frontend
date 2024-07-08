@@ -4,15 +4,19 @@ axios.defaults.withCredentials = true;
 
 export const useScheduleStore = defineStore('schedule', {
   state: () => ({
+    duplicateSlotError: null,
     selectedDate: '',
     endDate: '', // Thêm endDate vào state
     slots: [],
+    invalidSlots: [],
     slotsToPost: [],
     selectedSlots: [],
     bookingResponse: null,
     errorMessage: "",
     errorMessageVisible: false,
+    pendingSlots: [],
     currentBookingType: 'one-time',
+    errorMessageTimer: null
   }),
   actions: {
     setCurrentBookingType(type) {
@@ -93,13 +97,39 @@ export const useScheduleStore = defineStore('schedule', {
 
 
     async addFixedSlots(startTime, endTime, courtNumber, status, startDate) {
-      let currentDate = this.convertDateStringToDate(startDate); // Chuyển đổi từ chuỗi thành Date
-      const endDate = this.convertDateStringToDate(this.endDate); // Chuyển đổi endDate từ state
+      let currentDate = this.convertDateStringToDate(startDate);
+      const endDate = this.convertDateStringToDate(this.endDate);
+      this.pendingSlots = [];
     
       while (currentDate <= endDate) {
-        const formattedDate = this.formatDate(currentDate); // Định dạng lại thành dd/MM/yyyy
-        await this.addSlot(startTime, endTime, courtNumber, status, formattedDate);
-        currentDate.setDate(currentDate.getDate() + 7); // Tăng ngày lên 7 ngày
+        const formattedDate = this.formatDate(currentDate);
+        const newSlot = {
+          startTime,
+          endTime,
+          court: courtNumber,
+          status,
+          date: formattedDate,
+          bookingType: 'Fixed'
+        };
+        this.pendingSlots.push(newSlot);
+        currentDate.setDate(currentDate.getDate() + 7);
+      }
+    
+      const validationPassed = await this.validateAndAddPendingSlots();
+    
+      if (!validationPassed) {
+        // Clear invalid slots from the view
+        this.pendingSlots.forEach(slot => {
+          const index = this.slots.findIndex(
+            existingSlot =>
+              existingSlot.startTime === slot.startTime &&
+              existingSlot.court === slot.court &&
+              existingSlot.date === slot.date
+          );
+          if (index !== -1) {
+            this.slots.splice(index, 1);
+          }
+        });
       }
     },
     
@@ -145,15 +175,68 @@ export const useScheduleStore = defineStore('schedule', {
     },
 
     async removeSlot(startTime, court) {
-      const index = this.slots.findIndex(
+      const slotsToRemove = this.slots.filter(
         slot => slot.startTime === startTime && slot.court === court && slot.status === "selected"
       );
-      if (index !== -1) {
-        this.slots.splice(index, 1);
-        this.slotsToPost = this.slotsToPost.filter(
-          slot => slot.startTime !== startTime || slot.court !== court
-        );
-        await this.postSlotsToBackend();
+    
+      for (const slot of slotsToRemove) {
+        const index = this.slots.findIndex(s => s === slot);
+        if (index !== -1) {
+          this.slots.splice(index, 1);
+          this.slotsToPost = this.slotsToPost.filter(
+            s => s !== slot
+          );
+        }
+      }
+    
+      await this.postSlotsToBackend();
+    },
+
+    async validateSlots(slotsToValidate) {
+      try {
+        const response = await axios.post('http://localhost:8080/courtmaster/api/test/getDuplicateBookingSlot', slotsToValidate);
+        return response.data;
+      } catch (error) {
+        console.error('Error validating slots:', error);
+        throw error;
+      }
+    },
+    //check trung
+    async validateAndAddPendingSlots() {
+      const slotsToValidate = this.pendingSlots.map(slot => ({
+        courtId: slot.court,
+        startBooking: slot.startTime,
+        endBooking: slot.endTime,
+        bookingDate: this.formatDateForBackend(slot.date),
+        bookingType: this.formatBookingType(slot.bookingType),
+      }));
+    
+      try {
+        const duplicateSlots = await this.validateSlots(slotsToValidate);
+    
+        if (duplicateSlots.length > 0) {
+          this.invalidSlots = duplicateSlots;
+          const errorMessages = duplicateSlots.map(slot =>
+            `Slot at court ${slot.courtName} from ${slot.startTime.slice(0, 5)} to ${slot.endTime.slice(0, 5)} - ${this.formatDate(slot.bookingDate)} is already booked, please try another time.\n`
+          );
+          this.duplicateSlotError = errorMessages.join('\n');
+          this.setErrorMessage(this.duplicateSlotError, 10000, true); // Display error for 10s and mark as duplicate error
+          this.pendingSlots = [];
+          return false;
+        }
+    
+        this.duplicateSlotError = null;
+        this.pendingSlots.forEach(slot => {
+          this.slots.push(slot);
+          this.slotsToPost.push(slot);
+        });
+        this.pendingSlots = [];
+        return true;
+      } catch (error) {
+        console.error('Error validating slots:', error);
+        this.setErrorMessage('An error occurred while validating slots. Please try again.');
+        this.pendingSlots = [];
+        return false;
       }
     },
 
@@ -175,24 +258,71 @@ export const useScheduleStore = defineStore('schedule', {
       try {
         const response = await axios.post('http://localhost:8080/courtmaster/booking/unpaidbookings', slotsToPost);
         console.log('Bookings posted successfully:', response.data);
-        this.bookingResponse = response.data;
+        this.setBookingResponse(response.data);
+        this.clearErrorMessage();
+        // this.slotsToPost = []; // Clear slotsToPost after successful posting
       } catch (error) {
         console.error('Error posting bookings:', error);
-        throw error;
+        this.setErrorMessage('An error occurred while booking. Please try again.');
       }
+    },
+
+    removeInvalidSlots() {
+      this.invalidSlots.forEach(invalidSlot => {
+        const index = this.slots.findIndex(slot => 
+          slot.court === invalidSlot.courtId &&
+          slot.startTime === invalidSlot.startTime.slice(0, 5) &&
+          slot.endTime === invalidSlot.endTime.slice(0, 5) &&
+          slot.date === this.formatDate(invalidSlot.bookingDate)
+        );
+        if (index !== -1) {
+          this.slots.splice(index, 1);
+        }
+      });
+      this.slotsToPost = this.slots.filter(slot => slot.status === 'selected');
+      this.invalidSlots = [];
+    },
+
+
+
+    
+    setErrorMessage(message, duration = 0, isDuplicateError = false) {
+      this.errorMessage = message;
+      this.errorMessageVisible = true;
+      this.isDuplicateError = isDuplicateError;
+    
+      if (this.errorMessageTimer) {
+        clearTimeout(this.errorMessageTimer);
+      }
+    
+      if (duration > 0 && !isDuplicateError) {
+        this.errorMessageTimer = setTimeout(() => {
+          this.clearErrorMessage();
+        }, duration);
+      }
+    },
+    
+    clearErrorMessage() {
+      if (this.isDuplicateError) {
+        return;
+      }
+      this.errorMessage = "";
+      this.errorMessageVisible = false;
+      if (this.errorMessageTimer) {
+        clearTimeout(this.errorMessageTimer);
+        this.errorMessageTimer = null;
+      }
+    },
+    
+    clearDuplicateSlotError() {
+      this.isDuplicateError = false;
+      this.clearErrorMessage();
     },
 
     setBookingResponse(response) {
       this.bookingResponse = response;
     },
-    setErrorMessage(message) {
-      this.errorMessage = message;
-      this.errorMessageVisible = true;
-    },
-    clearErrorMessage() {
-      this.errorMessage = "";
-      this.errorMessageVisible = false;
-    },
+
     setCurrentBookingType(type) {
       this.currentBookingType = type;
     },

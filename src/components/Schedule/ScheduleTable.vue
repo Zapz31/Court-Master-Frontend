@@ -390,6 +390,7 @@ const handleMouseUp = async () => {
   if (!isDragging.value) return;
 
   isDragging.value = false;
+  scheduleStore.clearDuplicateSlotError();
   let slotStart = selectedCells.value[0].time;
   let slotEnd = selectedCells.value[selectedCells.value.length - 1].time;
   const court = selectedCells.value[0].court;
@@ -414,22 +415,55 @@ const handleMouseUp = async () => {
     return;
   }
 
-  if (scheduleStore.currentBookingType === "fixed") {
-    await scheduleStore.addFixedSlots(
-      slotStart,
-      slotEnd,
-      court,
-      "selected",
-      formattedDate
-    );
-  } else {
-    await scheduleStore.addSlot(
-      slotStart,
-      slotEnd,
-      court,
-      "selected",
-      formattedDate
-    );
+  try {
+    let validationPassed = false;
+    if (scheduleStore.currentBookingType === "fixed") {
+      await scheduleStore.addFixedSlots(
+        slotStart,
+        slotEnd,
+        court,
+        "selected",
+        formattedDate
+      );
+      validationPassed = await scheduleStore.validateAndAddPendingSlots();
+    } else {
+      const newSlot = {
+        startTime: slotStart,
+        endTime: slotEnd,
+        court: court,
+        status: "selected",
+        date: formattedDate,
+        bookingType: scheduleStore.currentBookingType,
+      };
+      scheduleStore.pendingSlots = [newSlot];
+      validationPassed = await scheduleStore.validateAndAddPendingSlots();
+    }
+
+    if (validationPassed) {
+      await scheduleStore.postSlotsToBackend();
+    } else {
+      // Remove invalid slots from the view
+      const slotsToRemove = scheduleStore.slots.filter(
+        (slot) =>
+          slot.startTime === slotStart &&
+          slot.endTime === slotEnd &&
+          slot.court === court &&
+          slot.status === "selected"
+      );
+
+      for (const slot of slotsToRemove) {
+        const index = scheduleStore.slots.findIndex((s) => s === slot);
+        if (index !== -1) {
+          scheduleStore.slots.splice(index, 1);
+        }
+      }
+
+      // Clear selected cells from the view
+      selectedCells.value = [];
+      return;
+    }
+  } catch (error) {
+    console.error("Error adding slot:", error);
   }
 
   selectedCells.value = [];
