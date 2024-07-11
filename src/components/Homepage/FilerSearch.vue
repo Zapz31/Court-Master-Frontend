@@ -138,13 +138,42 @@
       <div class="button-func">
         <div class="button">
           <button @click="clearFilterSearch" type="button" class="button">
-            Clear all filter
+            <svg
+              height="24"
+              viewBox="0 0 1024 1024"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m899.1 869.6-53-305.6h17.9c14.4 0 26-11.6 26-26v-192c0-14.4-11.6-26-26-26h-246v-182c0-14.4-11.6-26-26-26h-160c-14.4 0-26 11.6-26 26v182h-246c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6c-.3 1.5-.4 3-.4 4.4 0 14.4 11.6 26 26 26h723c1.5 0 3-.1 4.4-.4 14.2-2.4 23.7-15.9 21.2-30zm-695.1-479.6h272v-208h72v208h272v104h-616zm468 440v-156c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156h-192v-156c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156h-149.2l45.1-260h528.1l45.1 260z"
+                fill="#ffffff"
+              />
+            </svg>
           </button>
         </div>
-
         <div class="button">
           <button @click="performSearch" type="submit" class="button">
-            Search
+            <svg
+              width="24"
+              height="24"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15.5 15.5L19 19"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5 11C5 14.3137 7.68629 17 11 17C12.6597 17 14.1621 16.3261 15.2483 15.237C16.3308 14.1517 17 12.654 17 11C17 7.68629 14.3137 5 11 5C7.68629 5 5 7.68629 5 11Z"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </button>
         </div>
       </div>
@@ -430,7 +459,7 @@ const searchResults = ref([
   color: white;
   font-style: bold;
   cursor: pointer;
-  padding: 10px 16px;
+  padding: 10px 36px;
   border-radius: 20px 0px 0px 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
@@ -450,7 +479,7 @@ const searchResults = ref([
   color: white;
   font-style: bold;
   cursor: pointer;
-  padding: 10px 16px;
+  padding: 10px 36px;
   border-radius: 0 20px 20px 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
