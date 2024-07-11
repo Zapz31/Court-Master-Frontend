@@ -36,7 +36,7 @@
             params: { clubId: currentClub.clubId },
           }"
         >
-          View Schedule
+          Xem giờ chơi
         </router-link>
       </button>
     </div>
@@ -50,22 +50,21 @@
         <thead>
           <tr>
             <th colspan="8">
-              <!--Time Frame {{ frame.timeFrameId }} - -->{{ frame.starTime }}
-              to
-              {{ frame.endTime }}
+              {{ formatTime(frame.starTime) }} to
+              {{ formatTime(frame.endTime) }}
             </th>
           </tr>
           <tr>
-            <th>PLAY-MODE</th>
+            <th>LOẠI LỊCH</th>
             <th
               v-for="day in [
-                'Monday',
-                'Tuesday',
-                'Wednesday',
-                'Thursday',
-                'Friday',
-                'Saturday',
-                'Sunday',
+                'Thứ hai',
+                'Thứ ba',
+                'Thứ tư',
+                'Thứ năm',
+                'Thứ sáu',
+                'Thứ bảy',
+                'Chủ nhật',
               ]"
               :key="day"
             >
@@ -74,13 +73,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="mode in ['flexible', 'oneTimePlay', 'fixed']" :key="mode">
-            <td>{{ mode }}</td>
+          <tr v-for="mode in playModes" :key="mode.api">
+            <td>{{ mode.display }}</td>
             <td
               v-for="pricing in frame.pricingServiceList"
               :key="pricing.dateOfWeek"
             >
-              {{ formatPrice(pricing[mode]) }} ₫
+              {{ formatPrice(pricing[mode.api]) }} ₫
             </td>
           </tr>
         </tbody>
@@ -108,7 +107,7 @@
             <textarea
               v-model="newComment"
               class="input"
-              placeholder="Comment....."
+              placeholder="Bạn đang nghĩ gì....."
               required=""
               @keydown.enter="handleEnterKey"
               maxlength="1000"
@@ -243,9 +242,25 @@ const fetchClubData = async () => {
     // You might want to set an error state here and display it in the template
   }
 };
+
+const playModes = ref([
+  { api: "flexible", display: "Lịch linh hoạt" },
+  { api: "oneTimePlay", display: "Lịch một ngày" },
+  { api: "fixed", display: "Lịch cố định" },
+]);
 const formatPrice = (price) => {
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
+
+const formatTime = (time) => {
+  if (!time) return "";
+  const parts = time.split(":");
+  if (parts.length < 2) return time;
+  const hours = parts[0].padStart(2, "0");
+  const minutes = parts[1].padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 onMounted(fetchClubData);
 
 watch(

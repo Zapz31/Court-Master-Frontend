@@ -13,16 +13,16 @@
     <div class="footer">
       <div class="footer-content">
         <div class="footer-section about">
-          <h2>About Us</h2>
+          <h2>Giới Thiệu</h2>
           <p>
-            Court Master is a platform that allows you to find and book
-            badminton courts easily. Our mission is to provide a seamless and
-            efficient way for badminton enthusiasts to connect with available
-            courts in their area.
+            Court Master là một nền tảng hấp dẫn cho những người yêu thích cầu
+            lông. Chúng tôi giúp bạn dễ dàng tìm và đặt sân cầu lông. Sứ mệnh
+            của chúng tôi là tạo ra một cách liền mạch và hiệu quả để kết nối
+            những người đam mê cầu lông với các sân có sẵn trong khu vực . 🏸🌟
           </p>
         </div>
         <div class="footer-section contact">
-          <h2>Contact Us</h2>
+          <h2>Liên hệ</h2>
           <p>
             <svg
               viewBox="0 0 576 512"
@@ -33,7 +33,7 @@
                 d="m528 32h-480c-26.5 0-48 21.5-48 48v352c0 26.5 21.5 48 48 48h480c26.5 0 48-21.5 48-48v-352c0-26.5-21.5-48-48-48zm0 400h-480v-352h480zm-320-176c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm-89.6 128h179.2c12.4 0 22.4-8.6 22.4-19.2v-19.2c0-31.8-30.1-57.6-67.2-57.6-10.8 0-18.7 8-44.8 8-26.9 0-33.4-8-44.8-8-37.1 0-67.2 25.8-67.2 57.6v19.2c0 10.6 10 19.2 22.4 19.2zm241.6-64h112c4.4 0 8-3.6 8-8v-16c0-4.4-3.6-8-8-8h-112c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm0-64h112c4.4 0 8-3.6 8-8v-16c0-4.4-3.6-8-8-8h-112c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm0-64h112c4.4 0 8-3.6 8-8v-16c0-4.4-3.6-8-8-8h-112c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8z"
               />
             </svg>
-            Court Master Service
+            Trung tâm dịch vụ Court Master
           </p>
 
           <p>
@@ -66,7 +66,7 @@
           </p>
         </div>
         <div class="footer-section follow-us">
-          <h2>Follow Us</h2>
+          <h2>Hãy để chúng tôi đến gần với bạn hơn</h2>
           <ul class="wrapper">
             <li class="icon facebook">
               <span class="tooltip">Facebook</span>
@@ -162,6 +162,7 @@ onMounted(() => {
 }
 
 .footer img {
+  margin-top: -20px;
   padding: 10px;
   width: 20%;
 }
