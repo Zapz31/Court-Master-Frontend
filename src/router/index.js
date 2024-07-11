@@ -44,6 +44,13 @@ const routes = [
         component: () => import('../views/BookingHistoryScreen.vue') ,
     },
 
+    {
+        path: '/customer/profile',
+        name: 'CustomerProfile',
+        component: () => import('../views/CustomerProfile.vue') ,
+    },
+
+
         {
             path: '/confirm-payment/:clubId',
             name: 'ConfirmPaymentScreen',

@@ -14,8 +14,11 @@
           class="club-image"
         />
         <h3>{{ club.clubName }}</h3>
-        <p>Address: {{ club.clubAddress }}</p>
-        <p>Average price: {{ formatPrice(club.averagePrice) }}₫/h</p>
+        <span class="bold">Địa chỉ: </span>
+        <span>{{ club.clubAddress }}</span
+        ><br /><br />
+        <span class="bold">Giá dao động: </span
+        ><span>{{ formatPrice(club.averagePrice) }}₫/h</span>
       </router-link>
     </div>
   </div>
@@ -67,6 +70,10 @@ const setCurrentClub = (club) => {
 .club-card:hover {
   transform: scale(1.05);
   /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */
+}
+
+.bold {
+  font-weight: bold;
 }
 
 .club-image {

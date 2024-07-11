@@ -1,29 +1,73 @@
 <template>
   <div class="general-form">
     <h1 class="title"><strong>I. General</strong></h1>
-    
-    <h4 class="sub-title"><strong><em>Club Name</em></strong></h4>
-    <textarea v-model="form.clubName" class="input-field" @input="validateClubName"></textarea>
+
+    <h4 class="sub-title">
+      <strong><em>Club Name</em></strong>
+    </h4>
+    <textarea
+      v-model="form.clubName"
+      class="input-field"
+      @input="validateClubName"
+    ></textarea>
     <p v-if="errors.clubName" class="error-message">{{ errors.clubName }}</p>
-    
-    <h4 class="sub-title"><strong><em>Description</em></strong></h4>
-    <textarea v-model="form.description" class="input-field description-input" @input="validateDescription"></textarea>
-    <p v-if="errors.description" class="error-message">{{ errors.description }}</p>
-    
-    <h4 class="sub-title"><strong><em>Avatar Image</em></strong></h4>
-    <input type="file" @change="onAvatarUpload" accept="image/*" class="file-input" ref="avatarInput" />
+
+    <h4 class="sub-title">
+      <strong><em>Description</em></strong>
+    </h4>
+    <textarea
+      v-model="form.description"
+      class="input-field description-input"
+      @input="validateDescription"
+    ></textarea>
+    <p v-if="errors.description" class="error-message">
+      {{ errors.description }}
+    </p>
+
+    <h4 class="sub-title">
+      <strong><em>Avatar Image</em></strong>
+    </h4>
+    <input
+      type="file"
+      @change="onAvatarUpload"
+      accept="image/*"
+      class="file-input"
+      ref="avatarInput"
+    />
     <p v-if="errors.avatar" class="error-message">{{ errors.avatar }}</p>
     <div v-if="form.avatarPreview" class="image-container avatar-container">
-      <img :src="form.avatarPreview" alt="Avatar Preview" class="image-preview avatar-preview" />
+      <img
+        :src="form.avatarPreview"
+        alt="Avatar Preview"
+        class="image-preview avatar-preview"
+      />
       <button @click="removeAvatar" class="remove-button">×</button>
     </div>
-    
-    <h4 class="sub-title"><strong><em>Description Images</em></strong></h4>
-    <input type="file" @change="onDescriptionImagesUpload" accept="image/*" multiple class="file-input" />
-    <p v-if="errors.descriptionImages" class="error-message">{{ errors.descriptionImages }}</p>
+
+    <h4 class="sub-title">
+      <strong><em>Description Images</em></strong>
+    </h4>
+    <input
+      type="file"
+      @change="onDescriptionImagesUpload"
+      accept="image/*"
+      multiple
+      class="file-input"
+    />
+    <p v-if="errors.descriptionImages" class="error-message">
+      {{ errors.descriptionImages }}
+    </p>
     <div class="image-grid">
-      <div v-for="(image, index) in form.descriptionImages" :key="index" class="image-container">
-        <img :src="image.preview" alt="Description Image" class="description-image" />
+      <div
+        v-for="(image, index) in form.descriptionImages"
+        :key="index"
+        class="image-container"
+      >
+        <img
+          :src="image.preview"
+          alt="Description Image"
+          class="description-image"
+        />
         <button @click="removeImage(index)" class="remove-button">×</button>
       </div>
     </div>
@@ -31,42 +75,42 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { reactive, ref } from "vue";
 
 const form = reactive({
-  clubName: '',
-  description: '',
+  clubName: "",
+  description: "",
   avatar: null,
   avatarPreview: null,
-  descriptionImages: []
+  descriptionImages: [],
 });
 
 const errors = reactive({
-  clubName: '',
-  description: '',
-  avatar: '',
-  descriptionImages: ''
+  clubName: "",
+  description: "",
+  avatar: "",
+  descriptionImages: "",
 });
 
 const avatarInput = ref(null);
 
 const validateClubName = () => {
   if (form.clubName.length < 3) {
-    errors.clubName = 'Club name must be at least 3 characters long';
+    errors.clubName = "Club name must be at least 3 characters long";
   } else if (form.clubName.length > 100) {
-    errors.clubName = 'Club name must not exceed 100 characters';
+    errors.clubName = "Club name must not exceed 100 characters";
   } else {
-    errors.clubName = '';
+    errors.clubName = "";
   }
 };
 
 const validateDescription = () => {
   if (form.description.length < 10) {
-    errors.description = 'Description must be at least 10 characters long';
+    errors.description = "Description must be at least 10 characters long";
   } else if (form.description.length > 1000) {
-    errors.description = 'Description must not exceed 1000 characters';
+    errors.description = "Description must not exceed 1000 characters";
   } else {
-    errors.description = '';
+    errors.description = "";
   }
 };
 
@@ -74,7 +118,7 @@ const onAvatarUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     if (file.size > 5 * 1024 * 1024) {
-      errors.avatar = 'Avatar image must not exceed 5MB';
+      errors.avatar = "Avatar image must not exceed 5MB";
       return;
     }
     form.avatar = file;
@@ -83,7 +127,7 @@ const onAvatarUpload = (event) => {
       form.avatarPreview = e.target.result;
     };
     reader.readAsDataURL(file);
-    errors.avatar = '';
+    errors.avatar = "";
   }
 };
 
@@ -91,7 +135,7 @@ const removeAvatar = () => {
   form.avatar = null;
   form.avatarPreview = null;
   if (avatarInput.value) {
-    avatarInput.value.value = '';
+    avatarInput.value.value = "";
   }
 };
 
@@ -99,24 +143,25 @@ const onDescriptionImagesUpload = (event) => {
   const files = event.target.files;
   if (files) {
     if (form.descriptionImages.length + files.length > 20) {
-      errors.descriptionImages = 'You can upload a maximum of 20 description images';
+      errors.descriptionImages =
+        "You can upload a maximum of 20 description images";
       return;
     }
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
-        errors.descriptionImages = 'Each description image must not exceed 5MB';
+        errors.descriptionImages = "Each description image must not exceed 5MB";
         return;
       }
       const reader = new FileReader();
       reader.onload = (e) => {
         form.descriptionImages.push({
           file: file,
-          preview: e.target.result
+          preview: e.target.result,
         });
       };
       reader.readAsDataURL(file);
     });
-    errors.descriptionImages = '';
+    errors.descriptionImages = "";
   }
 };
 
@@ -205,7 +250,8 @@ const removeImage = (index) => {
   height: 200px;
 }
 
-.image-preview, .description-image {
+.image-preview,
+.description-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -214,7 +260,8 @@ const removeImage = (index) => {
   transition: transform 0.3s ease;
 }
 
-.image-preview:hover, .description-image:hover {
+.image-preview:hover,
+.description-image:hover {
   transform: scale(1.05);
 }
 

@@ -4,7 +4,7 @@
       <input
         v-model="searchQuery"
         @input="filterResults"
-        placeholder="Type a name or address..."
+        placeholder="Nhập tên hoặc địa chỉ..."
         type="text"
       />
       <div v-if="filteredResults.length > 0" class="search-results">
@@ -195,7 +195,6 @@ const citySearch = ref("");
 const districtSearch = ref("");
 const selectedWard = ref("");
 const wardSearch = ref("");
-const wardLabel = ref("Ward");
 
 const cities = ref([]);
 const districts = ref([]);
@@ -223,10 +222,11 @@ const dropdowns = ref({
   hoursExpect: false,
 });
 
-const cityLabel = ref("City/Province");
-const districtLabel = ref("District");
-const openTimeLabel = ref("Opened time");
-const hoursExpectLabel = ref("Hours of expect");
+const cityLabel = ref("Tỉnh/Thành phố");
+const districtLabel = ref("Quận/Huyện");
+const wardLabel = ref("Phường/Xã");
+const openTimeLabel = ref("Giờ mở cửa");
+const hoursExpectLabel = ref("Giờ chơi mong đợi");
 
 const filteredResults = computed(() => {
   if (!searchQuery.value) return [];
@@ -403,12 +403,6 @@ const clearFilterSearch = async () => {
   hoursExpect.value = "";
   hoursExpectLabel.value = "Hours of expect";
 };
-
-const searchResults = ref([
-  { id: 1, name: "Club A", address: "abc, Ho Chi Minh City" },
-  { id: 2, name: "Club B", address: "def, Hanoi" },
-  { id: 3, name: "Club C", address: "ghi, Da Nang" },
-]);
 </script>
 
 <style scoped>
@@ -499,10 +493,12 @@ const searchResults = ref([
 }
 
 .filter-item {
+  font-weight: bold;
+  font-size: 14px;
   margin-right: 8px;
   position: relative;
   cursor: pointer;
-  padding: 8px;
+  padding: 5px;
   background-color: white;
   border-radius: 10px;
   text-align: left;
@@ -528,7 +524,7 @@ const searchResults = ref([
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 10px;
+  padding: 5px 0px;
   border: none; /* Remove border from dropdown toggle */
   border-radius: 5px;
   cursor: pointer;

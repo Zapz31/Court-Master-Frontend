@@ -1,16 +1,58 @@
 <template>
   <div class="container">
-    <div class="logo">
-      <logo />
-      <page-name />
-      <user-avatar />
+    <div class="profile-container">
+      <div class="profile-sidebar">
+        <div class="logo">
+          <a href="/">
+            <img
+              src="../../public/img/mono_white_crop.png"
+              alt="CourtMasterLogo"
+            />
+          </a>
+        </div>
+        <div class="profile-image-container">
+          <img
+            :src="getImageUrl(user.imageURL)"
+            alt="Profile Picture"
+            class="profile-picture"
+          />
+        </div>
+        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+        <p class="user-role">{{ user.role }}</p>
+        <button @click="logout" class="logout-button">Đăng xuất</button>
+      </div>
+      <div class="profile-main">
+        <div class="info-card">
+          <h2>Thông tin cá nhân</h2>
+          <div class="info-item">
+            <i class="fas fa-envelope"></i>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-phone"></i>
+            <p><strong>Số điện thoại:</strong> {{ user.phoneNumber }}</p>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-birthday-cake"></i>
+            <p><strong>Ngày sinh:</strong> {{ formatDate(user.birthDay) }}</p>
+          </div>
+        </div>
+        <div class="info-card">
+          <h2>Thông tin tài khoản</h2>
+          <div class="info-item">
+            <i class="fas fa-id-card"></i>
+            <p><strong>ID người dùng:</strong> {{ user.userId }}</p>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-calendar-plus"></i>
+            <p>
+              <strong>Ngày đăng ký:</strong> {{ formatDate(user.RegisterDate) }}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="filter_search" v-click-outside="closeDropdowns">
-      <filter-search ref="filterSearchRef" />
-    </div>
-    <div class="content">
-      <history-detail />
-    </div>
+
     <div class="footer">
       <div class="footer-content">
         <div class="footer-section about">
@@ -117,43 +159,155 @@
     </div>
   </div>
 </template>
+  
+  <script setup>
+import { storeToRefs } from "pinia";
+import { useAuthStore } from "../stores/auth";
 
-<script setup>
-import { ref } from "vue";
-import FilterSearch from "../components/History/FilerSearch.vue";
-import HistoryDetail from "../components/History/HistoryDetail.vue";
-import Logo from "../components/History/Logo.vue";
-import PageName from "../components/History/PageName.vue";
-import UserAvatar from "../components/History/UserAvatar.vue";
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+const { logout } = authStore;
 
-const filterSearchRef = ref(null);
-
-const closeDropdowns = () => {
-  if (filterSearchRef.value) {
-    filterSearchRef.value.closeAllDropdowns();
-  }
-};
-</script>
-
-<style>
-.filter_search {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 36px;
-  margin-bottom: auto;
-  margin-top: -100px;
+function formatDate(dateString) {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN");
 }
 
+const getImageUrl = (base64String) => {
+  return `data:image/png;base64,${base64String}`;
+};
+</script>
+  
+  <style scoped>
 .container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  margin: -8px;
 }
 
 .logo {
+  margin-bottom: 48px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+}
+.logo img {
+  width: 68%;
+}
+.profile-container {
+  /* margin: -2px; */
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: white;
+}
+
+.profile-sidebar {
+  width: 300px;
+  background-color: #6babf4;
+  padding: 2rem;
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.profile-image-container {
+  width: 200px;
+  height: 200px;
+  margin: 2rem auto 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid white;
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-sidebar h1 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.user-role {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 2rem;
+}
+
+.logout-button {
+  background-color: white;
+  color: #6babf4;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-style: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  margin-top: auto;
+}
+
+.logout-button:hover {
+  background-color: #f0f0f0;
+}
+
+.profile-main {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.info-card {
+  margin-top: 30px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.info-card h2 {
+  color: #6babf4;
+  border-bottom: 2px solid #6babf4;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.info-item i {
+  color: #6babf4;
+  font-size: 1.2rem;
+  width: 30px;
+}
+
+.info-item p {
+  margin: 0;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    flex-direction: column;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .profile-main {
+    padding: 1rem;
+  }
 }
 
 /* ------------------------------------------------------ */
@@ -308,18 +462,4 @@ const closeDropdowns = () => {
 }
 
 /* ------------------------------------------------------ */
-
-.content {
-  flex-grow: 1;
-  padding: 30px;
-}
-
-.footer {
-  margin: -6px;
-  background-color: lightgray;
-  padding: 1rem;
-  text-align: center;
-  margin-top: auto;
-  /* Đẩy footer xuống cuối trang */
-}
 </style>

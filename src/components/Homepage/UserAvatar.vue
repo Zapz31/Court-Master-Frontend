@@ -13,25 +13,25 @@
       </div>
       <div v-if="menuVisible" class="dropdown-content">
         <template v-if="userRole === 'customer'">
-          <router-link to="/customer/profile">View Profile</router-link>
-          <router-link to="/customer/booking">My Booking</router-link>
+          <router-link to="/customer/profile">Xem hồ sơ</router-link>
+          <router-link to="/customer/booking">Lịch đã đặt</router-link>
 
           <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho customer -->
         </template>
         <template v-else-if="userRole === 'staff'">
-          <router-link to="/staff/orders">Manage Orders</router-link>
-          <router-link to="/staff/customers">Manage Customers</router-link>
-          <router-link to="/customer/profile">My Profile</router-link>
+          <router-link to="/staff/orders">Quản lý lịch đặt</router-link>
+          <router-link to="/staff/customers">Quản lí khách hàng</router-link>
+          <router-link to="/customer/profile">Xem hồ sơ</router-link>
 
           <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho staff -->
         </template>
         <template v-else-if="userRole === 'manager'">
-          <router-link to="/manager/reports">Reports</router-link>
-          <router-link to="/manager/settings">Settings</router-link>
-          <router-link to="/customer/profile">My Profile</router-link>
-          <router-link to="/customer/profile">Manage my court</router-link>
+          <router-link to="/manager/reports">Báo cáo</router-link>
+          <router-link to="/manager/settings">Cài đặt</router-link>
+          <router-link to="/customer/profile">Xem hồ sơ</router-link>
+          <router-link to="/customer/profile">Quản lí sân</router-link>
 
           <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho manager -->
@@ -43,19 +43,15 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
-import router from "../../router";
 import { useAuthStore } from "../../stores/auth";
-import { storeToRefs } from 'pinia';
-
 
 const authStore = useAuthStore();
 
 // const { user } = storeToRefs(authStore);
- const link = ref("");
- const userName = ref("");
+const link = ref("");
+const userName = ref("");
 //  link.value = user.value.imageURL;
 //  userName.value = user.value.firstName;
-
 
 // ===========================================DATA TEST==============================================
 const props = defineProps({
@@ -101,7 +97,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
-  
 });
 
 const signout = async () => {
@@ -114,16 +109,16 @@ const signout = async () => {
 
     console.log(response.data);
     authStore.logout();
-    deleteCookie('uwu')
+    deleteCookie("uwu");
     // router.push("/login");
-    window.location.replace("/login")
+    window.location.replace("/login");
   } catch (error) {
     console.error("Đã xảy ra lỗi:", error);
   }
 };
 
 function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
 
 const getImageUrl = (base64String) => {
