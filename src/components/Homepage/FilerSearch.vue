@@ -387,11 +387,12 @@ const searchResults = ref([
   font-style: bold;
   background-color: white;
   display: flex;
-  padding: 10px;
+  padding: 8px;
   border-radius: 25px;
   max-width: 100%;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  flex-wrap: wrap;
 }
 
 .box:hover {
@@ -401,22 +402,26 @@ const searchResults = ref([
 .search {
   display: flex;
   align-items: center;
-  margin-right: 20px;
+  margin-right: 10px;
   position: relative;
+  flex: 1;
 }
 
 .search input[type="text"] {
   background-color: white;
   color: black;
-  padding: 10px;
+  padding: 8px;
   border: none;
   border-radius: 20px 0 0 20px;
   font-size: 16px;
   outline: none;
+  width: 100%;
+  max-width: 350px;
 }
 
 .button-func {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .button button[type="button"] {
@@ -425,10 +430,11 @@ const searchResults = ref([
   color: white;
   font-style: bold;
   cursor: pointer;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: 20px 0px 0px 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
+  margin-right: 5px;
 }
 
 .button button[type="button"]:hover {
@@ -444,7 +450,7 @@ const searchResults = ref([
   color: white;
   font-style: bold;
   cursor: pointer;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: 0 20px 20px 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
@@ -460,17 +466,21 @@ const searchResults = ref([
 .filter {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .filter-item {
-  margin-right: 10px;
+  margin-right: 8px;
   position: relative;
   cursor: pointer;
-  padding: 10px;
+  padding: 8px;
   background-color: white;
   border-radius: 10px;
   text-align: left;
   transition: transform 0.3s ease;
+  flex: 1;
+  min-width: 130px;
+  max-width: 180px;
 }
 
 .filter-item:hover {
@@ -517,7 +527,7 @@ const searchResults = ref([
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   padding: 10px;
-  /* z-index: 1; */
+  z-index: 1;
 }
 
 .dropdown-content div,
@@ -529,6 +539,11 @@ const searchResults = ref([
 .dropdown-content input[type="text"] {
   border: none;
   outline: none; /* Remove outline from dropdown input */
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  background-color: white;
 }
 
 .dropdown-content div:hover,
@@ -546,7 +561,6 @@ const searchResults = ref([
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   padding: 10px;
-  /* z-index: 1; */
   width: calc(100% - 60px);
 }
 

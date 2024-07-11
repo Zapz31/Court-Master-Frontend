@@ -1,7 +1,8 @@
 <template>
   <div class="container">
     <div class="logo">
-      <logo /><user-avatar />
+      <logo />
+      <user-avatar />
     </div>
 
     <div class="content">
@@ -14,6 +15,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { onMounted, ref } from "vue";
@@ -46,9 +48,7 @@ onMounted(() => {
 .content {
   flex-grow: 1;
   padding: 1rem;
-  margin-left: 20%;
-  margin-right: 20%;
-  margin-top: -100px;
+  margin: 0 20%;
 }
 
 .footer {
@@ -57,6 +57,27 @@ onMounted(() => {
   padding: 1rem;
   text-align: center;
   margin-top: auto;
-  /* Đẩy footer xuống cuối trang */
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .content {
+    margin: 0 10%;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin: 0 5%;
+  }
+
+  .logo {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer {
+    padding: 0.5rem;
+  }
 }
 </style>

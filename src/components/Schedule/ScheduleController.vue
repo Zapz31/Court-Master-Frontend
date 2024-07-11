@@ -168,8 +168,6 @@ watch(
   },
   { deep: true }
 );
-
-
 </script>
 
 <style scoped>
@@ -281,8 +279,9 @@ watch(
 }
 
 .logo {
-  height: 32px;
-  width: 120px;
+  margin: -10px;
+  height: 33px;
+  width: 78px;
 }
 
 .date-range-picker {

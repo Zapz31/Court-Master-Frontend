@@ -28,13 +28,18 @@
     <div class="clubAddress">
       <p>{{ currentClub.clubAddress }}</p>
     </div>
-    <button class="button">
-      <router-link
-        :to="{ name: 'ScheduleScreen', params: { clubId: currentClub.clubId } }"
-      >
-        View Schedule
-      </router-link>
-    </button>
+    <div>
+      <button class="button">
+        <router-link
+          :to="{
+            name: 'ScheduleScreen',
+            params: { clubId: currentClub.clubId },
+          }"
+        >
+          View Schedule
+        </router-link>
+      </button>
+    </div>
 
     <div class="time-frame-container">
       <table
@@ -545,8 +550,8 @@ h4 {
 }
 
 .time-frame-table {
-  margin-left: -100px;
-  width: 128%;
+  /* margin-left: -100px; */
+  width: 100%;
   border-collapse: collapse;
   margin-bottom: 2rem;
 }
@@ -831,5 +836,126 @@ textarea:focus {
   transition: 0.6s ease;
   border-radius: 0 3px 3px 0;
   user-select: none;
+}
+
+@media (max-width: 480px) {
+  .main-image {
+    max-height: 200px;
+  }
+
+  .button {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .time-frame-table th,
+  .time-frame-table td {
+    font-size: 8px;
+    padding: 3px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .main-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .time-frame-container {
+    overflow-x: auto;
+  }
+
+  .time-frame-table {
+    min-width: 600px;
+  }
+
+  .button {
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+
+  .commenter,
+  .comment {
+    width: 100%;
+  }
+
+  .form {
+    --width-of-input: 100%;
+  }
+
+  .input {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .name h1 {
+    font-size: 24px;
+  }
+
+  .clubAddress p {
+    font-size: 14px;
+  }
+
+  .navigation-buttons button {
+    font-size: 1.5rem;
+  }
+
+  .time-frame-table th,
+  .time-frame-table td {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .comments-container h4 {
+    font-size: 16px;
+  }
+
+  .rating:not(:checked) > label {
+    font-size: 24px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .name h1 {
+    font-size: 20px;
+  }
+
+  .clubAddress p {
+    font-size: 12px;
+  }
+
+  .button {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .navigation-buttons button {
+    font-size: 1.2rem;
+  }
+
+  .time-frame-table th,
+  .time-frame-table td {
+    padding: 4px;
+    font-size: 10px;
+  }
+
+  .comments-container h4 {
+    font-size: 14px;
+  }
+
+  .rating:not(:checked) > label {
+    font-size: 20px;
+  }
+
+  .avatar img,
+  .avatar1 img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .user-info1 {
+    margin-left: 10px;
+  }
 }
 </style>

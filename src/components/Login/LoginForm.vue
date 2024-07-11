@@ -25,7 +25,8 @@
           id="email_field" v-model="emailOrPhone" />
       </div>
     </div>
-    <p v-if="invalidMess === 'Your email is not registered'">Email hoặc số điện thoại của bạn chưa được đăng ký</p>
+    <div class="loginMess"><p v-if="invalidMess === 'Your email is not registered'">Your email or phone number has not been registered</p></div>
+    
     <!-- ------------------------------------------------------------------------------------- -->
     <div class="input_container">
       <label class="input_label" for="password_field">Password</label>
@@ -46,7 +47,8 @@
 
     </div>
   </div>
-  <p v-if="invalidMess === 'Invalid password'">Mật khẩu không hợp lệ</p>
+  <div class="loginMess"><p v-if="invalidMess === 'Invalid password'">Invalid password</p></div>
+  
 
   <!-- ------------------------------------------------------------------------------------- -->
 
@@ -215,6 +217,12 @@ function setCookie(name, value, days) {
     0px 7px 15px rgba(0, 0, 0, 0.1), 0px 0px 0px rgba(0, 0, 0, 0.1);
   border-radius: 11px;
   font-family: "Inter", sans-serif;
+}
+
+.loginMess{
+  display: flex;
+  justify-content: center;
+  color: red;
 }
 
 .title_container {

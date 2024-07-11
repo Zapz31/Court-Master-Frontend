@@ -21,6 +21,7 @@ import { useClubStore } from '../../stores/clubMng';
 import { storeToRefs } from 'pinia'
 import axios from 'axios';
 import { computed } from 'vue';
+import router from '../../router';
 axios.defaults.withCredentials = true;
 
 const useClubStr = useClubStore();
@@ -65,6 +66,7 @@ onMounted(async () => {
         
             const response = await axios.post(`http://localhost:8080/courtmaster/booking/payment-handle`,payload);
             console.log('Response from server:', response.data);
+            router.push("/payment-success")
         } 
     }catch (error) {
             console.error('Error sending payment data:', error);
