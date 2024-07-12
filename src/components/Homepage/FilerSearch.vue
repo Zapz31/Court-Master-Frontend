@@ -410,9 +410,9 @@ const clearFilterSearch = async () => {
   font-style: bold;
   background-color: white;
   display: flex;
-  padding: 8px;
+  padding: 4px;
   border-radius: 25px;
-  max-width: 100%;
+  max-width: 88%;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   flex-wrap: wrap;
@@ -431,6 +431,7 @@ const clearFilterSearch = async () => {
 }
 
 .search input[type="text"] {
+  width: 100%;
   background-color: white;
   color: black;
   padding: 8px;
@@ -494,7 +495,7 @@ const clearFilterSearch = async () => {
 
 .filter-item {
   font-weight: bold;
-  font-size: 14px;
+  font-size: 12px;
   margin-right: 8px;
   position: relative;
   cursor: pointer;
@@ -504,8 +505,8 @@ const clearFilterSearch = async () => {
   text-align: left;
   transition: transform 0.3s ease;
   flex: 1;
-  min-width: 130px;
-  max-width: 180px;
+  min-width: 100px;
+  max-width: 130px;
 }
 
 .filter-item:hover {

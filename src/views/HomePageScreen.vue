@@ -2,15 +2,22 @@
   <div class="container">
     <div class="logo">
       <logo />
+      <h1>Homepage</h1>
       <user-avatar />
     </div>
     <div class="filter_search" v-click-outside="closeDropdowns">
       <filter-search ref="filterSearchRef" />
     </div>
     <div class="content">
-      <div class="club-list">
-        <club-card />
-        <!-- Add more club cards here as needed -->
+      <div v-if="clubStore.clubs.length > 0" class="club-list">
+        <club-card
+          v-for="club in clubStore.clubs"
+          :key="club.clubId"
+          :club="club"
+        />
+      </div>
+      <div v-else class="no-results">
+        <p>Không có kết quả nào được tìm thấy</p>
       </div>
     </div>
     <div class="footer">
@@ -120,11 +127,14 @@
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import ClubCard from "../components/Homepage/ClubCard.vue";
 import FilterSearch from "../components/Homepage/FilerSearch.vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
+import { useClubStore } from "../stores/clubMng";
+
+const clubStore = useClubStore();
 
 const filterSearchRef = ref(null);
 
@@ -133,6 +143,11 @@ const closeDropdowns = () => {
     filterSearchRef.value.closeAllDropdowns();
   }
 };
+onMounted(async () => {
+  if (clubStore.clubs.length === 0) {
+    await clubStore.fetchClubs();
+  }
+});
 </script>
 
 <style>
@@ -146,6 +161,10 @@ const closeDropdowns = () => {
   display: flex;
   justify-content: space-between;
   padding: 10px;
+}
+.logo h1 {
+  margin-top: 48px;
+  color: #6babf4;
 }
 
 .filter_search {
@@ -364,6 +383,13 @@ const closeDropdowns = () => {
   .footer {
     padding: 0.5rem;
   }
+}
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  color: #666;
 }
 
 @media (max-width: 480px) {
