@@ -393,15 +393,15 @@ const performSearch = async () => {
 const clearFilterSearch = async () => {
   searchQuery.value = "";
   selectedCity.value = "";
-  cityLabel.value = "City/Province";
+  cityLabel.value = "Tỉnh/Thành phố";
   selectedDistrict.value = "";
-  districtLabel.value = "District";
+  districtLabel.value = "Quận/Huyện";
   selectedWard.value = "";
-  wardLabel.value = "Ward";
+  wardLabel.value = "Phường/Xã";
   openTime.value = "";
-  openTimeLabel.value = "Opened time";
+  openTimeLabel.value = "Giờ mở cửa";
   hoursExpect.value = "";
-  hoursExpectLabel.value = "Hours of expect";
+  hoursExpectLabel.value = "Giờ chơi mong đợi";
 };
 </script>
 
@@ -411,9 +411,10 @@ const clearFilterSearch = async () => {
   background-color: white;
   display: flex;
   padding: 4px;
+  border: solid#6babf4;
   border-radius: 25px;
   max-width: 88%;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); */
   transition: transform 0.3s ease;
   flex-wrap: wrap;
 }
