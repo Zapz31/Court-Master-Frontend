@@ -10,11 +10,7 @@
     </div>
     <div class="content">
       <div v-if="clubStore.clubs.length > 0" class="club-list">
-        <club-card
-          v-for="club in clubStore.clubs"
-          :key="club.clubId"
-          :club="club"
-        />
+        <club-card />
       </div>
       <div v-else class="no-results">
         <p>Không có kết quả nào được tìm thấy</p>
