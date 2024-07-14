@@ -1,30 +1,30 @@
 <template>
   <div class="container">
-    <h1>Confirm Payment Information</h1>
+    <h1>Thông tin thanh toán</h1>
 
     <section class="info-section">
-      <h2>Club Information</h2>
+      <h2>Thông tin câu lạc bộ</h2>
       <div class="payment-info">
         <div class="info-item">
-          <span class="label">Club Name:</span>
+          <span class="label">Tên:</span>
           <span class="value">{{ clubName }}</span>
         </div>
         <div class="info-item">
-          <span class="label">Phone number:</span>
+          <span class="label">Số điện thoại quản lí:</span>
           <span class="value">{{ courtManagerPhone }}</span>
         </div>
       </div>
     </section>
 
     <section class="info-section">
-      <h2>Individual Information</h2>
+      <h2>Thông tin cá nhân</h2>
       <div class="payment-info">
         <div class="info-item">
-          <span class="label">Fullname:</span>
+          <span class="label">Họ và tên:</span>
           <span class="value">{{ fullName }}</span>
         </div>
         <div class="info-item">
-          <span class="label">Phone number:</span>
+          <span class="label">Số điện thoại:</span>
           <span class="value">{{ user.phoneNumber }}</span>
         </div>
         <div class="info-item">
@@ -32,16 +32,16 @@
           <span class="value">{{ user.email }}</span>
         </div>
         <div class="info-item">
-          <span class="label">Total Playing Time (hours):</span>
+          <span class="label">Tổng giờ chơi (h):</span>
           <span class="value">{{ totalPlayingTime }}</span>
         </div>
       </div>
     </section>
 
     <section class="info-section">
-      <h2>Payment Information</h2>
+      <h2>Thông tin thanh toán</h2>
       <div class="info-item">
-        <span class="label">Total Price:</span>
+        <span class="label">Tổng chi phí:</span>
         <span class="value">{{ formatPrice(calculatedTotalPrice) }} đ</span>
       </div>
       <div class="wrapper">
@@ -55,7 +55,7 @@
             class="input"
           />
           <label for="fullyPay" class="btn">
-            <span class="span">Fully Pay</span>
+            <span class="span">Trả trước toàn bộ</span>
           </label>
         </div>
         <div class="option">
@@ -68,7 +68,7 @@
             class="input"
           />
           <label for="deposit50" class="btn">
-            <span class="span">Deposited 50%</span>
+            <span class="span">Trả trước 50%</span>
           </label>
         </div>
         <div class="option">
@@ -81,23 +81,23 @@
             class="input"
           />
           <label for="deposit25" class="btn">
-            <span class="span">Deposited 25%</span>
+            <span class="span">Trả trước 25%</span>
           </label>
         </div>
       </div>
     </section>
 
     <section class="info-section">
-      <h2>Booking Details</h2>
+      <h2>Thông tin đặt sân</h2>
       <table class="booking-table">
         <thead>
           <tr>
-            <th>Court Name</th>
-            <th>Start Booking</th>
-            <th>End Booking</th>
-            <th>Booking Date</th>
-            <th>Booking Type</th>
-            <th>Price</th>
+            <th>Sân</th>
+            <th>Giờ bắt đầu</th>
+            <th>Giờ bắt kết thúc</th>
+            <th>Ngày đặt</th>
+            <th>Loại lịch</th>
+            <th>Chi phí</th>
           </tr>
         </thead>
         <tbody>
@@ -106,7 +106,7 @@
             <td>{{ slot.startBooking }}</td>
             <td>{{ slot.endBooking }}</td>
             <td>{{ slot.bookingDate }}</td>
-            <td>{{ slot.bookingType }}</td>
+            <td>{{ translateBookingType(slot.bookingType) }}</td>
             <td>{{ formatPrice(slot.price) }} đ</td>
           </tr>
         </tbody>
@@ -115,9 +115,9 @@
 
     <div class="actions">
       <button @click="confirmPayment(calculatedTotalPrice)" class="confirm-btn">
-        Confirm
+        Xác nhận
       </button>
-      <button @click="goBack" class="back-btn">Go Back</button>
+      <button @click="goBack" class="back-btn">Trở về</button>
     </div>
   </div>
 </template>
@@ -174,6 +174,19 @@ const getCourtName = (courtId) => {
     (c) => c.courtId === courtId
   );
   return court ? court.courtName : courtId;
+};
+
+const translateBookingType = (bookingType) => {
+  switch (bookingType) {
+    case "One-time play":
+      return "Lịch trong ngày";
+    case "Flexible":
+      return "Lịch linh hoạt";
+    case "Fixed":
+      return "Lịch cố định";
+    default:
+      return bookingType; // Trả về giá trị gốc nếu không khớp
+  }
 };
 
 const formattedBookings = computed(() => {

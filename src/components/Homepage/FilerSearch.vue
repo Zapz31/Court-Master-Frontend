@@ -503,23 +503,25 @@ const clearFilterSearch = async () => {
   padding: 5px;
   background-color: white;
   border-radius: 10px;
-  text-align: left;
-  transition: transform 0.3s ease;
+  text-align: center;
+  transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
   flex: 1;
   min-width: 100px;
   max-width: 130px;
 }
 
 .filter-item:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  background-color: #6babf4;
+  color: white;
 }
 
 .filter-item input {
   width: 78%;
   padding: 0px;
-  border: none; /* Remove border from filter input */
+  border: none;
   border-radius: 5px;
-  outline: none; /* Remove outline */
+  outline: none;
 }
 
 .dropdown-toggle {
@@ -527,7 +529,7 @@ const clearFilterSearch = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 5px 0px;
-  border: none; /* Remove border from dropdown toggle */
+  border: none;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -561,11 +563,12 @@ const clearFilterSearch = async () => {
 .dropdown-content input {
   padding: 10px;
   cursor: pointer;
+  color: black;
 }
 
 .dropdown-content input[type="text"] {
   border: none;
-  outline: none; /* Remove outline from dropdown input */
+  outline: none;
   width: 100%;
   padding: 5px 10px;
   font-size: 14px;
@@ -573,9 +576,15 @@ const clearFilterSearch = async () => {
   background-color: white;
 }
 
-.dropdown-content div:hover,
-.dropdown-content input:hover {
-  background-color: #ddd;
+.dropdown-content div:hover {
+  background-color: #f1f1f1;
+}
+
+.scroll-indicator {
+  text-align: center;
+  font-style: italic;
+  color: #888;
+  padding: 5px;
 }
 
 .search-results {

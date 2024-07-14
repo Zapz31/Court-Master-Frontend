@@ -173,6 +173,7 @@ onMounted(async () => {
 }
 
 .content {
+  max-width: 3000px;
   flex-grow: 1;
   display: flex;
   justify-content: center;

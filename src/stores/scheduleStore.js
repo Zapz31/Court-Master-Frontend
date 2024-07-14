@@ -217,7 +217,7 @@ export const useScheduleStore = defineStore('schedule', {
         if (duplicateSlots.length > 0) {
           this.invalidSlots = duplicateSlots;
           const errorMessages = duplicateSlots.map(slot =>
-            `Slot at court ${slot.courtName} from ${slot.startTime.slice(0, 5)} to ${slot.endTime.slice(0, 5)} - ${this.formatDate(slot.bookingDate)} is already booked, please try another time.\n`
+            `Giờ chơi tại sân ${slot.courtName} từ ${slot.startTime.slice(0, 5)} đến ${slot.endTime.slice(0, 5)} - ${this.formatDate(slot.bookingDate)} đã được đặt, vui lòng chọn 1 giờ chơi khác.\n`
           );
           this.duplicateSlotError = errorMessages.join('\n');
           this.setErrorMessage(this.duplicateSlotError, 10000, true); // Display error for 10s and mark as duplicate error

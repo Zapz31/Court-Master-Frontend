@@ -245,7 +245,7 @@ const fetchClubData = async () => {
 
 const playModes = ref([
   { api: "flexible", display: "Lịch linh hoạt" },
-  { api: "oneTimePlay", display: "Lịch một ngày" },
+  { api: "oneTimePlay", display: "Lịch trong ngày" },
   { api: "fixed", display: "Lịch cố định" },
 ]);
 const formatPrice = (price) => {

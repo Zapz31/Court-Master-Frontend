@@ -13,7 +13,7 @@
     </div>
     <div v-else class="date-range-picker">
       <div class="date-picker">
-        <label>Start Date:</label>
+        <label>Ngày bắt đầu:</label>
         <input
           type="date"
           :value="selectedDate"
@@ -22,7 +22,7 @@
         />
       </div>
       <div class="date-picker">
-        <label>End Date:</label>
+        <label>Ngày kết thúc:</label>
         <input
           type="date"
           :value="endDate"
@@ -33,16 +33,16 @@
       </div>
     </div>
     <div class="type-dropdown">
-      <label>Type:</label>
+      <label>Loại lịch:</label>
       <select v-model="selectedType" @change="updateCurrentBookingType">
-        <option value="one-time">One Time</option>
-        <option value="flexible">Flexible</option>
-        <option value="fixed">Fixed</option>
+        <option value="one-time">Lịch trong ngày</option>
+        <option value="flexible">Lịch linh hoạt</option>
+        <option value="fixed">Lịch cố định</option>
       </select>
     </div>
 
     <button v-if="currentClub" class="book-btn" @click="prepareBookingData">
-      Book
+      Đặt sân
     </button>
     <button v-else class="book-btn" disabled>Please choose your slot</button>
 
@@ -89,7 +89,7 @@ const prepareBookingData = () => {
     !scheduleStore.bookingResponse ||
     !scheduleStore.bookingResponse.unpaidBookingList.length
   ) {
-    scheduleStore.setErrorMessage("Please select at least one slot.");
+    scheduleStore.setErrorMessage("Vui lòng chọn ít nhất 1 giờ chơi.");
     return;
   }
 
@@ -101,7 +101,7 @@ const prepareBookingData = () => {
 
   if (!allSameType) {
     scheduleStore.setErrorMessage(
-      "All selected slots must have the same booking type."
+      "Tất cả giờ chơi cần có chung một loại lịch."
     );
     return;
   }
@@ -188,6 +188,7 @@ watch(
 
 .book-btn {
   padding: 10px 20px;
+  font-weight: bold;
   background-color: #6babf4;
   color: white;
   border: none;

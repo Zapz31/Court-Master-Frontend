@@ -82,6 +82,17 @@ const routes = [
         name: 'PaymentSuccess',
         component: () => import('../views/PaymentSuccess.vue') ,
     },
+
+    {
+        path: '/unable-access',
+        name: 'UnableAccessScreen',
+        component: () => import('../views/ErrorScreen/UnableAccessScreen.vue') ,
+    },
+    {
+        path: '/page-not-found',
+        name: 'PageNotFound',
+        component: () => import('../views/ErrorScreen/PageNotFoundScreen.vue') ,
+    },
 ]
 
 const router = createRouter({

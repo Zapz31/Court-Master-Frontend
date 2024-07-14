@@ -8,9 +8,9 @@
     >
       <thead>
         <tr>
-          <th class="time-column">Time</th>
+          <th class="time-column">Thời gian</th>
           <th v-for="court in sortedCourts" :key="court.courtId">
-            {{ court.courtName }}
+            Sân {{ court.courtName }}
           </th>
         </tr>
       </thead>

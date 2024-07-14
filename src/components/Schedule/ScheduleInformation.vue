@@ -5,7 +5,7 @@
       <span v-else>&#9664;</span>
     </button>
     <div class="schedule-information" ref="infoPanel">
-      <h3>Booking Information</h3>
+      <h3>Thông tin đặt sân</h3>
       <div class="info-scroll">
         <div v-if="formattedBookings.length > 0">
           <div
@@ -13,25 +13,27 @@
             :key="index"
             class="info-item"
           >
-            <label>Date: {{ booking.date }}</label>
-            <label>Time: {{ booking.startTime }} - {{ booking.endTime }}</label>
-            <label>Duration: {{ booking.playTime }}</label>
-            <label>Price: {{ formatPrice(booking.price) }}₫</label>
-            <label>Booking Type: {{ booking.bookingType }}</label>
-            <label>Court: {{ booking.courtName }}</label>
+            <label>Ngày chơi: {{ booking.date }}</label>
+            <label
+              >Thời gian: {{ booking.startTime }} - {{ booking.endTime }}</label
+            >
+            <label>Thời lượng: {{ booking.playTime }}</label>
+            <label>Chi phí: {{ formatPrice(booking.price) }}₫</label>
+            <label>Loại lịch: {{ booking.bookingType }}</label>
+            <label>Sân: {{ booking.courtName }}</label>
           </div>
         </div>
         <div v-else class="info-item">
-          <label>Not selected time yet</label>
+          <label>Chưa có giờ chơi nào được chọn</label>
         </div>
       </div>
       <div v-if="scheduleStore.bookingResponse" class="total-info">
         <label
-          >Total Price:
+          >Tổng chi phí:
           {{ formatPrice(scheduleStore.bookingResponse.totalPrice) }}₫</label
         >
         <label
-          >Total Hours: {{ scheduleStore.bookingResponse.totalHour }}</label
+          >Tổng thời lượng: {{ scheduleStore.bookingResponse.totalHour }}</label
         >
       </div>
     </div>
@@ -64,8 +66,8 @@ const formattedBookings = computed(() => {
     endTime: scheduleStore.formatTimeFromBackend(booking.endBooking),
     playTime: booking.playTime,
     price: booking.price,
-    bookingType: scheduleStore.formatBookingTypeFromBackend(
-      booking.bookingType
+    bookingType: translateBookingType(
+      scheduleStore.formatBookingTypeFromBackend(booking.bookingType)
     ),
     courtName: getCourtName(booking.courtId),
   }));
@@ -76,6 +78,19 @@ const getCourtName = (courtId) => {
     (c) => c.courtId === courtId
   );
   return court ? court.courtName : courtId;
+};
+
+const translateBookingType = (bookingType) => {
+  switch (bookingType) {
+    case "One-time play":
+      return "Lịch trong ngày";
+    case "Flexible":
+      return "Lịch linh hoạt";
+    case "Fixed":
+      return "Lịch cố định";
+    default:
+      return bookingType; // Trả về giá trị gốc nếu không khớp
+  }
 };
 </script>
 

@@ -57,6 +57,10 @@ const setCurrentClub = (club) => {
   gap: 20px;
 }
 
+.club-list h3 {
+  color: #0d66cd;
+}
+
 .club-card {
   padding: 20px;
   width: 250px;
