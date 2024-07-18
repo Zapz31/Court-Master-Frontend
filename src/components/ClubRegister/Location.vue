@@ -1,27 +1,27 @@
 <template>
   <div class="location-form">
-    <h1 class="title"><strong>II. Location</strong></h1>
+    <h1 class="title"><strong>II. Địa chỉ</strong></h1>
     <div class="grid-container">
       <div class="grid-item">
-        <h4 class="sub-title"><strong><em>City/Province</em></strong></h4>
+        <h4 class="sub-title"><strong><em>Tỉnh/Thành phố</em></strong></h4>
         <select v-model="form.selectedCity" class="dropdown" @change="onCityChange">
-          <option value="" disabled selected>Select City/Province</option>
+          <option value=""></option>
           <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
         </select>
         <p v-if="errors.city" class="error-message">{{ errors.city }}</p>
       </div>
       <div class="grid-item">
-        <h4 class="sub-title"><strong><em>District</em></strong></h4>
-        <select v-model="form.selectedDistrict" class="dropdown" @change="onDistrictChange" :disabled="!form.selectedCity">
-          <option value="" disabled selected>Select District</option>
+        <h4 class="sub-title"><strong><em>Quận/Huyện</em></strong></h4>
+        <select v-model="form.selectedDistrict" class="dropdown" @change="onDistrictChange">
+          <option value=""></option>
           <option v-for="district in filteredDistricts" :key="district" :value="district">{{ district }}</option>
         </select>
         <p v-if="errors.district" class="error-message">{{ errors.district }}</p>
       </div>
       <div class="grid-item">
-        <h4 class="sub-title"><strong><em>Ward/Commune</em></strong></h4>
-        <select v-model="form.selectedWard" class="dropdown" :disabled="!form.selectedDistrict">
-          <option value="" disabled selected>Select Ward/Commune</option>
+        <h4 class="sub-title"><strong><em>Phường/Thị trấn/Xã</em></strong></h4>
+        <select v-model="form.selectedWard" class="dropdown" @change="onWardChange">
+          <option value=""></option>
           <option v-for="ward in filteredWards" :key="ward" :value="ward">{{ ward }}</option>
         </select>
         <p v-if="errors.ward" class="error-message">{{ errors.ward }}</p>
@@ -29,9 +29,9 @@
     </div>
 
     <div class="address-container">
-      <h4 class="sub-title"><strong><em>Address</em></strong></h4>
-      <textarea v-model="form.address" class="input-field address-input" @input="validateAddress"></textarea>
-      <p v-if="errors.address" class="error-message">{{ errors.address }}</p>
+      <h4 class="sub-title"><strong><em>Địa chỉ</em></strong></h4>
+      <textarea v-model="form.unitNumber" class="input-field address-input" @input="validateAddress"></textarea>
+      <p v-if="errors.unitNumber" class="error-message">{{ errors.unitNumber }}</p>
     </div>
   </div>
 </template>
@@ -43,15 +43,25 @@ const form = reactive({
   selectedCity: '',
   selectedDistrict: '',
   selectedWard: '',
-  address: ''
+  unitNumber: '' // Thay đổi từ 'address' thành 'unitNumber'
 });
 
 const errors = reactive({
   city: '',
   district: '',
   ward: '',
-  address: ''
+  unitNumber: '' // Thay đổi từ 'address' thành 'unitNumber'
 });
+
+const validateAddress = () => {
+  if (!form.unitNumber.trim()) {
+    errors.unitNumber = 'Address is required';
+  } else if (form.unitNumber.length < 5) {
+    errors.unitNumber = 'Address must be at least 5 characters long';
+  } else {
+    errors.unitNumber = '';
+  }
+};
 
 // Example data - replace with actual data or API calls
 const cities = ['Ho Chi Minh City', 'Hanoi', 'Da Nang', 'Can Tho', 'Hai Phong'];
@@ -85,6 +95,10 @@ const onDistrictChange = () => {
   validateDistrict();
 };
 
+const onWardChange = () => {
+  validateWard();
+};
+
 const validateCity = () => {
   errors.city = form.selectedCity ? '' : 'Please select a city';
 };
@@ -96,16 +110,6 @@ const validateDistrict = () => {
 const validateWard = () => {
   errors.ward = form.selectedWard ? '' : 'Please select a ward';
 };
-
-const validateAddress = () => {
-  if (!form.address.trim()) {
-    errors.address = 'Address is required';
-  } else if (form.address.length < 5) {
-    errors.address = 'Address must be at least 5 characters long';
-  } else {
-    errors.address = '';
-  }
-};
 </script>
 
 <style scoped>
@@ -115,7 +119,7 @@ const validateAddress = () => {
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 0px 0px 0px 0px;
-  box-shadow: 0px 0px 2px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 .title {

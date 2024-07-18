@@ -1,73 +1,55 @@
 <template>
   <div class="general-form">
-    <h1 class="title"><strong>I. General</strong></h1>
+    <h1 class="title"><strong>I. Thông tin chung</strong></h1>
 
     <h4 class="sub-title">
-      <strong><em>Club Name</em></strong>
+      <strong><em>Tên câu lạc bộ</em></strong>
     </h4>
-    <textarea
-      v-model="form.clubName"
-      class="input-field"
-      @input="validateClubName"
-    ></textarea>
+    <textarea v-model="form.badmintonClub.badmintonClubName" class="input-field" @input="validateClubName"></textarea>
     <p v-if="errors.clubName" class="error-message">{{ errors.clubName }}</p>
 
     <h4 class="sub-title">
-      <strong><em>Description</em></strong>
+      <strong><em>Mô tả</em></strong>
     </h4>
-    <textarea
-      v-model="form.description"
-      class="input-field description-input"
-      @input="validateDescription"
-    ></textarea>
+    <textarea v-model="form.badmintonClub.description" class="input-field description-input"
+      @input="validateDescription"></textarea>
     <p v-if="errors.description" class="error-message">
       {{ errors.description }}
     </p>
 
+    <!-- Court section -->
+    <div class="court-section">
+      <h4 class="sub-title">
+        <strong><em>Tên sân</em></strong>
+      </h4>
+      <div v-for="(court, courtIndex) in form.courtList" :key="courtIndex" class="court-input">
+        <input type="text" v-model="court.courtName" placeholder="Nhập tên sân" @input="validateCourts" />
+        <button @click="removeCourt(courtIndex)" class="remove-court-btn">Bỏ</button>
+      </div>
+      <button @click="addCourt" class="add-court-btn">Thêm sân</button>
+      <p v-if="errors.courts" class="error-message">{{ errors.courts }}</p>
+    </div>
+
     <h4 class="sub-title">
-      <strong><em>Avatar Image</em></strong>
+      <strong><em>Ảnh chính</em></strong>
     </h4>
-    <input
-      type="file"
-      @change="onAvatarUpload"
-      accept="image/*"
-      class="file-input"
-      ref="avatarInput"
-    />
+    <input type="file" @change="onAvatarUpload" accept="image/*" class="file-input" ref="avatarInput" />
     <p v-if="errors.avatar" class="error-message">{{ errors.avatar }}</p>
     <div v-if="form.avatarPreview" class="image-container avatar-container">
-      <img
-        :src="form.avatarPreview"
-        alt="Avatar Preview"
-        class="image-preview avatar-preview"
-      />
+      <img :src="form.avatarPreview" alt="Avatar Preview" class="image-preview avatar-preview" />
       <button @click="removeAvatar" class="remove-button">×</button>
     </div>
 
     <h4 class="sub-title">
-      <strong><em>Description Images</em></strong>
+      <strong><em>Ảnh phụ</em></strong>
     </h4>
-    <input
-      type="file"
-      @change="onDescriptionImagesUpload"
-      accept="image/*"
-      multiple
-      class="file-input"
-    />
+    <input type="file" @change="onDescriptionImagesUpload" accept="image/*" multiple class="file-input" />
     <p v-if="errors.descriptionImages" class="error-message">
       {{ errors.descriptionImages }}
     </p>
     <div class="image-grid">
-      <div
-        v-for="(image, index) in form.descriptionImages"
-        :key="index"
-        class="image-container"
-      >
-        <img
-          :src="image.preview"
-          alt="Description Image"
-          class="description-image"
-        />
+      <div v-for="(image, index) in form.descriptionImages" :key="index" class="image-container">
+        <img :src="image.preview" alt="Description Image" class="description-image" />
         <button @click="removeImage(index)" class="remove-button">×</button>
       </div>
     </div>
@@ -78,11 +60,19 @@
 import { reactive, ref } from "vue";
 
 const form = reactive({
-  clubName: "",
-  description: "",
-  avatar: null,
-  avatarPreview: null,
-  descriptionImages: [],
+  badmintonClub: {
+    badmintonClubName: "",
+    description: "",
+    courtManagerId: "STF000010" // You might want to make this dynamic later
+  },
+  address: {
+    unitNumber: "",
+    ward: "",
+    district: "",
+    province: ""
+  },
+  timeFramesList: [], // We'll add this later in the full component
+  courtList: []
 });
 
 const errors = reactive({
@@ -90,7 +80,28 @@ const errors = reactive({
   description: "",
   avatar: "",
   descriptionImages: "",
+  courts: "",
 });
+
+const addCourt = () => {
+  form.courtList.push({ courtName: "" });
+};
+
+const removeCourt = (index) => {
+  if (form.courtList.length > 1) {
+    form.courtList.splice(index, 1);
+  } else {
+    errors.courts = "You must have at least one court";
+  }
+};
+
+const validateCourts = () => {
+  if (form.courtList.some(court => court.courtName.trim() === "")) {
+    errors.courts = "All court names must be filled";
+  } else {
+    errors.courts = "";
+  }
+};
 
 const avatarInput = ref(null);
 
@@ -171,6 +182,54 @@ const removeImage = (index) => {
 </script>
 
 <style scoped>
+.court-section {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.court-input {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.court-input input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.add-court-btn,
+.remove-court-btn {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.add-court-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.add-court-btn:hover {
+  background-color: #218838;
+}
+
+.remove-court-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.remove-court-btn:hover {
+  background-color: #c82333;
+}
+
 .error-message {
   color: red;
   font-size: 0.8em;
@@ -183,7 +242,7 @@ const removeImage = (index) => {
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px 8px 0px 0px;
-  box-shadow: 0px -1px 2px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 .title {

@@ -8,13 +8,13 @@
         <thead>
           <tr>
             <th>No</th>
-            <th>Slot ID</th>
-            <th>Date</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-            <th>Price/Hours</th>
-            <th>Check in</th>
-            <th>Court name</th>
+            <th>ID Khung giờ</th>
+            <th>Ngày đặt</th>
+            <th>Giờ bắt đầu</th>
+            <th>Giờ kết thúc</th>
+            <th>Giá/Giờ</th>
+            <th>Trạng thái check-in</th>
+            <th>Tên sân</th>
           </tr>
         </thead>
         <tbody>
@@ -25,8 +25,8 @@
             <td>{{ item.startTime }}</td>
             <td>{{ item.endTime }}</td>
             <td>{{ item.price }}</td>
-            <td v-if="item.isCheckIn === 0">Not checked in</td>
-            <td v-else>Checked in</td>
+            <td v-if="item.isCheckIn === 0">Chưa checked in</td>
+            <td v-else>Đã checked in</td>
             <td>{{ item.courtName }}</td>
             <td>
               <span class="status" :class="item.status">

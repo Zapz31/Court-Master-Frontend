@@ -3,7 +3,7 @@
     <div class="table-container">
       <div class="button-container">
         <button @click="deleteSelected" :disabled="!hasSelection" class="delete-button">
-          Delete Selected
+          Xóa lựa chọn
         </button>
       </div>
       <div class="table">
@@ -11,16 +11,16 @@
           <thead>
             <tr>
               <th></th>
-              <th>No</th>
+              <th>STT</th>
               <th>ID</th>
-              <th>Club Name</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Total price/hours</th>
-              <th>Manager Phone</th>
-              <th>Booking Slot</th>
+              <th>Tên câu lạc bộ</th>
+              <th>Loại</th>
+              <th>Trạng thái</th>
+              <th>Ngày bắt đầu</th>
+              <th>Ngày kết thúc</th>
+              <th>Tổng giá/giờ</th>
+              <th>SĐT người quản lý</th>
+              <th>Khung giờ</th>
             </tr>
           </thead>
           <tbody>

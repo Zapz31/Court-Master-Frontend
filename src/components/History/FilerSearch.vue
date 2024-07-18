@@ -1,64 +1,34 @@
 <template>
   <div class="box" @click.self="closeAllDropdowns">
     <div class="search">
-      <input
-        v-model="searchQuery"
-        placeholder="Type club name or manager phone..."
-        type="text"
-      />
+      <input v-model="searchQuery" placeholder="Nhập tên câu lạc bộ/SĐT" type="text" />
     </div>
     <div class="filter">
       <div class="filter-item">
-        <div
-          class="dropdown-toggle"
-          @click="toggleDropdown('startDate')"
-          :class="{ active: dropdowns.startDate }"
-        >
+        <div class="dropdown-toggle" @click="toggleDropdown('startDate')" :class="{ active: dropdowns.startDate }">
           <span>{{ startDate || startDateLabel }}</span>
           <i class="fas fa-calendar"></i>
         </div>
         <div v-if="dropdowns.startDate" class="dropdown-content" @click.stop>
-          <input
-            type="date"
-            v-model="startDate"
-            @change="selectStartDate"
-            class="date-input"
-          />
+          <input type="date" v-model="startDate" @change="selectStartDate" class="date-input" />
         </div>
       </div>
       <div class="filter-item">
-        <div
-          class="dropdown-toggle"
-          @click="toggleDropdown('endDate')"
-          :class="{ active: dropdowns.endDate }"
-        >
+        <div class="dropdown-toggle" @click="toggleDropdown('endDate')" :class="{ active: dropdowns.endDate }">
           <span>{{ endDate || endDateLabel }}</span>
           <i class="fas fa-calendar"></i>
         </div>
         <div v-if="dropdowns.endDate" class="dropdown-content" @click.stop>
-          <input
-            type="date"
-            v-model="endDate"
-            @change="selectEndDate"
-            class="date-input"
-          />
+          <input type="date" v-model="endDate" @change="selectEndDate" class="date-input" />
         </div>
       </div>
       <div class="filter-item">
-        <div
-          class="dropdown-toggle"
-          @click="toggleDropdown('type')"
-          :class="{ active: dropdowns.type }"
-        >
+        <div class="dropdown-toggle" @click="toggleDropdown('type')" :class="{ active: dropdowns.type }">
           <span>{{ selectedType || typeLabel }}</span>
           <i class="fas fa-chevron-down"></i>
         </div>
         <div v-if="dropdowns.type" class="dropdown-content" @click.stop>
-          <div
-            v-for="type in types"
-            :key="type"
-            @click="selectType(type)"
-          >
+          <div v-for="type in types" :key="type" @click="selectType(type)">
             {{ type }}
           </div>
         </div>
@@ -96,9 +66,9 @@ const dropdowns = ref({
   type: false,
 });
 
-const startDateLabel = ref("Start Date");
-const endDateLabel = ref("End Date");
-const typeLabel = ref("Type");
+const startDateLabel = ref("Ngày bắt đầu");
+const endDateLabel = ref("Ngày kết thúc");
+const typeLabel = ref("Loại lịch");
 
 const types = ["One-time play", "Fixed", "Flexible"];
 
@@ -109,7 +79,7 @@ const toggleDropdown = (dropdown) => {
       dropdowns.value[key] = false;
     }
   });
-  
+
   // Toggle the clicked dropdown
   dropdowns.value[dropdown] = !dropdowns.value[dropdown];
 };
@@ -178,9 +148,9 @@ const clearFilterSearch = () => {
   startDate.value = '';
   endDate.value = '';
   selectedType.value = '';
-  startDateLabel.value = 'Start Date';
-  endDateLabel.value = 'End Date';
-  typeLabel.value = 'Type';
+  startDateLabel.value = 'Ngày bắt đầu';
+  endDateLabel.value = 'Ngày kết thúc';
+  typeLabel.value = 'Loại lịch';
 };
 </script>
 
@@ -204,17 +174,13 @@ const clearFilterSearch = () => {
 
 .box {
   background-color: white;
+  margin-bottom: 45px;
   display: flex;
   padding: 10px;
   border-radius: 25px;
   max-width: 100%;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  z-index: 20;
-}
-
-.box:hover {
-  transform: scale(1.05);
 }
 
 .filter {
@@ -231,6 +197,7 @@ const clearFilterSearch = () => {
   border-radius: 10px;
   text-align: center;
   transition: transform 0.3s ease;
+  min-width: 150px; /* Thêm độ rộng tối thiểu */
 }
 
 .filter-item:hover {
@@ -245,6 +212,7 @@ const clearFilterSearch = () => {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  width: 100%;
 }
 
 .dropdown-toggle.active {
@@ -259,24 +227,45 @@ const clearFilterSearch = () => {
 .dropdown-content {
   position: absolute;
   top: 100%;
-  left: -29px;
+  left: 0; /* Căn chỉnh với cạnh trái của filter-item */
+  right: 0; /* Căn chỉnh với cạnh phải của filter-item */
   background-color: white;
-  min-width: 160px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  border-radius: 0 0 10px 10px;
+  z-index: 1; /* Đảm bảo dropdown hiển thị trên các phần tử khác */
 }
 
 .dropdown-content div,
-.dropdown-content input {
+.dropdown-content input,
+.dropdown-content select {
   padding: 10px;
   cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dropdown-content div:hover,
-.dropdown-content input:hover {
-  background-color: #ddd;
+.dropdown-content input:hover,
+.dropdown-content select:hover {
+  background-color: #f1f1f1;
+}
+
+.button button[type="button"].clear-button {
+  background-color: grey;
+  border: none;
+  color: white;
+  font-style: bold;
+  cursor: pointer;
+  padding: 12px 20px;
+  border-radius: 20px;
+  margin-right: 10px;
+  transition: 0.3s ease;
+}
+
+.button button[type="button"].clear-button:hover {
+  transform: scale(1.05);
+  color: white;
+  background-color: lightslategrey;
 }
 
 .button button[type="button"] {

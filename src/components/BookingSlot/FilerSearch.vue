@@ -42,11 +42,8 @@
           <i class="fas fa-check"></i>
         </div>
         <div v-if="dropdowns.checkInStatus" class="dropdown-content" @click.stop>
-          <select v-model="checkInStatus" @change="selectCheckInStatus" class="status-select">
-            <option value="">Select Status</option>
-            <option value="Checked in">Checked in</option>
-            <option value="Not checked in">Not checked in</option>
-          </select>
+          <div @click="selectCheckInStatus('Checked in')">Đã checked in</div>
+          <div @click="selectCheckInStatus('Not checked in')">Chưa checked in</div>
         </div>
       </div>
 
@@ -81,10 +78,10 @@ const dropdowns = ref({
   bookingDate: false,
   checkInStatus: false
 });
-const startTimeLabel = ref("Start Time");
-const endTimeLabel = ref("End Time");
-const bookingDateLabel = ref("Booking Date");
-const checkInStatusLabel = 'Check In Status';
+const startTimeLabel = ref("Giờ bắt đầu");
+const endTimeLabel = ref("Giờ kết thúc");
+const bookingDateLabel = ref("Ngày đặt");
+const checkInStatusLabel = ref('Trạng thái check-in');
 
 const toggleDropdown = (dropdown) => {
   Object.keys(dropdowns.value).forEach(key => {
@@ -128,7 +125,15 @@ const selectBookingDate = () => {
   dropdowns.value.bookingDate = false;
 };
 
-const selectCheckInStatus = () => {
+const selectCheckInStatus = (status) => {
+  checkInStatus.value = status;
+  if (status === 'Checked in') {
+    isCheckin.value = 1;
+  } else if (status === 'Not checked in') {
+    isCheckin.value = 0;
+  } else {
+    isCheckin.value = 2;
+  }
   dropdowns.value.checkInStatus = false;
 };
 
@@ -138,7 +143,7 @@ watch(checkInStatus, (newStatus) => {
   } else if (newStatus === 'Not checked in') {
     isCheckin.value = 0;
   } else {
-    isCheckin.value = 2; // Default value if no status is selected
+    isCheckin.value = 2; // Giá trị mặc định nếu không có trạng thái được chọn hoặc đã bị xóa
   }
 });
 
@@ -160,9 +165,12 @@ const clearFilterSearch = () => {
   isCheckin.value = 2;
   startTime.value = "";
   endTime.value = "";
-  bookingDate.value = "",
-    startTimeLabel.value = "Start Time";
-  endTimeLabel.value = "End Time";
+  bookingDate.value = "";
+  checkInStatus.value = ""; // Thêm dòng này để xóa trạng thái
+  startTimeLabel.value = "Giờ bắt đầu";
+  endTimeLabel.value = "Giờ kết thúc";
+  bookingDateLabel.value = "Ngày đặt"; // Thêm dòng này để đặt lại nhãn ngày đặt
+  checkInStatusLabel.value = "Trạng thái check-in"; // Thêm dòng này để đặt lại nhãn trạng thái
 };
 </script>
 
@@ -220,10 +228,6 @@ const clearFilterSearch = () => {
   transition: transform 0.3s ease;
 }
 
-.box:hover {
-  transform: scale(1.05);
-}
-
 .filter {
   display: flex;
   align-items: center;
@@ -238,6 +242,7 @@ const clearFilterSearch = () => {
   border-radius: 10px;
   text-align: center;
   transition: transform 0.3s ease;
+  min-width: 150px; /* Thêm độ rộng tối thiểu */
 }
 
 .filter-item:hover {
@@ -252,6 +257,7 @@ const clearFilterSearch = () => {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  width: 100%;
 }
 
 .dropdown-toggle.active {
@@ -266,24 +272,27 @@ const clearFilterSearch = () => {
 .dropdown-content {
   position: absolute;
   top: 100%;
-  left: -29px;
+  left: 0; /* Căn chỉnh với cạnh trái của filter-item */
+  right: 0; /* Căn chỉnh với cạnh phải của filter-item */
   background-color: white;
-  min-width: 160px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  border-radius: 0 0 10px 10px;
+  z-index: 1; /* Đảm bảo dropdown hiển thị trên các phần tử khác */
 }
 
 .dropdown-content div,
-.dropdown-content input {
+.dropdown-content input,
+.dropdown-content select {
   padding: 10px;
   cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dropdown-content div:hover,
-.dropdown-content input:hover {
-  background-color: #ddd;
+.dropdown-content input:hover,
+.dropdown-content select:hover {
+  background-color: #f1f1f1;
 }
 
 .button button[type="button"] {
