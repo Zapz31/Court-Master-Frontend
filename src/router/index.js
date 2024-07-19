@@ -84,6 +84,12 @@ const routes = [
     },
 
     {
+        path: '/dashboard',
+        name: 'DashboardScreen',
+        component: () => import('../views/DashboardScreen.vue') ,
+    },
+
+    {
         path: '/unable-access',
         name: 'UnableAccessScreen',
         component: () => import('../views/ErrorScreen/UnableAccessScreen.vue') ,
