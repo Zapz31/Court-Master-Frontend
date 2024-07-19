@@ -1,8 +1,8 @@
 <template>
   <!-- Phân quyền cho từng role (có thể chỉnh sửa nhanh) -->
   <div class="dropdown" @click="toggleMenu">
-    <div v-if="userRole === 'guest'" class="box-login">
-      <router-link class="button" to="/login"><h5>Login</h5></router-link>
+    <div v-if="authStore.user.userId === ''" class="box-login">
+      <button class="button" @click="backToLogin"><h5>Login</h5></button>
     </div>
     <div v-else class="box">
       <div class="username">
@@ -50,6 +50,10 @@ const authStore = useAuthStore();
 // const { user } = storeToRefs(authStore);
 const link = ref("");
 const userName = ref("");
+
+const backToLogin = () => {
+  window.location.replace("/login");
+}
 //  link.value = user.value.imageURL;
 //  userName.value = user.value.firstName;
 
@@ -99,6 +103,7 @@ onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
 });
 
+
 const signout = async () => {
   try {
     const response = await axios.post(
@@ -109,7 +114,6 @@ const signout = async () => {
 
     console.log(response.data);
     authStore.logout();
-    deleteCookie("uwu");
     // router.push("/login");
     window.location.replace("/login");
   } catch (error) {
@@ -117,9 +121,7 @@ const signout = async () => {
   }
 };
 
-function deleteCookie(name) {
-  document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-}
+
 
 const getImageUrl = (base64String) => {
   return `data:image/png;base64,${base64String}`;

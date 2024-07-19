@@ -10,7 +10,7 @@
         <tr>
           <th class="time-column">Thời gian</th>
           <th v-for="court in sortedCourts" :key="court.courtId">
-            Sân {{ court.courtName }}
+            Sân: {{ court.courtName }}
           </th>
         </tr>
       </thead>

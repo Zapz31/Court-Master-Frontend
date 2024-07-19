@@ -31,10 +31,7 @@
     <div>
       <button class="button">
         <router-link
-          :to="{
-            name: 'ScheduleScreen',
-            params: { clubId: currentClub.clubId },
-          }"
+          :to="getTargetRoute()"
         >
           Xem giờ chơi
         </router-link>
@@ -209,8 +206,27 @@
 
 <script setup>
 import { storeToRefs } from "pinia";
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch} from "vue";
 import { useClubStore } from "../../stores/clubMng";
+import { useAuthStore } from "../../stores/auth";
+
+const authStore = useAuthStore();
+const getTargetRoute = () => {
+  let uId = authStore.user.userId;
+  if(uId === ''){
+    uId = "1";
+  }
+  if (uId !== "1") {
+    return {
+      name: 'ScheduleScreen',
+      params: { clubId: currentClub.value.clubId }
+    }
+  } else {
+    return {
+      name: 'UnableAccessScreen',
+    }
+  }
+}
 
 const props = defineProps({
   clubId: {
@@ -233,6 +249,8 @@ const fetchClubData = async () => {
     if (userString) {
       const user = JSON.parse(userString);
       userId.value = user.userId || "";
+    } else {
+      userId.value="1";
     }
     await clubStore.fetchClubById(props.clubId, userId.value);
     // Start auto slide after data is fetched

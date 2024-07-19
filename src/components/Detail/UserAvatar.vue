@@ -1,8 +1,8 @@
 <template>
   <!-- Phân quyền cho từng role (có thể chỉnh sửa nhanh) -->
   <div class="dropdown" @click="toggleMenu">
-    <div v-if="userRole === 'guest'" class="box-login">
-      <router-link class="button" to="/login"><h5>Login</h5></router-link>
+    <div v-if="authStore.user.userId === ''" class="box-login">
+      <button class="button" @click="backToLogin"><h5>Login</h5></button>
     </div>
     <div v-else class="box">
       <div class="username">
@@ -118,6 +118,10 @@ const signout = async () => {
     console.error("Đã xảy ra lỗi:", error);
   }
 };
+
+const backToLogin = () => {
+  window.location.replace("/login");
+}
 
 function deleteCookie(name) {
   document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';

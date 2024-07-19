@@ -129,9 +129,10 @@ import FilterSearch from "../components/Homepage/FilerSearch.vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
 import { useClubStore } from "../stores/clubMng";
+import { useAuthStore } from "../stores/auth";
 
 const clubStore = useClubStore();
-
+const authStore = useAuthStore();
 const filterSearchRef = ref(null);
 
 const closeDropdowns = () => {
@@ -143,7 +144,15 @@ onMounted(async () => {
   if (clubStore.clubs.length === 0) {
     await clubStore.fetchClubs();
   }
+  const isExistCookie = authStore.checkCookieExists("uwu");
+  if(isExistCookie){
+    authStore.checkTokenValidity();
+  }
+  
 });
+
+
+
 </script>
 
 <style>
