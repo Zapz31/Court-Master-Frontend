@@ -1,7 +1,3 @@
-<!-- LOI CON TON TAI: KHI BO QUA FIRST NAME VA NHAP CAC O KHAC, LOI KO HIEN LEN 
-  + Chưa check dc password va confirm
--->
-
 <template>
   <div class="parent_container">
     <div class="Register_title">
@@ -11,6 +7,16 @@
     <div class="form_container">
       <form class="form" @submit.prevent="registerUser">
         <p class="message">Signup now and get full access to our app.</p>
+
+        <!-- User Role Dropdown -->
+        <label class="dropdown-role">
+          <select class="input" v-model="role">
+            <option value="customer" selected>Customer</option>
+            <option value="staff">Staff</option>
+            <option value="manager">Manager</option>
+          </select>
+          <span>You are:</span>
+        </label>
 
         <div class="flex">
           <label>
@@ -136,6 +142,7 @@
   </div>
 </template>
 
+
 <script setup>
 import axios from "axios";
 import { computed, ref } from "vue";
@@ -162,6 +169,7 @@ const isValidEmail = computed(() => {
 });
 const password = ref("");
 const confirmPassword = ref("");
+const role = ref("customer"); // Add the role ref
 
 const handleInvalid = (event, field) => {
   event.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
@@ -222,7 +230,7 @@ const validateForm = () => {
 
 const registerUser = async () => {
   formError.value = false;
-  const currentDate = new Date().toISOString().split('T')[0];
+  const currentDate = new Date().toISOString().split("T")[0];
   const isFormValid = validateForm();
 
   if (!isFormValid) {
@@ -242,8 +250,8 @@ const registerUser = async () => {
         phoneNumber: phoneNumber.value,
         email: email.value,
         password: password.value,
-        role: 3,
-        registerDate: currentDate
+        role: role.value, // Include the role in the registration data
+        registerDate: currentDate,
       }
     );
     console.log(response.data);
@@ -261,11 +269,16 @@ const registerUser = async () => {
 };
 </script>
 
+
 <style scoped>
 .form_container {
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+.dropdown-role {
+  width: 106%;
 }
 
 .form {
