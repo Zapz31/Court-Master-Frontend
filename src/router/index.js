@@ -14,6 +14,12 @@ const routes = [
     },
 
     {
+        path: '/register-staff',
+        name: 'RegisterStaffScreen',
+        component: () => import('../views/RegisterStaffScreen.vue') ,
+    },
+
+    {
         path: '/forgot',
         name: 'ForgotPasswordScreen',
         component: () => import('../views/ForgotPasswordScreen.vue') ,

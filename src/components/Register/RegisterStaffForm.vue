@@ -8,15 +8,6 @@
       <form class="form" @submit.prevent="registerUser">
         <br />
 
-        <!-- User Role Dropdown -->
-        <label class="dropdown-role">
-          <select class="input" v-model="roleId">
-            <option :value="1">Customer</option>
-            <option :value="2">Manager</option>
-          </select>
-          <span>Bạn là:</span>
-        </label>
-
         <div class="flex">
           <label>
             <input
@@ -146,8 +137,6 @@
 import axios from "axios";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
-
-const roleId = ref(1); // Mặc định là Customer
 const duplicateError = ref("");
 const firstNameError = ref("");
 const lastNameError = ref("");
@@ -256,7 +245,7 @@ const registerUser = async () => {
         phoneNumber: phoneNumber.value,
         email: email.value,
         password: password.value,
-        role: roleId.value, // Sử dụng roleId thay vì role
+        role: 3, // Sử dụng roleId thay vì role
         registerDate: currentDate,
       }
     );
