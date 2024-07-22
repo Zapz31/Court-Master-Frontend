@@ -78,15 +78,21 @@
   <script setup>
 import Chart from "chart.js/auto";
 import { onMounted, ref } from "vue";
+import { useAuthStore } from "../stores/auth";
+import axios from "axios";
 
 // Dữ liệu mẫu
-const totalRevenue = ref(456789000);
-const totalBookings = ref(2405);
-const totalCustomers = ref(10353);
+const totalRevenue = ref();
+const totalBookings = ref();
+const totalCustomers = ref();
 
-const revenuePercentage = ref(20);
-const bookingsPercentage = ref(33);
-const customersPercentage = ref(-8);
+const authStore = useAuthStore();
+
+const clubId = ref('');
+
+const revenuePercentage = ref();
+const bookingsPercentage = ref();
+const customersPercentage = ref();
 
 const loyalCustomers = ref([
   {
@@ -107,6 +113,81 @@ const loyalCustomers = ref([
   },
   // Thêm nhiều khách hàng khác nếu cần
 ]);
+
+const year = ref(new Date().getFullYear());
+const month = ref(new Date().getMonth() + 1);
+
+const dailyRevenue = ref([]);
+const dailyBookings = ref([]);
+
+
+
+// Lay club id thong qua court manager id
+const fetchClubId = async () => {
+  try {
+    const response = await axios.get(`http://localhost:8080/courtmaster/courtmanager/get-clubId-by-cId`, {
+      params: {
+        userId: authStore.user.userId
+      }
+    });
+    clubId.value = response.data.clubId;
+  } catch (error) {
+    console.error('Error fetching clubId:', error);
+  }
+};
+
+const fetchDashboardData = async () => {
+  if (!clubId.value) {
+    console.error('ClubId is not set');
+    return;
+  }
+
+  const requestBody = {
+    clubId: "C0000001",
+    year: year.value,
+    month: 8
+  };
+
+  try {
+    const [revenueResponse, bookingsResponse, totalRevenueResponse, totalBookingResponse, totalCustomerResponse] = await Promise.all([
+      axios.post('http://localhost:8080/courtmaster/courtmanager/get-daily-revenue', requestBody),
+      axios.post('http://localhost:8080/courtmaster/courtmanager/get-daily-booking', requestBody),
+      axios.post('http://localhost:8080/courtmaster/courtmanager/gettotalrevenueinfor', requestBody),
+      axios.post('http://localhost:8080/courtmaster/courtmanager/gettotalbookinginfor', requestBody),
+      axios.post('http://localhost:8080/courtmaster/courtmanager/gettotalcustomernumber', requestBody),
+    ]);
+
+    dailyRevenue.value = transformDailyData(revenueResponse.data);
+    dailyBookings.value = bookingsResponse.data;
+    totalRevenue.value = totalRevenueResponse.data.totalRevenue;
+    revenuePercentage.value = totalRevenueResponse.data.percentVariation;
+    totalBookings.value = totalBookingResponse.data.totalBookingSlot;
+    bookingsPercentage.value = totalBookingResponse.data.percentVariation;
+    totalCustomers.value = totalCustomerResponse.data.totalCustomer;
+    customersPercentage.value = totalCustomerResponse.data.percentVariation;
+
+
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+  }
+};
+
+const transformDailyData = (data) => {
+  // Create an object to store aggregated data by date
+  const aggregatedData = {};
+
+  // Aggregate the data by date
+  data.forEach(item => {
+    const date = new Date(item.paymentTime).getDate();
+    if (!aggregatedData[date]) {
+      aggregatedData[date] = { paymentTime: date, amount: 0 };
+    }
+    aggregatedData[date].amount += item.amount;
+  });
+
+  // Convert the aggregated data object back to an array
+  return Object.values(aggregatedData).sort((a, b) => a.paymentTime - b.paymentTime);
+};
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat("vi-VN").format(value);
@@ -134,24 +215,28 @@ const currentMonth = today.getMonth() + 1;
 const daysInCurrentMonth = getDaysInMonth(currentYear, currentMonth);
 
 // Dữ liệu doanh thu hàng ngày
-const dailyRevenue = ref(
-  generateDailyData(daysInCurrentMonth, 50000000, 1000000)
-);
+// const dailyRevenue = ref(
+//   generateDailyData(daysInCurrentMonth, 50000000, 1000000)
+// );
 
 // Dữ liệu đặt sân hàng ngày
-const dailyBookings = ref(generateDailyData(daysInCurrentMonth, 100, 5));
+// const dailyBookings = ref(generateDailyData(daysInCurrentMonth, 100, 5));
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchClubId();
+  await fetchDashboardData();
+
+
   // Biểu đồ doanh thu
   const ctxRevenue = document.getElementById("revenueChart").getContext("2d");
   new Chart(ctxRevenue, {
-    type: "line",
+    type: "bar",
     data: {
-      labels: dailyRevenue.value.map((item) => item.day),
+      labels: dailyRevenue.value.map((item) => item.paymentTime),
       datasets: [
         {
           label: "Doanh Thu",
-          data: dailyRevenue.value.map((item) => item.value),
+          data: dailyRevenue.value.map((item) => item.amount),
           borderColor: "blue",
           backgroundColor: "rgba(0, 0, 255, 0.1)",
           fill: true,
@@ -178,11 +263,11 @@ onMounted(() => {
   new Chart(ctxBookings, {
     type: "bar",
     data: {
-      labels: dailyBookings.value.map((item) => item.day),
+      labels: dailyBookings.value.map((item) => item.bookingDate),
       datasets: [
         {
           label: "Đặt Sân",
-          data: dailyBookings.value.map((item) => item.value),
+          data: dailyBookings.value.map((item) => item.numberOfBooking),
           backgroundColor: "rgba(75, 192, 192, 0.7)",
         },
       ],
