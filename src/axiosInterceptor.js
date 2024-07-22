@@ -3,7 +3,7 @@ import router from './router';
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8080', // Đặt baseURL của bạn ở đây
-  timeout: 10000, // Khoảng thời gian tối đa client chờ đợi phản hồi từ server. Nếu quá thời gian này mà client vẫn chưa nhận được response thì 
+  timeout: 100000, // Khoảng thời gian tối đa client chờ đợi phản hồi từ server. Nếu quá thời gian này mà client vẫn chưa nhận được response thì 
                  // Axios sẽ tự động hủy bỏ request và trả về lỗi sẽ có mã 'ECONNABORTED' cho các lỗi timeout. 
   withCredentials: true, // Nếu bạn cần gửi cookies trong các yêu cầu cross-origin
 });
