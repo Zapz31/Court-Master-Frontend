@@ -14,7 +14,7 @@
     <p class="description">Bạn không có quyền truy cập vào dịch vụ này.</p>
     <div class="actions">
       <button @click="goBack" class="button">Quay lại</button>
-      <router-link to="/" class="button">Về trang chủ</router-link>
+      <button @click="goHome" class="button">Về trang chủ</button>
     </div>
     <p class="redirect-message">Sẽ quay lại sau {{ seconds }} giây...</p>
   </div>
@@ -22,17 +22,19 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
 
 const seconds = ref(60);
-const router = useRouter();
 
 const goBack = () => {
-  if (window.history.length > 2) {
-    router.go(-2);
+  if (document.referrer) {
+    window.history.go(-1);
   } else {
-    router.push("/");
+    goHome();
   }
+};
+
+const goHome = () => {
+  window.location.replace("/");
 };
 
 let interval;
@@ -54,6 +56,7 @@ onUnmounted(() => {
   }
 });
 </script>
+
 <style scoped>
 .unable-access {
   display: flex;

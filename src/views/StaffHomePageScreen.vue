@@ -2,20 +2,36 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Homepage</h1>
+      <h1>Trang chủ nhân viên</h1>
       <user-avatar />
     </div>
-    <div class="filter_search" v-click-outside="closeDropdowns">
-      <filter-search ref="filterSearchRef" />
-    </div>
-    <div class="content">
-      <div v-if="clubStore.clubs.length > 0" class="club-list">
-        <club-card />
+
+    <div class="staff-homepage">
+      <div class="button-container">
+        <router-link to="/check-in" class="nav-button">
+          <i class="fas fa-clipboard-check"></i>
+          Content 1
+        </router-link>
+        <router-link to="/court-management" class="nav-button">
+          <i class="fas fa-gavel"></i>
+          Content 1
+        </router-link>
+        <router-link to="/schedule" class="nav-button">
+          <i class="fas fa-calendar-alt"></i>
+          Content 1
+        </router-link>
+        <router-link to="/schedule" class="nav-button">
+          <i class="fas fa-calendar-alt"></i>
+          Content 1
+        </router-link>
+        <router-link to="/schedule" class="nav-button">
+          <i class="fas fa-calendar-alt"></i>
+          Content 1
+        </router-link>
       </div>
-      <div v-else class="no-results">
-        <p>Không có kết quả nào được tìm thấy</p>
-      </div>
     </div>
+    <br />
+
     <div class="footer">
       <div class="footer-content">
         <div class="footer-section about">
@@ -66,8 +82,6 @@
 </template>
 <script setup>
 import { onMounted, ref } from "vue";
-import ClubCard from "../components/Homepage/ClubCard.vue";
-import FilterSearch from "../components/Homepage/FilerSearch.vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
 import { useAuthStore } from "../stores/auth";
@@ -126,6 +140,57 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   padding: 1rem;
+}
+
+.staff-homepage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.button-container {
+  margin-top: -80px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.nav-button {
+  margin: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 200px;
+  text-decoration: none;
+  font-size: 1.2rem;
+  color: black;
+  background-color: whitesmoke;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Box shadow */
+  border: 2px solid #6babf4; /* Added border */
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.nav-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Shadow on hover */
+}
+
+.nav-button i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
 /* ------------------------------------------------------ */

@@ -298,7 +298,10 @@ const confirmPayment = async (totalPrice) => {
   }
 };
 const goBack = () => {
-  router.go(-1);
+  // Set a flag in local storage to indicate that a reload is needed
+  localStorage.setItem("shouldReload", "true");
+  // Navigate back
+  window.history.back();
 };
 </script>
 

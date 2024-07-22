@@ -2,7 +2,7 @@
   <!-- Phân quyền cho từng role (có thể chỉnh sửa nhanh) -->
   <div class="dropdown" @click="toggleMenu">
     <div v-if="authStore.user.userId === ''" class="box-login">
-      <button class="button" @click="backToLogin"><h5>Login</h5></button>
+      <button class="button" @click="backToLogin"><h5>Đăng nhập</h5></button>
     </div>
     <div v-else class="box">
       <div class="username">
@@ -111,7 +111,7 @@ const signout = async () => {
 
     console.log(response.data);
     authStore.logout();
-    deleteCookie('uwu')
+    deleteCookie("uwu");
     // router.push("/login");
     window.location.replace("/login");
   } catch (error) {
@@ -121,10 +121,10 @@ const signout = async () => {
 
 const backToLogin = () => {
   window.location.replace("/login");
-}
+};
 
 function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
 
 const getImageUrl = (base64String) => {
@@ -151,15 +151,13 @@ const getImageUrl = (base64String) => {
   align-items: center;
   transition: background-color 0.3s;
 }
-.box-login,
-.button {
+.box-login .button {
   font-size: 18px;
   font-weight: bold;
+  border: none;
   color: white;
   text-decoration: none;
-}
-.box-login:hover {
-  background-color: royalblue;
+  background: #6babf4;
 }
 
 /* ------------------------------------------ */

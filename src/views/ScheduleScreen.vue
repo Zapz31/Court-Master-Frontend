@@ -32,6 +32,15 @@ const fetchClubData = async () => {
 };
 
 onMounted(fetchClubData);
+onMounted(() => {
+  // Check if the reload flag is set
+  if (localStorage.getItem("shouldReload") === "true") {
+    // Remove the flag
+    localStorage.removeItem("shouldReload");
+    // Reload the page
+    window.location.reload();
+  }
+});
 
 watch(() => route.params.clubId, fetchClubData);
 </script>

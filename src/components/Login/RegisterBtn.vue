@@ -6,9 +6,9 @@
 
 <template>
   <div class="register">
-    <h1>You did not have account?</h1>
+    <h1>Bạn chưa có tài khoản?</h1>
     <div class="btn_block">
-      <a class="button" href="/register">Register</a>
+      <a class="button" href="/register">Đăng Ký</a>
     </div>
   </div>
 </template>

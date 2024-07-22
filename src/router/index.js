@@ -26,6 +26,12 @@ const routes = [
     },
 
     {
+        path: '/staff',
+        name: 'StaffHomePageScreen',
+        component: () => import('../views/StaffHomePageScreen.vue') ,
+    },
+
+    {
         path: '/schedule/:clubId',
         name: 'ScheduleScreen',
         props: true,

@@ -2,7 +2,7 @@
   <!-- Phân quyền cho từng role (có thể chỉnh sửa nhanh) -->
   <div class="dropdown" @click="toggleMenu">
     <div v-if="authStore.user.userId === ''" class="box-login">
-      <button class="button" @click="backToLogin"><h5>Login</h5></button>
+      <button class="button" @click="backToLogin"><h5>Đăng nhập</h5></button>
     </div>
     <div v-else class="box">
       <div class="username">
@@ -53,7 +53,7 @@ const userName = ref("");
 
 const backToLogin = () => {
   window.location.replace("/login");
-}
+};
 //  link.value = user.value.imageURL;
 //  userName.value = user.value.firstName;
 
@@ -103,7 +103,6 @@ onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
 });
 
-
 const signout = async () => {
   try {
     const response = await axios.post(
@@ -120,8 +119,6 @@ const signout = async () => {
     console.error("Đã xảy ra lỗi:", error);
   }
 };
-
-
 
 const getImageUrl = (base64String) => {
   return `data:image/png;base64,${base64String}`;
@@ -147,15 +144,13 @@ const getImageUrl = (base64String) => {
   align-items: center;
   transition: background-color 0.3s;
 }
-.box-login,
-.button {
+.box-login .button {
   font-size: 18px;
   font-weight: bold;
+  border: none;
   color: white;
   text-decoration: none;
-}
-.box-login:hover {
-  background-color: royalblue;
+  background: #6babf4;
 }
 
 /* ------------------------------------------ */
