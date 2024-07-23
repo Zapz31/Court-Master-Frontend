@@ -96,7 +96,7 @@ const routes = [
     },
 
     {
-        path: '/dashboard',
+        path: '/manager/dashboard',
         name: 'DashboardScreen',
         component: () => import('../views/DashboardScreen.vue') ,
     },

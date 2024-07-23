@@ -12,14 +12,14 @@
         <img :src="getImageUrl(authStore.user.imageURL)" :alt="userName" />
       </div>
       <div v-if="menuVisible" class="dropdown-content">
-        <template v-if="userRole === 'customer'">
+        <template v-if="authStore.user.role === 'USER_CUSTOMER'">
           <router-link to="/customer/profile">Xem hồ sơ</router-link>
           <router-link to="/customer/booking">Lịch đã đặt</router-link>
 
           <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho customer -->
         </template>
-        <template v-else-if="userRole === 'staff'">
+        <template v-else-if="authStore.user.role === 'USER_COURT_STAFF'">
           <router-link to="/staff/orders">Quản lý lịch đặt</router-link>
           <router-link to="/staff/customers">Quản lí khách hàng</router-link>
           <router-link to="/customer/profile">Xem hồ sơ</router-link>
@@ -27,8 +27,8 @@
           <button @click="signout">Log out</button>
           <!-- Thêm các router-link khác cho staff -->
         </template>
-        <template v-else-if="userRole === 'manager'">
-          <router-link to="/manager/reports">Báo cáo</router-link>
+        <template v-else-if="authStore.user.role === 'USER_COURT_MANAGER'">
+          <router-link to="/manager/dashboard">Báo cáo</router-link>
           <router-link to="/manager/settings">Cài đặt</router-link>
           <router-link to="/customer/profile">Xem hồ sơ</router-link>
           <router-link to="/customer/profile">Quản lí sân</router-link>

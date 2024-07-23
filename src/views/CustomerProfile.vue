@@ -19,7 +19,8 @@
         </div>
         <h1>{{ user.firstName }} {{ user.lastName }}</h1>
         <p class="user-role">{{ user.role }}</p>
-        <button @click="logout" class="logout-button">Đăng xuất</button>
+        <!-- <a href="/login"></a>
+        <button @click="logout" class="logout-button">Đăng xuất</button> -->
       </div>
       <div class="profile-main">
         <div class="info-card">

@@ -1,12 +1,18 @@
 <template>
   <div class="dashboard">
     <header class="header">
-      <div class="logo">
-        <img
-          src="../../public/img/mono_white_crop.png"
-          alt="Logo Court Master"
-        />
-      </div>
+      <a href="/">
+
+        <div class="logo">
+       
+       <img
+         src="../../public/img/mono_white_crop.png"
+         alt="Logo Court Master"
+       />
+     </div>
+
+      </a>
+      
       <h1>Bảng Điều Khiển</h1>
       <div class="user-info">
         <img
