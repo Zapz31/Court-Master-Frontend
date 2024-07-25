@@ -20,6 +20,12 @@ const routes = [
     },
 
     {
+        path: '/staff/checkin',
+        name: 'CheckinScreen',
+        component: () => import('../views/CheckinScreen.vue') ,
+    },
+
+    {
         path: '/forgot',
         name: 'ForgotPasswordScreen',
         component: () => import('../views/ForgotPasswordScreen.vue') ,

@@ -249,8 +249,13 @@ const signin = async () => {
       authStore.saveUserToLocalStorage();
 
       setCookie("uwu", token.value, 10);
-
-      router.push("/");
+      if (authStore.user.role === "USER_COURT_STAFF") {
+        router.push("/staff");
+      } else if (authStore.user.role === "SYSTEM_ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
     }
     invalidMess.value = response.data.massage; // Invalid password // Your email is not registered
   } catch (error) {

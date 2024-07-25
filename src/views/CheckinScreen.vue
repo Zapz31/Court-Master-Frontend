@@ -2,62 +2,51 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Trang chủ nhân viên</h1>
+      <h1>Check in</h1>
       <user-avatar />
     </div>
-
-    <div class="staff-homepage">
-      <div class="button-container">
-        <router-link to="/check-in" class="nav-button">
-          <div class="icon-text">
-            <svg
-              height="60"
-              viewBox="0 0 60.601004 60.601004"
-              width="60"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m7.7705009 56.04988c-1.7775001 0-3.2187503-1.44125-3.2187503-3.21875v-45.0612539c0-1.7775001 1.4412502-3.2187502 3.2187503-3.2187502h45.0600041c1.7775 0 3.21875 1.4412501 3.21875 3.2187502v45.0612539c0 1.7775-1.44125 3.21875-3.21875 3.21875z"
-                fill="#fff"
-                stroke="#000"
-                stroke-width=".60625"
-              />
-              <path
-                d="m40.389252 16.706128c1.56375 0 2.83125-1.26875 2.83125-2.8325s-1.2675-2.83125-2.83125-2.83125c-1.565 0-2.8325 1.2675-2.8325 2.83125s1.2675 2.8325 2.8325 2.8325"
-              />
-              <path
-                d="m51.460503 30.867379h-4.47875l.44875-8.560001c.155-2.19125-1.39875-4.17-3.608751-4.4975-1.12-.165-2.2675-.25375-3.4325-.25375-1.82125 0-3.59125.21125-5.29125.6075-.18375.0425-.33375.17-.41125.3375l-5.322501 11.401251h2.95l2.807501-4.855.41125 5.82h-26.4287524v1.93h26.5637524l1.16125 16.478751h3.07625v-16.146251h.965v16.146251h3.0775l1.15625-16.478751h6.356251z"
-              />
-              <path
-                d="m20.143001 16.706128c1.565 0 2.83375-1.26875 2.83375-2.8325s-1.26875-2.83125-2.83375-2.83125c-1.5625 0-2.83125 1.2675-2.83125 2.83125s1.26875 2.8325 2.83125 2.8325"
-              />
-              <path
-                d="m16.416751 22.022378.90875 3.935c-.8475 1.21375-1.55625 2.533751-2.105 3.932501l9.847501.0012c-.54875-1.4-1.2575-2.720001-2.10625-3.935001l.90875-3.93375 1.5525 2.69c.2775.48.79625.805 1.39125.805.64625 0 1.2-.3825 1.4575-.93l2.26625-4.86375h-2.41l-1.08625 2.04375-1.71-3.085c-.0825-.14875-.2175-.2675-.38125-.3225-1.50625-.52-3.123751-.80375-4.807501-.80375-1.2275 0-2.42.1525-3.56125.43625-1.5675.39-2.68 1.665-2.945 3.16l-1.54875 8.750001h2.2275l2.10125-7.880001"
-              />
-            </svg>
-            <span>Check-in</span>
-          </div>
-        </router-link>
-        <router-link to="/court-management" class="nav-button">
-          <i class="fas fa-gavel"></i>
-          Content 1
-        </router-link>
-        <router-link to="/schedule" class="nav-button">
-          <i class="fas fa-calendar-alt"></i>
-          Content 1
-        </router-link>
-        <router-link to="/schedule" class="nav-button">
-          <i class="fas fa-calendar-alt"></i>
-          Content 1
-        </router-link>
-        <router-link to="/schedule" class="nav-button">
-          <i class="fas fa-calendar-alt"></i>
-          Content 1
-        </router-link>
+    <div class="filter_search" v-click-outside="closeDropdowns">
+      <filter-search ref="filterSearchRef" />
+    </div>
+    <div class="content">
+      <!-- Table here -->
+      <div class="check-in-page">
+        <table>
+          <thead>
+            <tr>
+              <th>Booking Slot ID</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Booking Date</th>
+              <th>Check-in Status</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="booking in bookings" :key="booking.booking_slot_id">
+              <td>{{ booking.booking_slot_id }}</td>
+              <td>{{ booking.start_time }}</td>
+              <td>{{ booking.end_time }}</td>
+              <td>{{ booking.booking_date }}</td>
+              <td>
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    v-model="booking.is_check_in"
+                    @change="toggleCheckIn(booking)"
+                  />
+                  <span class="slider round"></span>
+                </label>
+                <span>{{
+                  booking.is_check_in ? "Check-in" : "Chưa Check-in"
+                }}</span>
+              </td>
+              <td>{{ booking.price }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <br />
-
     <div class="footer">
       <div class="footer-content">
         <div class="footer-section about">
@@ -81,12 +70,34 @@
           <ul class="wrapper">
             <li class="icon facebook">
               <span class="tooltip">Facebook</span>
+              <svg
+                viewBox="0 0 320 512"
+                height="1.2em"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"
+                ></path>
+              </svg>
             </li>
             <li class="icon twitter">
               <span class="tooltip">Twitter</span>
+              <svg
+                height="1.8em"
+                fill="currentColor"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+                class="twitter"
+              >
+                <path
+                  d="M42,12.429c-1.323,0.586-2.746,0.977-4.247,1.162c1.526-0.906,2.7-2.351,3.251-4.058c-1.428,0.837-3.01,1.452-4.693,1.776C34.967,9.884,33.05,9,30.926,9c-4.08,0-7.387,3.278-7.387,7.32c0,0.572,0.067,1.129,0.193,1.67c-6.138-0.308-11.582-3.226-15.224-7.654c-0.64,1.082-1,2.349-1,3.686c0,2.541,1.301,4.778,3.285,6.096c-1.211-0.037-2.351-0.374-3.349-0.914c0,0.022,0,0.055,0,0.086c0,3.551,2.547,6.508,5.923,7.181c-0.617,0.169-1.269,0.263-1.941,0.263c-0.477,0-0.942-0.054-1.392-0.135c0.94,2.902,3.667,5.023,6.898,5.086c-2.528,1.96-5.712,3.134-9.174,3.134c-0.598,0-1.183-0.034-1.761-0.104C9.268,36.786,13.152,38,17.321,38c13.585,0,21.017-11.156,21.017-20.834c0-0.317-0.01-0.633-0.025-0.945C39.763,15.197,41.013,13.905,42,12.429"
+                ></path>
+              </svg>
             </li>
             <li class="icon instagram">
               <span class="tooltip">Instagram</span>
+
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="1.2em"
@@ -107,25 +118,38 @@
   </div>
 </template>
 <script setup>
-import { onMounted, ref } from "vue";
-import UserAvatar from "../components/Homepage/UserAvatar.vue";
-import Logo from "../components/StaffHomepage/Logo.vue";
-import { useAuthStore } from "../stores/auth";
+import { ref } from "vue";
 
-const authStore = useAuthStore();
-const filterSearchRef = ref(null);
+const bookings = ref([
+  {
+    booking_slot_id: 1,
+    start_time: "08:00",
+    end_time: "09:00",
+    booking_date: "2024-07-25",
+    is_check_in: false,
+    price: 100,
+  },
+  {
+    booking_slot_id: 2,
+    start_time: "09:00",
+    end_time: "10:00",
+    booking_date: "2024-07-25",
+    is_check_in: true,
+    price: 150,
+  },
+  {
+    booking_slot_id: 3,
+    start_time: "10:00",
+    end_time: "11:00",
+    booking_date: "2024-07-25",
+    is_check_in: false,
+    price: 200,
+  },
+]);
 
-const closeDropdowns = () => {
-  if (filterSearchRef.value) {
-    filterSearchRef.value.closeAllDropdowns();
-  }
+const toggleCheckIn = (booking) => {
+  booking.is_check_in = !booking.is_check_in;
 };
-onMounted(async () => {
-  const isExistCookie = authStore.checkCookieExists("uwu");
-  if (isExistCookie) {
-    authStore.checkTokenValidity();
-  }
-});
 </script>
 
 <style>
@@ -145,15 +169,6 @@ onMounted(async () => {
   color: #6babf4;
 }
 
-.filter_search {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 36px;
-  margin-bottom: auto;
-  margin-top: -100px;
-}
-
 .content {
   max-width: 3000px;
   flex-grow: 1;
@@ -163,71 +178,66 @@ onMounted(async () => {
   padding: 1rem;
 }
 
-.staff-homepage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+.check-in-page {
+  padding: 20px;
 }
 
-h1 {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 2rem;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.button-container {
-  margin-top: -80px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
 }
 
-.nav-button {
-  margin: 68px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 300px;
-  height: 200px;
-  text-decoration: none;
-  font-size: 1.2rem;
-  color: black;
-  background-color: whitesmoke;
-  /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); Box shadow */
-  border: 2px solid #6babf4; /* Added border */
-  border-radius: 20px;
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
 }
 
-.nav-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Shadow on hover */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
 }
 
-.nav-button i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+input:checked + .slider {
+  background-color: #2196f3;
 }
 
-.icon-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+input:checked + .slider:before {
+  transform: translateX(26px);
 }
-
-.icon-text svg {
-  margin-bottom: 8px;
-}
-
-.icon-text span {
-  font-size: 16px; /* Adjust as necessary */
-}
-
 /* ------------------------------------------------------ */
 .footer {
   background-color: #d3d3d3;
@@ -381,37 +391,6 @@ h1 {
 }
 
 /* ------------------------------------------------------ */
-
-.club-list {
-  padding-bottom: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.club-card {
-  padding: 20px;
-  width: 250px;
-  height: 350px;
-  text-align: center;
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.club-card:hover {
-  transform: scale(1.05);
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */
-}
-
-.club-image {
-  border-radius: 20px;
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
 
 @media (max-width: 768px) {
   .filter_search {
