@@ -2,7 +2,7 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Homepage</h1>
+      <h1>Trang chủ</h1>
       <user-avatar />
     </div>
     <div class="filter_search" v-click-outside="closeDropdowns">
