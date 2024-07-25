@@ -63,7 +63,7 @@ onMounted(async () => {
             clubId: paymentStore.paymentPayload.currentClubInfo.clubId,
             clubName: paymentStore.paymentPayload.currentClubInfo.clubName
         };
-        
+            
             const response = await axios.post(`http://localhost:8080/courtmaster/booking/payment-handle`,payload);
             console.log('Response from server:', response.data);
             router.push("/payment-success")
