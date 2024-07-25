@@ -1,6 +1,7 @@
 // src/stores/clubStore.js
 import { defineStore } from 'pinia';
 import axiosInstance from '../axiosInterceptor';
+axios.defaults.withCredentials = true;
 
 export const useClubStore = defineStore('club', {
   state: () => ({

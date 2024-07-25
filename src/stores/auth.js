@@ -2,6 +2,7 @@ import router from "../router";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
+axios.defaults.withCredentials = true;
 export const useAuthStore = defineStore("auth", ()=> {
     const user = ref({
         userId: "",
