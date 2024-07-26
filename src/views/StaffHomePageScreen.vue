@@ -8,7 +8,7 @@
 
     <div class="staff-homepage">
       <div class="button-container">
-        <router-link to="/check-in" class="nav-button">
+        <router-link to="/staff/checkin" class="nav-button">
           <div class="icon-text">
             <svg
               height="60"
@@ -38,17 +38,43 @@
             <span>Check-in</span>
           </div>
         </router-link>
-        <router-link to="/court-management" class="nav-button">
-          <i class="fas fa-gavel"></i>
-          Content 1
+        <router-link to="/staff/checkedin" class="nav-button">
+          <div class="icon-text">
+            <svg
+              height="60"
+              viewBox="0 0 60.601004 60.601004"
+              width="60"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m7.7705009 56.04988c-1.7775001 0-3.2187503-1.44125-3.2187503-3.21875v-45.0612539c0-1.7775001 1.4412502-3.2187502 3.2187503-3.2187502h45.0600041c1.7775 0 3.21875 1.4412501 3.21875 3.2187502v45.0612539c0 1.7775-1.44125 3.21875-3.21875 3.21875z"
+                fill="#fff"
+                stroke="#000"
+                stroke-width=".60625"
+              />
+              <path
+                d="m40.389252 16.706128c1.56375 0 2.83125-1.26875 2.83125-2.8325s-1.2675-2.83125-2.83125-2.83125c-1.565 0-2.8325 1.2675-2.8325 2.83125s1.2675 2.8325 2.8325 2.8325"
+              />
+              <path
+                d="m51.460503 30.867379h-4.47875l.44875-8.560001c.155-2.19125-1.39875-4.17-3.608751-4.4975-1.12-.165-2.2675-.25375-3.4325-.25375-1.82125 0-3.59125.21125-5.29125.6075-.18375.0425-.33375.17-.41125.3375l-5.322501 11.401251h2.95l2.807501-4.855.41125 5.82h-26.4287524v1.93h26.5637524l1.16125 16.478751h3.07625v-16.146251h.965v16.146251h3.0775l1.15625-16.478751h6.356251z"
+              />
+              <path
+                d="m20.143001 16.706128c1.565 0 2.83375-1.26875 2.83375-2.8325s-1.26875-2.83125-2.83375-2.83125c-1.5625 0-2.83125 1.2675-2.83125 2.83125s1.26875 2.8325 2.83125 2.8325"
+              />
+              <path
+                d="m16.416751 22.022378.90875 3.935c-.8475 1.21375-1.55625 2.533751-2.105 3.932501l9.847501.0012c-.54875-1.4-1.2575-2.720001-2.10625-3.935001l.90875-3.93375 1.5525 2.69c.2775.48.79625.805 1.39125.805.64625 0 1.2-.3825 1.4575-.93l2.26625-4.86375h-2.41l-1.08625 2.04375-1.71-3.085c-.0825-.14875-.2175-.2675-.38125-.3225-1.50625-.52-3.123751-.80375-4.807501-.80375-1.2275 0-2.42.1525-3.56125.43625-1.5675.39-2.68 1.665-2.945 3.16l-1.54875 8.750001h2.2275l2.10125-7.880001"
+              />
+            </svg>
+            <span>Đã check-in</span>
+          </div>
         </router-link>
         <router-link to="/schedule" class="nav-button">
           <i class="fas fa-calendar-alt"></i>
-          Content 1
+          Quản lí sân
         </router-link>
-        <router-link to="/schedule" class="nav-button">
+        <router-link :to="`/staff/schedule/${clubId}`" class="nav-button">
           <i class="fas fa-calendar-alt"></i>
-          Content 1
+          Vận hành câu lạc bộ
         </router-link>
         <router-link to="/schedule" class="nav-button">
           <i class="fas fa-calendar-alt"></i>
@@ -107,25 +133,24 @@
   </div>
 </template>
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
 import Logo from "../components/StaffHomepage/Logo.vue";
 import { useAuthStore } from "../stores/auth";
-
-const authStore = useAuthStore();
-const filterSearchRef = ref(null);
-
-const closeDropdowns = () => {
-  if (filterSearchRef.value) {
-    filterSearchRef.value.closeAllDropdowns();
-  }
-};
 onMounted(async () => {
   const isExistCookie = authStore.checkCookieExists("uwu");
   if (isExistCookie) {
     authStore.checkTokenValidity();
   }
 });
+const authStore = useAuthStore();
+const filterSearchRef = ref(null);
+const clubId = computed(() => authStore.user.clubId);
+const closeDropdowns = () => {
+  if (filterSearchRef.value) {
+    filterSearchRef.value.closeAllDropdowns();
+  }
+};
 </script>
 
 <style>

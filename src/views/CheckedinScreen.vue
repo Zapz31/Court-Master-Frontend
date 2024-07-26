@@ -26,7 +26,7 @@
           </thead>
           <tbody>
             <tr
-              v-for="booking in pendingCheckIns"
+              v-for="booking in checkedInBookings"
               :key="
                 booking.customerPhoneNumber +
                 booking.startTime +
@@ -38,14 +38,14 @@
               <td>{{ booking.customerFullName }}</td>
               <td>{{ booking.badmintonCourtName }}</td>
               <td>{{ formatTime(booking.startTime) }}</td>
-              <td>{{ booking.endTime }}</td>
+              <td>{{ formatTime(booking.endTime) }}</td>
               <td>{{ formatDate(booking.bookingDate) }}</td>
               <td class="status-cell">
                 <button
-                  @click="checkInStore.performCheckIn(booking.bookingSlotId)"
-                  class="check-in"
+                  @click="checkInStore.performCheckedIn(booking.bookingSlotId)"
+                  class="checked-in"
                 >
-                  Check-in
+                  Checked In
                 </button>
               </td>
               <td>{{ formatPrice(booking.price) }}₫</td>
@@ -133,16 +133,14 @@ import UserAvatar from "../components/StaffHomepage/UserAvatar.vue";
 import { useCheckInStore } from "../stores/checkInStore";
 
 const checkInStore = useCheckInStore();
-const { pendingCheckIns } = storeToRefs(checkInStore);
+const { checkedInBookings } = storeToRefs(checkInStore);
 
 function formatDate(date) {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes} ${day}/${month}/${year}`;
+  return `${day}/${month}/${year}`;
 }
 
 const formatPrice = (price) => {
@@ -159,7 +157,7 @@ const formatTime = (time) => {
 };
 
 onMounted(async () => {
-  await checkInStore.fetchUnCheckinList();
+  await checkInStore.fetchCheckedInList();
 });
 </script>
 
@@ -205,26 +203,22 @@ onMounted(async () => {
   border-spacing: 0;
   border-radius: 10px;
   overflow: hidden;
-  border: 2px solid #ddd; /* Đường viền đậm hơn */
+  border: 2px solid #ddd;
 }
-
 .check-in-page th,
 .check-in-page td {
   text-align: center;
-  border: 1px solid #ddd; /* Đường viền đậm hơn */
+  border: 1px solid #ddd;
   padding: 8px;
 }
-
 .check-in-page th {
-  background-color: #6babf4; /* Light blue background for headers */
-  color: white; /* White text color for headers */
+  background-color: #6babf4;
+  color: white;
   text-align: left;
 }
-
 .check-in-page tr:hover {
-  background-color: #f1f1f1; /* Light grey background for row hover */
+  background-color: #f1f1f1;
 }
-
 .status-cell button {
   padding: 5px 10px;
   border: none;
@@ -232,26 +226,18 @@ onMounted(async () => {
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
 }
-
 .status-cell button:hover {
-  background-color: #6babf4; /* Light blue background for button hover */
-  color: white; /* White text color for button hover */
+  background-color: #6babf4;
+  color: white;
 }
-
 .status-cell button {
   padding: 5px 10px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
-
 .status-cell button.checked-in {
   background-color: #4caf50;
-  color: white;
-}
-
-.status-cell button:not(.checked-in) {
-  background-color: #f44336;
   color: white;
 }
 

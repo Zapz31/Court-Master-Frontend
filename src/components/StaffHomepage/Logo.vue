@@ -1,6 +1,6 @@
 <template>
   <div class="logo">
-    <a href="/">
+    <a href="/staff">
       <img
         src="../../../public/img/mono_blue.png"
         alt="logo_img"

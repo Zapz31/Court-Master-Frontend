@@ -96,7 +96,7 @@ const handleOutsideClick = (event) => {
 
 onMounted(() => {
   document.addEventListener("click", handleOutsideClick);
-  authStore.loadUserFromLocalStorage();
+  authStore.loadUserFromLocalStorage;
   console.log(authStore.user.imageURL);
   console.log(1);
 });

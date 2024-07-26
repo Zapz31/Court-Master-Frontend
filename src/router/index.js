@@ -26,6 +26,18 @@ const routes = [
     },
 
     {
+        path: '/staff/court',
+        name: 'CourtMngScreen',
+        component: () => import('../views/CourtMngScreen.vue') ,
+    },
+
+        {
+        path: '/staff/checkedin',
+        name: 'CheckedinScreen',
+        component: () => import('../views/CheckedinScreen.vue') ,
+    },
+
+    {
         path: '/forgot',
         name: 'ForgotPasswordScreen',
         component: () => import('../views/ForgotPasswordScreen.vue') ,
