@@ -1,8 +1,8 @@
 <template>
   <!-- Phân quyền cho từng role (có thể chỉnh sửa nhanh) -->
   <div class="dropdown" @click="toggleMenu">
-    <div v-if="userRole === 'guest'" class="box-login">
-      <router-link class="button" to="/login"><h5>Login</h5></router-link>
+    <div v-if="authStore.user.userId === ''" class="box-login">
+      <button class="button" @click="backToLogin"><h5>Đăng nhập</h5></button>
     </div>
     <div v-else class="box">
       <div class="username">
@@ -11,31 +11,54 @@
       <div class="avatar">
         <img :src="getImageUrl(authStore.user.imageURL)" :alt="userName" />
       </div>
-      <div v-if="menuVisible" class="dropdown-content">
-        <template v-if="userRole === 'customer'">
-          <router-link to="/customer/profile">View Profile</router-link>
-          <router-link to="/customer/booking">My Booking</router-link>
+      <div
+        v-if="menuVisible"
+        class="dropdown-overlay"
+        @click="toggleMenu"
+      ></div>
+      <div :class="['dropdown-content', { active: menuVisible }]">
+        <div class="dropdown-items">
+          <div class="info-dropdown">
+            <div class="username">
+              <h4>
+                {{ authStore.user.firstName }} {{ authStore.user.lastName }}
+              </h4>
+            </div>
+            <div class="avatar">
+              <img
+                :src="getImageUrl(authStore.user.imageURL)"
+                :alt="userName"
+              />
+            </div>
+          </div>
 
-          <button @click="signout">Log out</button>
-          <!-- Thêm các router-link khác cho customer -->
-        </template>
-        <template v-else-if="userRole === 'staff'">
-          <router-link to="/staff/orders">Manage Orders</router-link>
-          <router-link to="/staff/customers">Manage Customers</router-link>
-          <router-link to="/customer/profile">My Profile</router-link>
+          <template v-if="authStore.user.role === 'USER_CUSTOMER'">
+            <router-link to="/customer/profile">Xem hồ sơ</router-link>
+            <router-link to="/customer/booking">Lịch đã đặt</router-link>
 
-          <button @click="signout">Log out</button>
-          <!-- Thêm các router-link khác cho staff -->
-        </template>
-        <template v-else-if="userRole === 'manager'">
-          <router-link to="/manager/reports">Reports</router-link>
-          <router-link to="/manager/settings">Settings</router-link>
-          <router-link to="/customer/profile">My Profile</router-link>
-          <router-link to="/customer/profile">Manage my court</router-link>
+            <button @click="signout">Log out</button>
+            <!-- Thêm các router-link khác cho customer -->
+          </template>
+          <template
+            class="staff"
+            v-else-if="authStore.user.role === 'USER_COURT_STAFF'"
+          >
+            <router-link to="/staff/orders">Quản lý lịch đặt</router-link>
+            <router-link to="/staff/customers">Quản lí khách hàng</router-link>
+            <router-link to="/customer/profile">Xem hồ sơ</router-link>
 
-          <button @click="signout">Log out</button>
-          <!-- Thêm các router-link khác cho manager -->
-        </template>
+            <button @click="signout">Log out</button>
+          </template>
+          <template v-else-if="authStore.user.role === 'USER_COURT_MANAGER'">
+            <router-link to="/manager/dashboard">Báo cáo</router-link>
+            <a href="/register-staff">Đăng kí tài khoản nhân viên</a>
+            <router-link to="/customer/profile">Xem hồ sơ</router-link>
+            <router-link to="/customer/profile">Quản lí sân</router-link>
+
+            <button @click="signout">Log out</button>
+            <!-- Thêm các router-link khác cho manager -->
+          </template>
+        </div>
       </div>
     </div>
   </div>
@@ -43,19 +66,19 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
-import router from "../../router";
 import { useAuthStore } from "../../stores/auth";
-import { storeToRefs } from 'pinia';
-
 
 const authStore = useAuthStore();
 
 // const { user } = storeToRefs(authStore);
- const link = ref("");
- const userName = ref("");
+const link = ref("");
+const userName = ref("");
+
+const backToLogin = () => {
+  window.location.replace("/login");
+};
 //  link.value = user.value.imageURL;
 //  userName.value = user.value.firstName;
-
 
 // ===========================================DATA TEST==============================================
 const props = defineProps({
@@ -101,7 +124,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener("click", handleOutsideClick);
-  
 });
 
 const signout = async () => {
@@ -114,17 +136,12 @@ const signout = async () => {
 
     console.log(response.data);
     authStore.logout();
-    deleteCookie('uwu')
     // router.push("/login");
-    window.location.replace("/login")
+    window.location.replace("/login");
   } catch (error) {
     console.error("Đã xảy ra lỗi:", error);
   }
 };
-
-function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-}
 
 const getImageUrl = (base64String) => {
   return `data:image/png;base64,${base64String}`;
@@ -138,8 +155,8 @@ const getImageUrl = (base64String) => {
   position: relative;
   display: inline-block;
   cursor: pointer;
+  z-index: 1000;
 }
-/* ------------------------------------------ */
 
 .box-login {
   margin-top: 58px;
@@ -150,20 +167,18 @@ const getImageUrl = (base64String) => {
   align-items: center;
   transition: background-color 0.3s;
 }
-.box-login,
-.button {
+
+.box-login .button {
   font-size: 18px;
   font-weight: bold;
+  border: none;
   color: white;
   text-decoration: none;
+  background: #6babf4;
 }
-.box-login:hover {
-  background-color: royalblue;
-}
-
-/* ------------------------------------------ */
 
 .box {
+  z-index: 1999;
   margin-top: 50px;
   background: #6babf4;
   border-radius: 30px;
@@ -172,47 +187,83 @@ const getImageUrl = (base64String) => {
   align-items: center;
   transition: background-color 0.3s;
 }
+
 .box:hover {
-  background-color: royalblue;
+  background-color: #5a9ae3;
 }
+
 .username h4 {
   margin: 0;
   font-size: 15px;
   font-weight: bold;
   color: white;
-  text-decoration: none; /* Loại bỏ gạch dưới */
+  text-decoration: none;
 }
+
 .avatar img {
   border-radius: 50%;
   width: 50px;
   height: 50px;
   margin-left: 10px;
 }
-.dropdown-content {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  background-color: white;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  padding: 12px 12px;
-  z-index: 1;
-  border-radius: 8px;
-  top: 68%;
-  left: 10px;
-}
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-}
-.dropdown-content a:hover {
-  background-color: #ddd;
+
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }
 
+.dropdown-content {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 300px;
+  height: 100vh;
+  background-color: #f8f9fa;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.dropdown-content.active {
+  right: 0;
+}
+
+.info-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.info-dropdown .username {
+  margin-right: 15px;
+}
+
+.info-dropdown .username h4 {
+  color: #333;
+  font-size: 18px;
+  margin: 0;
+}
+
+.info-dropdown .avatar img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #6babf4;
+}
+
+.dropdown-content a,
 .dropdown-content button {
-  color: black;
+  color: #333;
   padding: 12px 16px;
   text-decoration: none;
   display: block;
@@ -221,10 +272,20 @@ const getImageUrl = (base64String) => {
   cursor: pointer;
   width: 100%;
   text-align: left;
-  font-size: 16.5px;
+  font-size: 16px;
+  transition: background-color 0.2s;
+  border-radius: 5px;
 }
 
+.dropdown-content a:hover,
 .dropdown-content button:hover {
-  background-color: #ddd;
+  background-color: #e9ecef;
+}
+
+.dropdown-content button:last-child {
+  margin-top: 20px;
+  color: #dc3545;
+  font-weight: bold;
 }
 </style>
+

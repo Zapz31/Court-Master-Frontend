@@ -32,6 +32,19 @@
         />
       </div>
     </div>
+
+    <div v-if="selectedType === 'flexible'" class="play-time-control">
+      <div class="total-play-time">
+        <span>Tổng giờ chơi: </span>
+        <span class="total-play-time-value"
+          >{{ totalPlayTime.toFixed(1) }}h</span
+        >
+      </div>
+      <button class="add-play-time-btn" @click="addPlayTime">
+        Thêm giờ chơi
+      </button>
+    </div>
+
     <div class="type-dropdown">
       <label>Loại lịch:</label>
       <select v-model="selectedType" @change="updateCurrentBookingType">
@@ -168,6 +181,17 @@ watch(
   },
   { deep: true }
 );
+
+const totalPlayTime = computed(() => {
+  if (selectedType.value !== "flexible" || !scheduleStore.bookingResponse)
+    return 0;
+  return scheduleStore.bookingResponse.unpaidBookingList.reduce(
+    (total, booking) => {
+      return total + (booking.endTime - booking.startTime) / (60 * 60 * 1000); // Convert milliseconds to hours
+    },
+    0
+  );
+});
 </script>
 
 <style scoped>
@@ -288,5 +312,38 @@ watch(
 .date-range-picker {
   display: flex;
   gap: 16px;
+}
+
+.play-time-control {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.total-play-time {
+  font-weight: bold;
+  color: #6babf4;
+}
+.total-play-time-value {
+  color: black;
+}
+
+.add-play-time-btn {
+  padding: 8px 16px;
+  font-weight: bold;
+  background-color: #6babf4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.add-play-time-btn:hover {
+  background-color: #4a93e7;
+}
+
+.add-play-time-btn:active {
+  background-color: #3b7ccc;
 }
 </style>
