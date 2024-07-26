@@ -194,7 +194,7 @@ export const useScheduleStore = defineStore('schedule', {
 
     async validateSlots(slotsToValidate) {
       try {
-        const response = await axios.post('http://localhost:8080/courtmaster/api/test/getDuplicateBookingSlot', slotsToValidate);
+        const response = await axios.post('http://localhost:8080/courtmaster/booking/getDuplicateBookingSlot', slotsToValidate);
         return response.data;
       } catch (error) {
         console.error('Error validating slots:', error);
