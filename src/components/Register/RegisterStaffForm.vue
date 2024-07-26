@@ -137,6 +137,8 @@
 import axios from "axios";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
+import { useAuthStore } from "../../stores/auth";
+const authStore = useAuthStore();
 const duplicateError = ref("");
 const firstNameError = ref("");
 const lastNameError = ref("");
@@ -247,6 +249,7 @@ const registerUser = async () => {
         password: password.value,
         role: 3, // Sử dụng roleId thay vì role
         registerDate: currentDate,
+        courtManagerId: authStore.user.userId
       }
     );
     console.log(response.data);
