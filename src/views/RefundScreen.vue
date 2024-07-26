@@ -2,7 +2,7 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Check in</h1>
+      <h1>Danh sách chờ hoàn tiền</h1>
       <user-avatar />
     </div>
     <div class="filter_search">
@@ -26,7 +26,7 @@
           </thead>
           <tbody>
             <tr
-              v-for="booking in checkedInBookings"
+              v-for="booking in pendingCheckIns"
               :key="
                 booking.customerPhoneNumber +
                 booking.startTime +
@@ -38,14 +38,14 @@
               <td>{{ booking.customerFullName }}</td>
               <td>{{ booking.badmintonCourtName }}</td>
               <td>{{ formatTime(booking.startTime) }}</td>
-              <td>{{ formatTime(booking.endTime) }}</td>
+              <td>{{ booking.endTime }}</td>
               <td>{{ formatDate(booking.bookingDate) }}</td>
               <td class="status-cell">
                 <button
-                  @click="checkInStore.performCheckedIn(booking.bookingSlotId)"
-                  class="checked-in"
+                  @click="checkInStore.performCheckIn(booking.bookingSlotId)"
+                  class="check-in"
                 >
-                  Checked In
+                  Check-in
                 </button>
               </td>
               <td>{{ formatPrice(booking.price) }}₫</td>
@@ -133,14 +133,16 @@ import UserAvatar from "../components/StaffHomepage/UserAvatar.vue";
 import { useCheckInStore } from "../stores/checkInStore";
 
 const checkInStore = useCheckInStore();
-const { checkedInBookings } = storeToRefs(checkInStore);
+const { pendingCheckIns } = storeToRefs(checkInStore);
 
 function formatDate(date) {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes} ${day}/${month}/${year}`;
 }
 
 const formatPrice = (price) => {
@@ -157,7 +159,7 @@ const formatTime = (time) => {
 };
 
 onMounted(async () => {
-  await checkInStore.fetchCheckedInList();
+  await checkInStore.fetchUnCheckinList();
 });
 </script>
 
@@ -252,6 +254,7 @@ onMounted(async () => {
   background-color: #f44336;
   color: white;
 }
+
 /* ------------------------------------------------------ */
 .footer {
   background-color: #d3d3d3;

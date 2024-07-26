@@ -1,7 +1,7 @@
 <template>
   <div class="parent_container">
     <div class="Register_title">
-      <p class="title">Đăng kí tài khoản</p>
+      <p class="title">Đăng kí tài khoản nhân viên</p>
     </div>
 
     <div class="form_container">

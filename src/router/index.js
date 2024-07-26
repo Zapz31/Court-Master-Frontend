@@ -20,6 +20,12 @@ const routes = [
     },
 
     {
+        path: '/staff/refund',
+        name: 'RefundScreen',
+        component: () => import('../views/RefundScreen.vue') ,
+    },
+
+    {
         path: '/staff/checkin',
         name: 'CheckinScreen',
         component: () => import('../views/CheckinScreen.vue') ,
@@ -27,8 +33,8 @@ const routes = [
 
     {
         path: '/staff/court',
-        name: 'CourtMngScreen',
-        component: () => import('../views/CourtMngScreen.vue') ,
+        name: 'CourtOperationScreen',
+        component: () => import('../views/CourtOperationScreen.vue') ,
     },
 
         {
@@ -53,6 +59,13 @@ const routes = [
         path: '/staff',
         name: 'StaffHomePageScreen',
         component: () => import('../views/StaffHomePageScreen.vue') ,
+    },
+
+    {
+        path: '/staff-schedule/:clubId',
+        name: 'StaffSchedulePageScreen',
+        component: () => import('../views/StaffScheduleScreen.vue') ,
+        props: true,
     },
 
     {

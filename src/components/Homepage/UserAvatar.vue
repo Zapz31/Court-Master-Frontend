@@ -31,7 +31,7 @@
         </template>
         <template v-else-if="authStore.user.role === 'USER_COURT_MANAGER'">
           <router-link to="/manager/dashboard">Báo cáo</router-link>
-          <router-link to="/manager/settings">Cài đặt</router-link>
+          <a href="/register-staff">Đăng kí tài khoản nhân viên</a>
           <router-link to="/customer/profile">Xem hồ sơ</router-link>
           <router-link to="/customer/profile">Quản lí sân</router-link>
 

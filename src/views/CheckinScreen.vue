@@ -10,8 +10,8 @@
     </div>
     <div class="content">
       <!-- Table here -->
-      <div class="check-in-page">
-        <table>
+      <div class="table-container">
+        <table class="fixed-header">
           <thead>
             <tr>
               <th>Customer Phone Number</th>
@@ -199,29 +199,36 @@ onMounted(async () => {
   width: 100%;
 }
 
-.check-in-page table {
+.table-container {
+  max-height: 500px; /* Set the height you want for the table container */
+  overflow-y: auto;
+}
+
+.fixed-header {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 10px;
-  overflow: hidden;
   border: 2px solid #ddd; /* Đường viền đậm hơn */
 }
 
-.check-in-page th,
-.check-in-page td {
+.fixed-header thead th {
+  position: sticky;
+  top: 0;
+  background-color: #6babf4; /* Light blue background for headers */
+  color: white; /* White text color for headers */
+  text-align: left;
+  z-index: 1;
+}
+
+.fixed-header th,
+.fixed-header td {
   text-align: center;
   border: 1px solid #ddd; /* Đường viền đậm hơn */
   padding: 8px;
 }
 
-.check-in-page th {
-  background-color: #6babf4; /* Light blue background for headers */
-  color: white; /* White text color for headers */
-  text-align: left;
-}
-
-.check-in-page tr:hover {
+.fixed-header tr:hover {
   background-color: #f1f1f1; /* Light grey background for row hover */
 }
 
@@ -236,13 +243,6 @@ onMounted(async () => {
 .status-cell button:hover {
   background-color: #6babf4; /* Light blue background for button hover */
   color: white; /* White text color for button hover */
-}
-
-.status-cell button {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .status-cell button.checked-in {

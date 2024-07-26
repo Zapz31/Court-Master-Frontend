@@ -35,7 +35,7 @@
                 d="m16.416751 22.022378.90875 3.935c-.8475 1.21375-1.55625 2.533751-2.105 3.932501l9.847501.0012c-.54875-1.4-1.2575-2.720001-2.10625-3.935001l.90875-3.93375 1.5525 2.69c.2775.48.79625.805 1.39125.805.64625 0 1.2-.3825 1.4575-.93l2.26625-4.86375h-2.41l-1.08625 2.04375-1.71-3.085c-.0825-.14875-.2175-.2675-.38125-.3225-1.50625-.52-3.123751-.80375-4.807501-.80375-1.2275 0-2.42.1525-3.56125.43625-1.5675.39-2.68 1.665-2.945 3.16l-1.54875 8.750001h2.2275l2.10125-7.880001"
               />
             </svg>
-            <span>Check-in</span>
+            <span>Danh sách check-in</span>
           </div>
         </router-link>
         <router-link to="/staff/checkedin" class="nav-button">
@@ -65,20 +65,32 @@
                 d="m16.416751 22.022378.90875 3.935c-.8475 1.21375-1.55625 2.533751-2.105 3.932501l9.847501.0012c-.54875-1.4-1.2575-2.720001-2.10625-3.935001l.90875-3.93375 1.5525 2.69c.2775.48.79625.805 1.39125.805.64625 0 1.2-.3825 1.4575-.93l2.26625-4.86375h-2.41l-1.08625 2.04375-1.71-3.085c-.0825-.14875-.2175-.2675-.38125-.3225-1.50625-.52-3.123751-.80375-4.807501-.80375-1.2275 0-2.42.1525-3.56125.43625-1.5675.39-2.68 1.665-2.945 3.16l-1.54875 8.750001h2.2275l2.10125-7.880001"
               />
             </svg>
-            <span>Đã check-in</span>
+            <span>Danh sách đã check-in</span>
           </div>
         </router-link>
-        <router-link to="/schedule" class="nav-button">
+        <router-link to="/staff/court" class="nav-button">
           <i class="fas fa-calendar-alt"></i>
           Quản lí sân
         </router-link>
-        <router-link :to="`/staff/schedule/${clubId}`" class="nav-button">
+        <div @click="navigateToStaffSchedule" class="nav-button">
+          <div class="icon-text">
+            <svg
+              height="60"
+              viewBox="0 0 64 64"
+              width="60"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2C10.89 2 10 2.89 10 4V8H4C2.89 8 2 8.89 2 10V60C2 61.11 2.89 62 4 62H60C61.11 62 62 61.11 62 60V10C62 8.89 61.11 8 60 8H54V4C54 2.89 53.11 2 52 2S50 2.89 50 4V8H14V4C14 2.89 13.11 2 12 2zM4 22H60V60H4V22zM26 36H14V48H26V36zM30 36V48H44V36H30zM48 36V48H58V36H48z"
+              />
+            </svg>
+            Vận hành câu lạc bộ
+          </div>
+        </div>
+
+        <router-link to="/staff/refund" class="nav-button">
           <i class="fas fa-calendar-alt"></i>
-          Vận hành câu lạc bộ
-        </router-link>
-        <router-link to="/schedule" class="nav-button">
-          <i class="fas fa-calendar-alt"></i>
-          Content 1
+          Danh sách chờ hoàn tiền
         </router-link>
       </div>
     </div>
@@ -107,12 +119,34 @@
           <ul class="wrapper">
             <li class="icon facebook">
               <span class="tooltip">Facebook</span>
+              <svg
+                viewBox="0 0 320 512"
+                height="1.2em"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"
+                ></path>
+              </svg>
             </li>
             <li class="icon twitter">
               <span class="tooltip">Twitter</span>
+              <svg
+                height="1.8em"
+                fill="currentColor"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+                class="twitter"
+              >
+                <path
+                  d="M42,12.429c-1.323,0.586-2.746,0.977-4.247,1.162c1.526-0.906,2.7-2.351,3.251-4.058c-1.428,0.837-3.01,1.452-4.693,1.776C34.967,9.884,33.05,9,30.926,9c-4.08,0-7.387,3.278-7.387,7.32c0,0.572,0.067,1.129,0.193,1.67c-6.138-0.308-11.582-3.226-15.224-7.654c-0.64,1.082-1,2.349-1,3.686c0,2.541,1.301,4.778,3.285,6.096c-1.211-0.037-2.351-0.374-3.349-0.914c0,0.022,0,0.055,0,0.086c0,3.551,2.547,6.508,5.923,7.181c-0.617,0.169-1.269,0.263-1.941,0.263c-0.477,0-0.942-0.054-1.392-0.135c0.94,2.902,3.667,5.023,6.898,5.086c-2.528,1.96-5.712,3.134-9.174,3.134c-0.598,0-1.183-0.034-1.761-0.104C9.268,36.786,13.152,38,17.321,38c13.585,0,21.017-11.156,21.017-20.834c0-0.317-0.01-0.633-0.025-0.945C39.763,15.197,41.013,13.905,42,12.429"
+                ></path>
+              </svg>
             </li>
             <li class="icon instagram">
               <span class="tooltip">Instagram</span>
+
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="1.2em"
@@ -133,24 +167,43 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
 import Logo from "../components/StaffHomepage/Logo.vue";
 import { useAuthStore } from "../stores/auth";
-onMounted(async () => {
-  const isExistCookie = authStore.checkCookieExists("uwu");
-  if (isExistCookie) {
-    authStore.checkTokenValidity();
-  }
-});
+const router = useRouter();
 const authStore = useAuthStore();
-const filterSearchRef = ref(null);
-const clubId = computed(() => authStore.user.clubId);
-const closeDropdowns = () => {
-  if (filterSearchRef.value) {
-    filterSearchRef.value.closeAllDropdowns();
+const clubId = ref(null);
+
+onMounted(async () => {
+  await fetchClubId();
+});
+
+async function fetchClubId() {
+  const staffId = authStore.user.userId;
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/courtmaster/staff/get-clubId-by-userId?staffId=${staffId}`
+    );
+    clubId.value = response.data.clubId;
+    console.log("Club ID:", clubId.value);
+  } catch (error) {
+    console.error("Error fetching clubId:", error);
   }
-};
+}
+
+function navigateToStaffSchedule() {
+  if (clubId.value) {
+    router.push({
+      name: "StaffSchedulePageScreen",
+      params: { clubId: clubId.value },
+    });
+  } else {
+    console.error("Club ID is not available");
+    // You might want to show an error message to the user here
+  }
+}
 </script>
 
 <style>
