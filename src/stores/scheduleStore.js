@@ -97,8 +97,19 @@ export const useScheduleStore = defineStore('schedule', {
 
 
     async addFixedSlots(startTime, endTime, courtNumber, status, startDate) {
+      if (!this.endDate) {
+        this.setErrorMessage('Vui lòng chọn ngày kết thúc.', 5000);
+        return;
+      }
+
       let currentDate = this.convertDateStringToDate(startDate);
       const endDate = this.convertDateStringToDate(this.endDate);
+
+      if (!currentDate || !endDate) {
+        this.setErrorMessage('Ngày bắt đầu hoặc ngày kết thúc không hợp lệ.', 5000);
+        return;
+      }
+
       this.pendingSlots = [];
     
       while (currentDate <= endDate) {
@@ -217,7 +228,7 @@ export const useScheduleStore = defineStore('schedule', {
         if (duplicateSlots.length > 0) {
           this.invalidSlots = duplicateSlots;
           const errorMessages = duplicateSlots.map(slot =>
-            `Giờ chơi tại sân ${slot.courtName} từ ${slot.startTime.slice(0, 5)} đến ${slot.endTime.slice(0, 5)} - ${this.formatDate(slot.bookingDate)} đã được đặt, vui lòng chọn 1 giờ chơi khác.\n`
+            `Giờ chơi tại sân ${slot.courtName} từ ${slot.startTime.slice(0, 5)} đến ${slot.endTime.slice(0, 5)} - ${this.formatDate(slot.bookingDate)} đã được đặt, vui lòng chọn 1 giờ chơi khác.`
           );
           this.duplicateSlotError = errorMessages.join('\n');
           this.setErrorMessage(this.duplicateSlotError, 10000, true); // Display error for 10s and mark as duplicate error
@@ -246,6 +257,17 @@ export const useScheduleStore = defineStore('schedule', {
         this.bookingResponse = null;
         return;
       }
+
+            // Validate that all slots have the same date for one-time play
+            if (this.currentBookingType === 'one-time') {
+              const dates = new Set(this.slotsToPost.map(slot => slot.date));
+              if (dates.size > 1) {
+                const errorMessage = 'Với chế độ trong ngày, bạn không được chọn slot không cùng 1 ngày';
+                this.setErrorMessage(errorMessage);
+                this.removeInvalidSlotsForOneTimePlay();
+                return;
+              }
+            }
     
       const slotsToPost = this.slotsToPost.map(slot => ({
         courtId: slot.court,
@@ -283,10 +305,21 @@ export const useScheduleStore = defineStore('schedule', {
       this.invalidSlots = [];
     },
 
+    removeInvalidSlotsForOneTimePlay() {
+      const validDate = this.slotsToPost[0].date;
+      this.slotsToPost = this.slotsToPost.filter(slot => slot.date === validDate);
+      this.slots = this.slots.map(slot => {
+        if (slot.date !== validDate && slot.status === 'selected') {
+          return { ...slot, status: 'available' };
+        }
+        return slot;
+      });
+    },
+
 
 
     
-    setErrorMessage(message, duration = 0, isDuplicateError = false) {
+    setErrorMessage(message, duration = 5000, isDuplicateError = false) {
       this.errorMessage = message;
       this.errorMessageVisible = true;
       this.isDuplicateError = isDuplicateError;

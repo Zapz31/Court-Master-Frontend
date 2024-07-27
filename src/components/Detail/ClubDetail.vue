@@ -30,11 +30,7 @@
     </div>
     <div>
       <button class="button">
-        <router-link
-          :to="getTargetRoute()"
-        >
-          Xem giờ chơi
-        </router-link>
+        <router-link :to="getTargetRoute()"> Xem giờ chơi </router-link>
       </button>
     </div>
 
@@ -92,12 +88,9 @@
         <div class="commenter">
           <div class="user-info">
             <div class="avatar">
-              <img
-                src="../../../public/img/avatarCourtMaster.jpg"
-                alt="Avatar"
-              />
+              <img :src="userImageUrl" alt="Avatar" />
             </div>
-            <h4>Doan Minh Tien</h4>
+            <h4>{{ user.firstName }} {{ user.lastName }}</h4>
           </div>
 
           <div class="form">
@@ -158,7 +151,7 @@
 
         <div class="comment" v-for="(comment, index) in comments" :key="index">
           <div class="avatar1">
-            <img src="../../../public/img/avatarCourtMaster.jpg" alt="Avatar" />
+            <img src="../../../public/img/avatarCourtMaster.jpg" alt="" />
           </div>
           <div class="user-info1">
             <h4>
@@ -166,19 +159,11 @@
             </h4>
             <p>{{ comment.text }}</p>
             <div class="rating1">
-              <span class="star-icon" :class="{ filled: comment.rating >= 1 }"
-                >&#9733;</span
-              >
-              <span class="star-icon" :class="{ filled: comment.rating >= 2 }"
-                >&#9733;</span
-              >
-              <span class="star-icon" :class="{ filled: comment.rating >= 3 }"
-                >&#9733;</span
-              >
-              <span class="star-icon" :class="{ filled: comment.rating >= 4 }"
-                >&#9733;</span
-              >
-              <span class="star-icon" :class="{ filled: comment.rating >= 5 }"
+              <span
+                v-for="i in 5"
+                :key="i"
+                class="star-icon"
+                :class="{ filled: comment.rating >= i }"
                 >&#9733;</span
               >
             </div>
@@ -206,27 +191,28 @@
 
 <script setup>
 import { storeToRefs } from "pinia";
-import { onBeforeUnmount, onMounted, ref, watch} from "vue";
-import { useClubStore } from "../../stores/clubMng";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useAuthStore } from "../../stores/auth";
+import { useClubStore } from "../../stores/clubMng";
 
 const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 const getTargetRoute = () => {
   let uId = authStore.user.userId;
-  if(uId === ''){
+  if (uId === "") {
     uId = "1";
   }
   if (uId !== "1") {
     return {
-      name: 'ScheduleScreen',
-      params: { clubId: currentClub.value.clubId }
-    }
+      name: "ScheduleScreen",
+      params: { clubId: currentClub.value.clubId },
+    };
   } else {
     return {
-      name: 'UnableAccessScreen',
-    }
+      name: "UnableAccessScreen",
+    };
   }
-}
+};
 
 const props = defineProps({
   clubId: {
@@ -250,7 +236,7 @@ const fetchClubData = async () => {
       const user = JSON.parse(userString);
       userId.value = user.userId || "";
     } else {
-      userId.value="1";
+      userId.value = "1";
     }
     await clubStore.fetchClubById(props.clubId, userId.value);
     // Start auto slide after data is fetched
@@ -337,6 +323,19 @@ const stopAutoSlide = () => {
   }
 };
 
+const userImageUrl = computed(() => {
+  if (user.value.imageURL) {
+    // Check if the imageURL is already a base64 string
+    if (user.value.imageURL.startsWith("data:image")) {
+      return user.value.imageURL;
+    }
+    // If it's not, assume it's a normal URL and convert it to base64
+    return `data:image/png;base64,${user.value.imageURL}`;
+  }
+  // Return default image if no user image is available
+  return "../../../public/img/avatarCourtMaster.jpg";
+});
+
 onBeforeUnmount(stopAutoSlide);
 //===========================FIXED FUNCTION OF COMMENT================================================
 const comments = ref([
@@ -379,7 +378,7 @@ const submitComment = () => {
   if (!newComment.value.trim()) return; // Do nothing if the comment is empty
 
   comments.value.push({
-    name: "Doan Minh Tien",
+    name: user.name,
     date: formatDate(new Date()),
     text: newComment.value,
     rating: newRating.value,
