@@ -4,7 +4,7 @@
       <input
         v-model="searchQuery"
         @input="filterResults"
-        placeholder="Nhập số điện thoại"
+        placeholder="Nhập số điện thoại hoặc tên"
         type="text"
       />
 
@@ -40,7 +40,21 @@
   </div>
 </template>
   
-  <script setup>
+<script setup>
+import { ref } from "vue";
+import { useCheckInStore } from "../../stores/checkInStore";
+
+const checkInStore = useCheckInStore();
+const searchQuery = ref("");
+
+const performSearch = async () => {
+  if (searchQuery.value.trim()) {
+    await checkInStore.searchCheckedInBookings(searchQuery.value);
+  } else {
+    // If the search query is empty, fetch all unchecked-in bookings
+    await checkInStore.fetchUnCheckinList();
+  }
+};
 </script>
   
 <style scoped>

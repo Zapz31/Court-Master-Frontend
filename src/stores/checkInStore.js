@@ -79,18 +79,75 @@ export const useCheckInStore = defineStore('checkIn', {
           console.error('Error performing check-in:', error);
         }
       },
-  
+
+
       async performCheckedIn(slotId) {
         try {
-          const response = await axiosInstance.post(`http://localhost:8080/courtmaster/staff/staffCheckIn?slotId=${slotId}`);
+          const response = await axiosInstance.get(`http://localhost:8080/courtmaster/staff/staffUnCheckIn?slotId=${slotId}`);
           if (response.data === "success") {
             // Cập nhật danh sách
             await this.fetchUnCheckinList();
             await this.fetchCheckedInList();
           }
         } catch (error) {
-          console.error('Error performing check-out:', error);
+          console.error('Error performing check-in:', error);
         }
+      },
+  
+  async searchBookings(query) {
+    if (!this.clubId) {
+      await this.fetchClubId();
+    }
+
+    if (!this.clubId) {
+      console.error('Invalid clubId:', this.clubId);
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get(`http://localhost:8080/courtmaster/staff/search-booked-list`, {
+        params: {
+          clubId: this.clubId,
+          phoneOrname: query,
+          isCheckIn: 0
+        }
+      });
+      this.pendingCheckIns = response.data;
+      console.log('Search results:', this.pendingCheckIns);
+    } catch (error) {
+      console.error('Error searching bookings:', error);
+      if (error.response && error.response.status === 400) {
+        console.error('Bad Request:', error.response.data);
       }
+    }
+  },
+
+  async searchCheckedInBookings(query) {
+    if (!this.clubId) {
+      await this.fetchClubId();
+    }
+
+    if (!this.clubId) {
+      console.error('Invalid clubId:', this.clubId);
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get(`http://localhost:8080/courtmaster/staff/search-booked-list`, {
+        params: {
+          clubId: this.clubId,
+          phoneOrname: query,
+          isCheckIn: 1
+        }
+      });
+      this.checkedInBookings = response.data;
+      console.log('Search results:', this.checkedInBookings);
+    } catch (error) {
+      console.error('Error searching checked-in bookings:', error);
+      if (error.response && error.response.status === 400) {
+        console.error('Bad Request:', error.response.data);
+      }
+    }
+  }
   }
 });

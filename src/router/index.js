@@ -33,9 +33,16 @@ const routes = [
 
     {
         path: '/staff/court',
-        name: 'CourtOperationScreen',
-        component: () => import('../views/CourtOperationScreen.vue') ,
+        name: 'CourtMngStaffScreen',
+        component: () => import('../views/CourtMngStaffScreen.vue.vue') ,
     },
+
+    {
+        path: '/manager/court',
+        name: 'CourtMngManagerScreen',
+        component: () => import('../views/CourtMngManagerScreen.vue') ,
+    },
+
 
         {
         path: '/staff/checkedin',
@@ -142,6 +149,13 @@ const routes = [
         name: 'PageNotFound',
         component: () => import('../views/ErrorScreen/PageNotFoundScreen.vue') ,
     },
+
+    {
+        path: '/manager-staffs',
+        name: 'MngStaffScreen',
+        component: () => import('../views/MngStaffScreen.vue') ,
+    },
+
 ]
 
 const router = createRouter({

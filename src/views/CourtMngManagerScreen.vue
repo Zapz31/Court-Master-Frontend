@@ -2,56 +2,32 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Check in</h1>
+      <h1>Quản lí sân</h1>
       <user-avatar />
     </div>
     <div class="filter_search">
-      <checkin-search class="filter-search" />
+      <filter-search class="filter-search" />
     </div>
     <div class="content">
       <!-- Table here -->
-      <div class="table-container">
-        <table class="fixed-header">
-          <thead>
-            <tr>
-              <th>Customer Phone Number</th>
-              <th>Customer Name</th>
-              <th>Court Name</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Booking Date</th>
-              <th>Check-in Status</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="booking in pendingCheckIns"
-              :key="
-                booking.customerPhoneNumber +
-                booking.startTime +
-                booking.bookingDate +
-                booking.badmintonCourtName
-              "
-            >
-              <td>{{ booking.customerPhoneNumber }}</td>
-              <td>{{ booking.customerFullName }}</td>
-              <td>{{ booking.badmintonCourtName }}</td>
-              <td>{{ formatTime(booking.startTime) }}</td>
-              <td>{{ booking.endTime }}</td>
-              <td>{{ formatDate(booking.bookingDate) }}</td>
-              <td class="status-cell">
-                <button
-                  @click="checkInStore.performCheckIn(booking.bookingSlotId)"
-                  class="check-in"
-                >
-                  Check-in
-                </button>
-              </td>
-              <td>{{ formatPrice(booking.price) }}₫</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="court-grid">
+        <div
+          v-for="court in courts"
+          :key="court.badminton_court_id"
+          class="court-card"
+        >
+          <h3>{{ court.badminton_court_name }}</h3>
+          <p>ID: {{ court.badminton_court_id }}</p>
+          <button
+            @click="toggleCourtStatus(court.badminton_court_id)"
+            :class="{
+              active: court.badminton_court_status === 'Activate',
+              'not-active': court.badminton_court_status !== 'Activate',
+            }"
+          >
+            {{ court.badminton_court_status }}
+          </button>
+        </div>
       </div>
     </div>
     <div class="footer">
@@ -125,15 +101,73 @@
   </div>
 </template>
 <script setup>
-import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
-import CheckinSearch from "../components/Check-in/CheckinSearch.vue";
-import Logo from "../components/StaffHomepage/Logo.vue";
-import UserAvatar from "../components/StaffHomepage/UserAvatar.vue";
+import Logo from "../components/Homepage/Logo.vue";
+import UserAvatar from "../components/Homepage/UserAvatar.vue";
 import { useCheckInStore } from "../stores/checkInStore";
 
+import { ref } from "vue";
+
+const courts = ref([
+  {
+    badminton_court_id: "CO000001",
+    badminton_court_name: "Sân B",
+    badminton_court_status: "Activate",
+  },
+  {
+    badminton_court_id: "CO000002",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+
+  {
+    badminton_court_id: "CO000003",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+
+  {
+    badminton_court_id: "CO000004",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+  {
+    badminton_court_id: "CO000005",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+  {
+    badminton_court_id: "CO000006",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+  {
+    badminton_court_id: "CO000007",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+  {
+    badminton_court_id: "CO000008",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+  {
+    badminton_court_id: "CO000009",
+    badminton_court_name: "Court 1",
+    badminton_court_status: "Activate",
+  },
+  // ... add all other courts here
+]);
+
+function toggleCourtStatus(courtId) {
+  const court = courts.value.find((c) => c.badminton_court_id === courtId);
+  if (court) {
+    court.badminton_court_status =
+      court.badminton_court_status === "Activate" ? "Not Activate" : "Activate";
+  }
+}
+
 const checkInStore = useCheckInStore();
-const { pendingCheckIns } = storeToRefs(checkInStore);
 
 function formatDate(date) {
   const d = new Date(date);
@@ -199,62 +233,78 @@ onMounted(async () => {
   width: 100%;
 }
 
-.table-container {
-  max-height: 500px; /* Set the height you want for the table container */
-  overflow-y: auto;
+.court-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 20px;
+  margin: -10px;
 }
 
-.fixed-header {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 10px;
-  border: 2px solid #ddd; /* Đường viền đậm hơn */
-}
-
-.fixed-header thead th {
-  position: sticky;
-  top: 0;
-  background-color: #6babf4; /* Light blue background for headers */
-  color: white; /* White text color for headers */
-  text-align: left;
-  z-index: 1;
-}
-
-.fixed-header th,
-.fixed-header td {
-  text-align: center;
-  border: 1px solid #ddd; /* Đường viền đậm hơn */
-  padding: 8px;
-}
-
-.fixed-header tr:hover {
-  background-color: #f1f1f1; /* Light grey background for row hover */
-}
-
-.status-cell button {
-  padding: 5px 10px;
-  border: none;
+.court-card {
+  margin: 20px;
+  background-color: #f0f0f0;
   border-radius: 8px;
+  padding: 68px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.court-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.court-card h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.court-card p {
+  color: #666;
+  margin: 10px 0;
+}
+
+.court-card button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
 }
 
-.status-cell button:hover {
-  background-color: #6babf4; /* Light blue background for button hover */
-  color: white; /* White text color for button hover */
-}
-
-.status-cell button.checked-in {
-  background-color: #4caf50;
+.court-card button.active {
+  background-color: #6babf4;
   color: white;
+  font-weight: bold;
 }
 
-.status-cell button:not(.checked-in) {
-  background-color: #f44336;
+.court-card button.not-active {
+  background-color: grey;
   color: white;
+  font-weight: bold;
 }
 
+@media (max-width: 1200px) {
+  .court-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .court-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .court-grid {
+    grid-template-columns: 1fr;
+  }
+}
 /* ------------------------------------------------------ */
 .footer {
   background-color: #d3d3d3;

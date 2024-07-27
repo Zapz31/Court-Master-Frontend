@@ -18,7 +18,9 @@
               >Thời gian: {{ booking.startTime }} - {{ booking.endTime }}</label
             >
             <label>Thời lượng: {{ booking.playTime }}</label>
-            <label>Chi phí: {{ formatPrice(booking.price) }}₫</label>
+            <label v-if="booking.bookingType !== 'Lịch linh hoạt'"
+              >Chi phí: {{ formatPrice(booking.price) }}₫</label
+            >
             <label>Loại lịch: {{ booking.bookingType }}</label>
             <label>Sân: {{ booking.courtName }}</label>
           </div>
@@ -28,7 +30,7 @@
         </div>
       </div>
       <div v-if="scheduleStore.bookingResponse" class="total-info">
-        <label
+        <label v-if="showTotalPrice"
           >Tổng chi phí:
           {{ formatPrice(scheduleStore.bookingResponse.totalPrice) }}₫</label
         >
@@ -73,6 +75,12 @@ const formattedBookings = computed(() => {
   }));
 });
 
+const showTotalPrice = computed(() => {
+  return formattedBookings.value.some(
+    (booking) => booking.bookingType !== "Lịch linh hoạt"
+  );
+});
+
 const getCourtName = (courtId) => {
   const court = clubStore.currentClub?.courtList.find(
     (c) => c.courtId === courtId
@@ -89,7 +97,7 @@ const translateBookingType = (bookingType) => {
     case "Fixed":
       return "Lịch cố định";
     default:
-      return bookingType; // Trả về giá trị gốc nếu không khớp
+      return bookingType;
   }
 };
 </script>

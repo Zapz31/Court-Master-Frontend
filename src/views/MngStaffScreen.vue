@@ -2,31 +2,62 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Quản lí sân</h1>
+      <h1>Quản lí nhân viên</h1>
       <user-avatar />
     </div>
     <div class="filter_search">
       <filter-search class="filter-search" />
     </div>
+
     <div class="content">
-      <!-- Table here -->
-      <div class="court-grid">
-        <div
-          v-for="court in courts"
-          :key="court.badminton_court_id"
-          class="court-card"
-        >
-          <h3>{{ court.badminton_court_name }}</h3>
-          <p>ID: {{ court.badminton_court_id }}</p>
-          <button
-            @click="toggleCourtStatus(court.badminton_court_id)"
-            :class="{
-              active: court.badminton_court_status === 'Activate',
-              'not-active': court.badminton_court_status !== 'Activate',
-            }"
-          >
-            {{ court.badminton_court_status }}
+      <div class="table-actions">
+        <div class="actions">
+          <a href="/register-staff" class="action-button register">Đăng ký</a>
+          <button @click="updateUsers" class="action-button update">
+            Cập nhật
           </button>
+          <button @click="deleteUsers" class="action-button delete">Xóa</button>
+        </div>
+        <div class="table-container">
+          <table class="fixed-header">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    v-model="selectAll"
+                    @change="toggleAll"
+                  />
+                  Chọn tất cả
+                </th>
+                <th>userId</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Birthday</th>
+                <th>Register Date</th>
+                <th>Avatar Image</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in users" :key="user.userId">
+                <td><input type="checkbox" v-model="user.selected" /></td>
+                <td>{{ user.userId }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.phoneNumber }}</td>
+                <td>{{ user.birthday }}</td>
+                <td>{{ user.registerDate }}</td>
+                <td>
+                  <img
+                    :src="user.avatarImage"
+                    :alt="user.name"
+                    class="avatar-image"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -100,101 +131,133 @@
     </div>
   </div>
 </template>
+
 <script setup>
-import { onMounted } from "vue";
-import Logo from "../components/StaffHomepage/Logo.vue";
-import UserAvatar from "../components/StaffHomepage/UserAvatar.vue";
-import { useCheckInStore } from "../stores/checkInStore";
-
 import { ref } from "vue";
+import FilterSearch from "../components/Check-in/CheckinSearch.vue";
+import Logo from "../components/Homepage/Logo.vue";
+import UserAvatar from "../components/Homepage/UserAvatar.vue";
 
-const courts = ref([
+const users = ref([
   {
-    badminton_court_id: "CO000001",
-    badminton_court_name: "Sân B",
-    badminton_court_status: "Activate",
+    userId: 1,
+    name: "John Doe",
+    email: "john@example.com",
+    phoneNumber: "1234567890",
+    birthday: "1990-01-01",
+    registerDate: "2024-01-01",
+    avatarImage: "../../public/img/avatarCourtMaster.jpg",
+    selected: false,
   },
   {
-    badminton_court_id: "CO000002",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-
-  {
-    badminton_court_id: "CO000003",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-
-  {
-    badminton_court_id: "CO000004",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
+    userId: 2,
+    name: "Jane Smith",
+    email: "jane@example.com",
+    phoneNumber: "0987654321",
+    birthday: "1992-05-15",
+    registerDate: "2024-02-01",
+    avatarImage: "../../public/img/avatarCourtMaster.jpg",
+    selected: false,
   },
   {
-    badminton_court_id: "CO000005",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
+    userId: 3,
+    name: "Bob Johnson",
+    email: "bob@example.com",
+    phoneNumber: "5555555555",
+    birthday: "1988-11-30",
+    registerDate: "2024-03-01",
+    avatarImage: "../../public/img/avatarCourtMaster.jpg",
+    selected: false,
   },
   {
-    badminton_court_id: "CO000006",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
+    userId: 4,
+    name: "Alice Brown",
+    email: "alice@example.com",
+    phoneNumber: "1112223333",
+    birthday: "1995-07-20",
+    registerDate: "2024-04-01",
+    avatarImage: "../../public/img/avatarCourtMaster.jpg",
+    selected: false,
   },
   {
-    badminton_court_id: "CO000007",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
+    userId: 5,
+    name: "Charlie Davis",
+    email: "charlie@example.com",
+    phoneNumber: "4444444444",
+    birthday: "1993-03-10",
+    registerDate: "2024-05-01",
+    avatarImage: "../../public/img/avatarCourtMaster.jpg",
+    selected: false,
   },
   {
-    badminton_court_id: "CO000008",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
+    userId: 6,
+    name: "Eva Wilson",
+    email: "eva@example.com",
+    phoneNumber: "6666666666",
+    birthday: "1991-09-05",
+    registerDate: "2024-06-01",
+    avatarImage: "../../public/img/avatarCourtMaster.jpg",
+    selected: false,
   },
   {
-    badminton_court_id: "CO000009",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
+    userId: 7,
+    name: "Frank Miller",
+    email: "frank@example.com",
+    phoneNumber: "7777777777",
+    birthday: "1987-12-25",
+    registerDate: "2024-07-01",
+    avatarImage: "frank.jpg",
+    selected: false,
   },
-  // ... add all other courts here
+  {
+    userId: 8,
+    name: "Grace Lee",
+    email: "grace@example.com",
+    phoneNumber: "8888888888",
+    birthday: "1994-02-14",
+    registerDate: "2024-08-01",
+    avatarImage: "grace.jpg",
+    selected: false,
+  },
+  {
+    userId: 9,
+    name: "Henry Taylor",
+    email: "henry@example.com",
+    phoneNumber: "9999999999",
+    birthday: "1989-06-30",
+    registerDate: "2024-09-01",
+    avatarImage: "henry.jpg",
+    selected: false,
+  },
+  {
+    userId: 10,
+    name: "Ivy Moore",
+    email: "ivy@example.com",
+    phoneNumber: "1010101010",
+    birthday: "1996-04-18",
+    registerDate: "2024-10-01",
+    avatarImage: "ivy.jpg",
+    selected: false,
+  },
 ]);
 
-function toggleCourtStatus(courtId) {
-  const court = courts.value.find((c) => c.badminton_court_id === courtId);
-  if (court) {
-    court.badminton_court_status =
-      court.badminton_court_status === "Activate" ? "Not Activate" : "Activate";
-  }
+const selectAll = ref(false);
+
+function toggleAll() {
+  users.value.forEach((user) => (user.selected = selectAll.value));
 }
 
-const checkInStore = useCheckInStore();
-
-function formatDate(date) {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes} ${day}/${month}/${year}`;
+function addUser() {
+  // Implement add user logic
 }
 
-const formatPrice = (price) => {
-  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-};
+function updateUsers() {
+  // Implement update users logic
+}
 
-const formatTime = (time) => {
-  if (!time) return "";
-  const parts = time.split(":");
-  if (parts.length < 2) return time;
-  const hours = parts[0].padStart(2, "0");
-  const minutes = parts[1].padStart(2, "0");
-  return `${hours}:${minutes}`;
-};
-
-onMounted(async () => {
-  await checkInStore.fetchUnCheckinList();
-});
+function deleteUsers() {
+  // Implement delete users logic
+}
 </script>
 
 <style>
@@ -203,7 +266,6 @@ onMounted(async () => {
   flex-direction: column;
   min-height: 100vh;
 }
-
 .logo {
   display: flex;
   justify-content: space-between;
@@ -214,17 +276,20 @@ onMounted(async () => {
   color: #6babf4;
 }
 
-.content {
-  max-width: 3000px;
-  flex-grow: 1;
+.table-actions {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 5rem;
+  flex-direction: column;
+  height: calc(100vh - 200px); /* Adjust this value based on your layout */
 }
 
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 5rem;
+}
 .filter_search {
-  padding: 0;
+  padding: 36px;
   display: flex;
   justify-content: center;
 }
@@ -233,78 +298,89 @@ onMounted(async () => {
   width: 100%;
 }
 
-.court-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  padding: 20px;
-  margin: -10px;
+.table-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  border: 2px solid #ddd;
+  border-radius: 0px;
+}
+.fixed-header {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.court-card {
-  margin: 20px;
-  background-color: #f0f0f0;
-  border-radius: 8px;
-  padding: 68px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+.fixed-header thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-.court-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.court-card h3 {
-  margin-top: 0;
-  color: #333;
-  font-size: 1.2em;
-}
-
-.court-card p {
-  color: #666;
-  margin: 10px 0;
-}
-
-.court-card button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.court-card button.active {
+.fixed-header th {
   background-color: #6babf4;
   color: white;
+  text-align: left;
+  padding: 12px;
+}
+
+.fixed-header td {
+  background-color: white;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.fixed-header tr:hover td {
+  background-color: #f1f1f1;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  background-color: #6babf4;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-button {
+  border-radius: 8px;
+  margin: 0 10px;
+  padding: 12px 24px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
   font-weight: bold;
+  transition: all 0.3s ease;
+  border: none;
+  outline: none;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
 }
 
-.court-card button.not-active {
-  background-color: grey;
-  color: white;
-  font-weight: bold;
+.action-button.register {
+  background-color: white;
+  color: black;
 }
 
-@media (max-width: 1200px) {
-  .court-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.action-button.update {
+  background-color: white;
+  color: black;
 }
 
-@media (max-width: 900px) {
-  .court-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.action-button.delete {
+  background-color: white;
+  color: black;
 }
 
-@media (max-width: 600px) {
-  .court-grid {
-    grid-template-columns: 1fr;
-  }
+.avatar-image {
+  align-items: center;
+  width: 100px; /* Adjust this value as needed */
+  height: 130px; /* Adjust this value as needed */
+  object-fit: cover;
+  border-radius: 5%;
 }
+
 /* ------------------------------------------------------ */
 .footer {
   background-color: #d3d3d3;
@@ -467,7 +543,7 @@ onMounted(async () => {
 
   .content {
     margin-left: 0;
-    padding: 0.5rem;
+    padding: 5rem;
   }
 
   .footer {

@@ -40,8 +40,8 @@
           >{{ totalPlayTime.toFixed(1) }}h</span
         >
       </div>
-      <button class="add-play-time-btn" @click="addPlayTime">
-        Thêm giờ chơi
+      <button class="add-play-time-btn" @click="showBuyPlayTimePopup">
+        Mua thêm giờ chơi
       </button>
     </div>
 
@@ -64,6 +64,17 @@
       :visible="scheduleStore.errorMessageVisible"
     />
   </div>
+
+  <!-- Thêm component popup vào cuối template -->
+  <BuyPlayTime
+    :isVisible="isBuyPlayTimePopupVisible"
+    :flexiblePrice="flexiblePrice"
+    :minPlayTime="minPlayTime"
+    :maxPlayTime="maxPlayTime"
+    @close="closeBuyPlayTimePopup"
+    @confirm="handleBuyPlayTime"
+    @updateTotalPrice="updateTotalPrice"
+  />
 </template>
 
 <script setup>
@@ -72,6 +83,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useClubStore } from "../../stores/clubMng";
 import { usePaymentStore } from "../../stores/PaymentStore";
 import { useScheduleStore } from "../../stores/scheduleStore";
+import BuyPlayTime from "./BuyPlayTime.vue";
 import ScheduleErrorMessage from "./ScheduleErrorMessage.vue";
 
 const selectedDate = ref("");
@@ -83,6 +95,71 @@ const paymentStore = usePaymentStore();
 const currentClub = computed(() => clubStore.currentClub);
 const route = useRoute();
 const router = useRouter();
+
+const isBuyPlayTimePopupVisible = ref(false);
+
+const currentTotalPrice = ref(0);
+
+const showBuyPlayTimePopup = () => {
+  isBuyPlayTimePopupVisible.value = true;
+};
+
+const closeBuyPlayTimePopup = () => {
+  isBuyPlayTimePopupVisible.value = false;
+};
+
+const updateTotalPrice = (price) => {
+  currentTotalPrice.value = price;
+};
+
+const getMostCommonPrice = (timeFrameList) => {
+  if (!timeFrameList || timeFrameList.length === 0) return 0;
+
+  const priceCounts = timeFrameList.reduce((acc, tf) => {
+    if (tf.type === "flexible") {
+      acc[tf.price] = (acc[tf.price] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  return Object.entries(priceCounts).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+};
+
+const flexiblePrice = computed(() => {
+  if (clubStore.currentClub && clubStore.currentClub.timeFrameList) {
+    return Number(getMostCommonPrice(clubStore.currentClub.timeFrameList));
+  }
+  return 0;
+});
+
+const minPlayTime = computed(() => {
+  if (clubStore.currentClub && clubStore.currentClub.timeFrameList) {
+    return Math.min(
+      ...clubStore.currentClub.timeFrameList
+        .filter((tf) => tf.type === "flexible")
+        .map((tf) => tf.minPlayTime || 1)
+    );
+  }
+  return 1;
+});
+
+const maxPlayTime = computed(() => {
+  if (clubStore.currentClub && clubStore.currentClub.timeFrameList) {
+    return Math.max(
+      ...clubStore.currentClub.timeFrameList
+        .filter((tf) => tf.type === "flexible")
+        .map((tf) => tf.maxPlayTime || 24)
+    );
+  }
+  return 24;
+});
+
+const handleBuyPlayTime = ({ hours, totalPrice }) => {
+  console.log(`Mua thêm ${hours} giờ chơi với tổng giá ${totalPrice} VND`);
+  // Cập nhật tổng giờ chơi
+  totalPlayTime.value += hours;
+  // Thêm các xử lý khác nếu cần, ví dụ như cập nhật state hoặc gửi request đến server
+};
 
 const handleBooking = () => {
   const bookingInfo = scheduleStore.getFormattedBookings();

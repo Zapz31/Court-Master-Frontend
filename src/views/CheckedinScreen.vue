@@ -2,11 +2,11 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Check in</h1>
+      <h1>Đã check in</h1>
       <user-avatar />
     </div>
     <div class="filter_search">
-      <filter-search class="filter-search" />
+      <checkedin-search class="filter-search" />
     </div>
     <div class="content">
       <!-- Table here -->
@@ -127,7 +127,7 @@
 <script setup>
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
-import FilterSearch from "../components/Check-in/FilterSearch.vue";
+import CheckedinSearch from "../components/Check-in/CheckedinSearch.vue";
 import Logo from "../components/StaffHomepage/Logo.vue";
 import UserAvatar from "../components/StaffHomepage/UserAvatar.vue";
 import { useCheckInStore } from "../stores/checkInStore";

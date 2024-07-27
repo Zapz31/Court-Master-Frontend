@@ -127,7 +127,7 @@
 <script setup>
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
-import FilterSearch from "../components/Check-in/FilterSearch.vue";
+import FilterSearch from "../components/Check-in/CheckinSearch.vue";
 import Logo from "../components/StaffHomepage/Logo.vue";
 import UserAvatar from "../components/StaffHomepage/UserAvatar.vue";
 import { useCheckInStore } from "../stores/checkInStore";
