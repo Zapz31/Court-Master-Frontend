@@ -8,6 +8,13 @@ export const useClubStore = defineStore('club', {
     clubs: [],
     currentClub: null,
   }),
+
+  getters: {
+    customerPlayableTime: (state) => {
+      return state.currentClub ? state.currentClub.customerPlayableTime : "00:00";
+    }
+  },
+
   actions: {
     async fetchClubs() {
       try {

@@ -9,7 +9,6 @@
           id="playTime"
           v-model.number="playTime"
           :min="minPlayTime"
-          :max="maxPlayTime"
           step="1"
         />
       </div>
@@ -22,21 +21,18 @@
     </div>
   </div>
 </template>
-  
-  <script setup>
+
+<script setup>
+import axios from "axios";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useClubStore } from "../../stores/clubMng";
+import { useScheduleStore } from "../../stores/scheduleStore";
 
 const props = defineProps({
   isVisible: Boolean,
-  flexiblePrice: {
-    type: Number,
-    required: true,
-  },
   minPlayTime: {
-    type: Number,
-    required: true,
-  },
-  maxPlayTime: {
     type: Number,
     required: true,
   },
@@ -44,56 +40,108 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "confirm", "updateTotalPrice"]);
 
+const clubStore = useClubStore();
+const { currentClub } = storeToRefs(clubStore);
+const scheduleStore = useScheduleStore();
 const playTime = ref(props.minPlayTime);
 const errorMessage = ref("");
+const calculatedPrice = ref(0);
+const route = useRoute();
+const router = useRouter();
 
 const totalPrice = computed(() => {
-  return playTime.value * props.flexiblePrice;
+  return calculatedPrice.value;
 });
 
 const formattedTotalPrice = computed(() => {
   return formatCurrency(totalPrice.value);
 });
 
-watch(playTime, (newValue) => {
-  errorMessage.value = "";
-  if (newValue < props.minPlayTime) {
-    playTime.value = props.minPlayTime;
-  } else if (newValue > props.maxPlayTime) {
-    playTime.value = props.maxPlayTime;
-  }
-  emit("updateTotalPrice", totalPrice.value);
-});
-
-const closePopup = () => {
-  emit("close");
-};
-
-const confirmPurchase = () => {
-  if (
-    playTime.value < props.minPlayTime ||
-    playTime.value > props.maxPlayTime ||
-    !Number.isInteger(playTime.value)
-  ) {
-    errorMessage.value = `Vui lòng nhập số giờ hợp lệ (từ ${props.minPlayTime} đến ${props.maxPlayTime} giờ).`;
-    return;
-  }
-  emit("confirm", { hours: playTime.value, totalPrice: totalPrice.value });
-  closePopup();
-};
-
 const formatCurrency = (value) => {
+  if (isNaN(value)) return "NaN đ";
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(value);
 };
 
+const fetchCalculatedPrice = async () => {
+  if (!currentClub.value) {
+    console.error("Current club is not set");
+    errorMessage.value = "Không thể tính toán giá. Vui lòng thử lại sau.";
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      "http://localhost:8080/courtmaster/booking/total-hours-calculated-price",
+      {
+        params: {
+          clubId: currentClub.value.clubId,
+          totalHours: playTime.value,
+        },
+      }
+    );
+    if (response.data && typeof response.data.totalPrice === "number") {
+      calculatedPrice.value = response.data.totalPrice;
+    } else {
+      console.error("Invalid price data:", response.data);
+      errorMessage.value = "Dữ liệu giá không hợp lệ.";
+    }
+    emit("updateTotalPrice", calculatedPrice.value);
+  } catch (error) {
+    console.error("Error fetching calculated price:", error);
+    errorMessage.value = "Không thể tính toán giá. Vui lòng thử lại sau.";
+  }
+};
+
+const closePopup = () => {
+  emit("close");
+};
+
+const confirmPurchase = () => {
+  if (playTime.value < props.minPlayTime || !Number.isInteger(playTime.value)) {
+    errorMessage.value = `Vui lòng nhập số giờ hợp lệ (từ ${props.minPlayTime} đến ${props.maxPlayTime} giờ).`;
+    return;
+  }
+  scheduleStore.updateFlexibleBooking(playTime.value, totalPrice.value);
+  emit("confirm", { hours: playTime.value, totalPrice: totalPrice.value });
+  closePopup();
+  router.push({
+    name: "ConfirmPaymentScreen",
+    params: { clubId: currentClub.value.clubId },
+  });
+};
+
+watch(playTime, async (newValue) => {
+  errorMessage.value = "";
+  if (typeof newValue !== "number" || isNaN(newValue)) {
+    playTime.value = props.minPlayTime;
+  } else if (newValue < props.minPlayTime) {
+    playTime.value = props.minPlayTime;
+  }
+  await fetchCalculatedPrice();
+});
+
+watch(
+  () => currentClub.value,
+  (newClub) => {
+    if (newClub) {
+      fetchCalculatedPrice();
+    }
+  }
+);
+
 onMounted(() => {
   console.log("BuyPlayTime component mounted");
   console.log("Props:", props);
+  if (currentClub.value) {
+    fetchCalculatedPrice();
+  }
 });
 </script>
+
+
   
   <style scoped>
 .popup-overlay {
@@ -182,3 +230,5 @@ button {
   color: #4caf50;
 }
 </style>
+
+

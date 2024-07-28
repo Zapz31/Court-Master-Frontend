@@ -15,9 +15,16 @@ export const useScheduleStore = defineStore('schedule', {
     errorMessage: "",
     errorMessageVisible: false,
     pendingSlots: [],
+    flexibleBooking: {
+      totalPlayTime: 0,
+      totalPrice: 0
+    },
     currentBookingType: 'one-time',
     errorMessageTimer: null
   }),
+
+  
+  
   actions: {
     setCurrentBookingType(type) {
       this.currentBookingType = type;
@@ -469,6 +476,18 @@ export const useScheduleStore = defineStore('schedule', {
     setBookingType(type) {
       this.bookingType = type;
     },
+    setTotalPlayingTime(time) {
+      this.totalPlayingTime = time;
+    },
+      // Add this action to update both booking type and total playing time
+      updateFlexibleBooking(totalPlayTime, totalPrice) {
+        this.flexibleBooking.totalPlayTime = totalPlayTime;
+        this.flexibleBooking.totalPrice = totalPrice;
+      },
+      setBookingResponse(response) {
+        this.bookingResponse = response;
+      },
+    
     
     formatBookingTypeFromBackend(type) {
       switch (type) {

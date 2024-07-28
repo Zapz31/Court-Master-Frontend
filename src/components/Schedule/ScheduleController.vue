@@ -36,9 +36,9 @@
     <div v-if="selectedType === 'flexible'" class="play-time-control">
       <div class="total-play-time">
         <span>Tổng giờ chơi: </span>
-        <span class="total-play-time-value"
-          >{{ totalPlayTime.toFixed(1) }}h</span
-        >
+        <span class="total-play-time-value">{{
+          formattedCustomerPlayableTime
+        }}</span>
       </div>
       <button class="add-play-time-btn" @click="showBuyPlayTimePopup">
         Mua thêm giờ chơi
@@ -75,6 +75,12 @@
     @confirm="handleBuyPlayTime"
     @updateTotalPrice="updateTotalPrice"
   />
+
+  <FlexibleBookingConfirm
+    :isVisible="isFlexiblePopupVisible"
+    @confirm="confirmFlexibleBooking"
+    @cancel="cancelFlexibleBooking"
+  />
 </template>
 
 <script setup>
@@ -84,8 +90,10 @@ import { useClubStore } from "../../stores/clubMng";
 import { usePaymentStore } from "../../stores/PaymentStore";
 import { useScheduleStore } from "../../stores/scheduleStore";
 import BuyPlayTime from "./BuyPlayTime.vue";
+import FlexibleBookingConfirm from "./FlexibleBookingConfirm.vue";
 import ScheduleErrorMessage from "./ScheduleErrorMessage.vue";
 
+const isFlexiblePopupVisible = ref(false);
 const selectedDate = ref("");
 const endDate = ref("");
 const selectedType = ref("one-time");
@@ -99,6 +107,12 @@ const router = useRouter();
 const isBuyPlayTimePopupVisible = ref(false);
 
 const currentTotalPrice = ref(0);
+
+const formattedCustomerPlayableTime = computed(() => {
+  const time = clubStore.customerPlayableTime;
+  const [hours, minutes] = time.split(":");
+  return `${parseInt(hours)}h${minutes !== "00" ? ` ${minutes}m` : ""}`;
+});
 
 const showBuyPlayTimePopup = () => {
   isBuyPlayTimePopupVisible.value = true;
@@ -136,7 +150,7 @@ const minPlayTime = computed(() => {
   if (clubStore.currentClub && clubStore.currentClub.timeFrameList) {
     return Math.min(
       ...clubStore.currentClub.timeFrameList
-        .filter((tf) => tf.type === "flexible")
+        .filter((tf) => tf.type === "Flexible")
         .map((tf) => tf.minPlayTime || 1)
     );
   }
@@ -196,8 +210,21 @@ const prepareBookingData = () => {
     return;
   }
 
-  //handleBooking();
-  goToConfirmPayment();
+  const bookingType =
+    scheduleStore.bookingResponse.unpaidBookingList[0].bookingType;
+
+  console.log("Current booking type:", bookingType); // Debugging line
+
+  if (bookingType === "flexible" || selectedType.value === "flexible") {
+    isFlexiblePopupVisible.value = true;
+  } else {
+    // Luồng 1: One-time play hoặc Fixed
+    handleNormalBooking();
+  }
+};
+
+const cancelFlexibleBooking = () => {
+  isFlexiblePopupVisible.value = false;
 };
 const minEndDate = computed(() => {
   if (!selectedDate.value) return "";
@@ -213,7 +240,7 @@ onMounted(async () => {
   updateCurrentBookingType();
 
   if (!currentClub.value) {
-    await clubStore.fetchClubById(route.params.clubId);
+    await clubStore.fetchClubById(route.params.clubId /* userId here */);
   }
 });
 
@@ -258,6 +285,11 @@ watch(
   },
   { deep: true }
 );
+
+watch(selectedType, (newType) => {
+  console.log("Selected type changed to:", newType);
+  updateCurrentBookingType();
+});
 
 const totalPlayTime = computed(() => {
   if (selectedType.value !== "flexible" || !scheduleStore.bookingResponse)

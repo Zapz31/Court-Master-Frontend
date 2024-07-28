@@ -1,10 +1,15 @@
 <template>
   <div class="container">
-    <h1>Thông tin thanh toán</h1>
+    <div v-if="!isFlexibleBooking">
+      <h1>Xác nhận đặt sân</h1>
+    </div>
+    <div v-else>
+      <h1>Xác nhận mua giờ chơi</h1>
+    </div>
 
-    <section class="info-section">
-      <h2>Thông tin câu lạc bộ</h2>
-      <div class="payment-info">
+    <div class="card-container">
+      <div class="card club-info">
+        <h2>Thông tin câu lạc bộ</h2>
         <div class="info-item">
           <span class="label">Tên:</span>
           <span class="value">{{ clubName }}</span>
@@ -14,11 +19,9 @@
           <span class="value">{{ courtManagerPhone }}</span>
         </div>
       </div>
-    </section>
 
-    <section class="info-section">
-      <h2>Thông tin cá nhân</h2>
-      <div class="payment-info">
+      <div class="card personal-info">
+        <h2>Thông tin cá nhân</h2>
         <div class="info-item">
           <span class="label">Họ và tên:</span>
           <span class="value">{{ fullName }}</span>
@@ -36,88 +39,85 @@
           <span class="value">{{ totalPlayingTime }}</span>
         </div>
       </div>
-    </section>
 
-    <section class="info-section">
-      <h2>Thông tin thanh toán</h2>
-      <div class="info-item">
-        <span class="label">Tổng chi phí:</span>
-        <span class="value">{{ formatPrice(calculatedTotalPrice) }} đ</span>
-      </div>
-      <div class="wrapper">
-        <div class="option">
-          <input
-            id="fullyPay"
-            v-model="paymentOption"
-            value="Paid"
-            name="btn"
-            type="radio"
-            class="input"
-          />
-          <label for="fullyPay" class="btn">
-            <span class="span">Trả trước toàn bộ</span>
-          </label>
+      <div class="card payment-info">
+        <h2>Thông tin thanh toán</h2>
+        <div class="info-item total-cost">
+          <span class="label">Tổng chi phí:</span>
+          <span class="value">{{ formatPrice(calculatedTotalPrice) }} đ</span>
         </div>
-        <div class="option">
-          <input
-            id="deposit50"
-            v-model="paymentOption"
-            value="Deposited 50%"
-            name="btn"
-            type="radio"
-            class="input"
-          />
-          <label for="deposit50" class="btn">
-            <span class="span">Trả trước 50%</span>
-          </label>
-        </div>
-        <div class="option">
-          <input
-            id="deposit25"
-            v-model="paymentOption"
-            value="Deposited 25%"
-            name="btn"
-            type="radio"
-            class="input"
-          />
-          <label for="deposit25" class="btn">
-            <span class="span">Trả trước 25%</span>
-          </label>
+        <div v-if="!isFlexibleBooking" class="payment-options">
+          <h3>Chọn phương thức thanh toán</h3>
+          <div class="option">
+            <input
+              id="fullyPay"
+              v-model="paymentOption"
+              value="Paid"
+              name="paymentOption"
+              type="radio"
+            />
+            <label for="fullyPay">Trả trước toàn bộ</label>
+          </div>
+          <div class="option">
+            <input
+              id="deposit50"
+              v-model="paymentOption"
+              value="Deposited 50%"
+              name="paymentOption"
+              type="radio"
+            />
+            <label for="deposit50">Trả trước 50%</label>
+          </div>
+          <div class="option">
+            <input
+              id="deposit25"
+              v-model="paymentOption"
+              value="Deposited 25%"
+              name="paymentOption"
+              type="radio"
+            />
+            <label for="deposit25">Trả trước 25%</label>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="info-section">
+    <div v-if="!isFlexibleBooking" class="card booking-info">
       <h2>Thông tin đặt sân</h2>
-      <table class="booking-table">
-        <thead>
-          <tr>
-            <th>Sân</th>
-            <th>Giờ bắt đầu</th>
-            <th>Giờ bắt kết thúc</th>
-            <th>Ngày đặt</th>
-            <th>Loại lịch</th>
-            <th>Chi phí</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(slot, index) in formattedBookings" :key="index">
-            <td>{{ slot.courtName }}</td>
-            <td>{{ slot.startBooking }}</td>
-            <td>{{ slot.endBooking }}</td>
-            <td>{{ slot.bookingDate }}</td>
-            <td>{{ translateBookingType(slot.bookingType) }}</td>
-            <td>{{ formatPrice(slot.price) }} đ</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+      <div class="table-responsive">
+        <table class="booking-table">
+          <thead>
+            <tr>
+              <th>Sân</th>
+              <th>Giờ bắt đầu</th>
+              <th>Giờ kết thúc</th>
+              <th>Ngày đặt</th>
+              <th>Loại lịch</th>
+              <th>Chi phí</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(slot, index) in formattedBookings" :key="index">
+              <td>{{ slot.courtName }}</td>
+              <td>{{ slot.startBooking }}</td>
+              <td>{{ slot.endBooking }}</td>
+              <td>{{ slot.bookingDate }}</td>
+              <td>{{ translateBookingType(slot.bookingType) }}</td>
+              <td>{{ formatPrice(slot.price) }} đ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <div class="actions">
-      <button @click="confirmPayment(calculatedTotalPrice)" class="confirm-btn">
+      <button @click="goBack" class="btn back-btn">Trở về</button>
+      <button
+        @click="confirmPayment(calculatedTotalPrice)"
+        class="btn confirm-btn"
+      >
         Xác nhận
       </button>
-      <button @click="goBack" class="back-btn">Trở về</button>
     </div>
   </div>
 </template>
@@ -146,6 +146,17 @@ const { bookingSchedule } = storeToRefs(paymentStore);
 const user = computed(() => authStore.user);
 const paymentOption = ref("Deposited 25%");
 
+const bookingType = computed(() => {
+  if (scheduleStore.flexibleBooking.totalPlayTime > 0) {
+    return "Flexible";
+  }
+  return bookingResponse.value?.scheduleType || "One-time play";
+});
+
+const isFlexibleBooking = computed(() => {
+  return bookingType.value === "Flexible";
+});
+
 const fullName = computed(() => {
   return `${user.value.firstName} ${user.value.lastName}`.trim();
 });
@@ -162,12 +173,26 @@ const courtManagerPhone = computed(
 const clubId = computed(() => clubStore.currentClub?.clubId || "");
 
 const totalPlayingTime = computed(() => {
-  return bookingResponse.value ? bookingResponse.value.totalHour : "0";
+  return (
+    scheduleStore.flexibleBooking.totalPlayTime ||
+    (bookingResponse.value ? bookingResponse.value.totalHour : "0")
+  );
 });
 
 const totalPrice = computed(() => {
-  return bookingResponse.value ? bookingResponse.value.totalPrice : 0;
+  return (
+    scheduleStore.flexibleBooking.totalPrice ||
+    (bookingResponse.value ? bookingResponse.value.totalPrice : 0)
+  );
 });
+
+// const totalPlayingTime = computed(() => {
+//   return bookingResponse.value ? bookingResponse.value.totalHour : "0";
+// });
+
+// const totalPrice = computed(() => {
+//   return bookingResponse.value ? bookingResponse.value.totalPrice : 0;
+// });
 
 const getCourtName = (courtId) => {
   const court = clubStore.currentClub?.courtList.find(
@@ -239,6 +264,9 @@ onMounted(() => {
 
 // Computed property for the recalculated total price
 const calculatedTotalPrice = computed(() => {
+  if (isFlexibleBooking.value) {
+    return totalPrice.value;
+  }
   switch (paymentOption.value) {
     case "Deposited 50%":
       return totalPrice.value * 0.5;
@@ -261,6 +289,12 @@ const calculatedTotalPrice = computed(() => {
 watch([paymentOption], ([newPaymentOption]) => {
   paymentStore.paymentPayload.bookingSchedule.bookingScheduleStatus =
     newPaymentOption;
+});
+
+watch([bookingType], ([newBookingType]) => {
+  if (newBookingType === "Flexible") {
+    paymentOption.value = "Paid";
+  }
 });
 
 function convertDateFormat(dateString) {
@@ -310,27 +344,35 @@ const goBack = () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
 h1 {
-  color: #6babf4;
+  color: #333;
   text-align: center;
+  margin-bottom: 30px;
 }
 
 h2 {
   color: #6babf4;
-  margin-top: 20px;
-}
-
-.info-section {
+  margin-top: 0;
   margin-bottom: 20px;
 }
 
-.payment-info {
-  background-color: #f9f9f9;
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background-color: #fff;
   border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  flex: 1;
+  min-width: 300px;
 }
 
 .info-item {
@@ -341,46 +383,95 @@ h2 {
 
 .label {
   font-weight: bold;
-  color: grey;
+  color: #666;
 }
 
 .value {
   color: #333;
 }
 
+.total-cost {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.payment-options {
+  margin-top: 20px;
+}
+
+.payment-options h3 {
+  margin-bottom: 10px;
+  font-size: 1em;
+  color: #666;
+}
+
+.option {
+  margin-bottom: 10px;
+}
+
+.option label {
+  margin-left: 10px;
+  cursor: pointer;
+}
+.booking-info {
+  position: relative;
+  overflow: hidden;
+}
+
+.table-responsive {
+  max-height: 400px; /* Điều chỉnh chiều cao tối đa theo nhu cầu */
+  overflow-y: auto;
+}
+
 .booking-table {
   width: 100%;
-  border-collapse: collapse;
-  overflow-x: auto;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .booking-table th,
 .booking-table td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
   text-align: left;
 }
 
 .booking-table th {
   background-color: #f2f2f2;
   color: #333;
+  font-weight: bold;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 10;
 }
 
+.booking-table th::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: #ddd;
+}
+
+.booking-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
 .actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
-.confirm-btn,
-.back-btn {
-  padding: 10px 20px;
+.btn {
+  padding: 12px 24px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
 }
 
 .confirm-btn {
@@ -389,46 +480,44 @@ h2 {
 }
 
 .back-btn {
-  background-color: grey;
-  color: white;
+  background-color: #ccc;
+  color: #333;
 }
 
 .confirm-btn:hover,
 .back-btn:hover {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
-.wrapper {
-  display: flex;
-  justify-content: space-between;
-  margin: 20px 0;
-}
+@media (max-width: 768px) {
+  .card-container {
+    flex-direction: column;
+  }
 
-.option {
-  flex: 1;
-  margin-right: 10px;
-}
+  .card {
+    min-width: 100%;
+  }
 
-.option:last-child {
-  margin-right: 0;
-}
+  .table-responsive {
+    max-height: 300px; /* Điều chỉnh cho màn hình nhỏ hơn */
+  }
 
-.input {
-  display: none;
-}
+  .booking-table {
+    font-size: 0.9em;
+  }
 
-.btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  cursor: pointer;
-}
+  .booking-table th,
+  .booking-table td {
+    padding: 8px;
+  }
 
-.input:checked + .btn {
-  background-color: #6babf4;
-  color: white;
+  .actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .btn {
+    width: 100%;
+  }
 }
 </style>

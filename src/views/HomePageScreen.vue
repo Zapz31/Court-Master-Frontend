@@ -92,9 +92,9 @@ import ClubCard from "../components/Homepage/ClubCard.vue";
 import FilterSearch from "../components/Homepage/FilerSearch.vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
+import router from "../router";
 import { useAuthStore } from "../stores/auth";
 import { useClubStore } from "../stores/clubMng";
-import router from "../router";
 
 const clubStore = useClubStore();
 const authStore = useAuthStore();
@@ -106,7 +106,7 @@ const closeDropdowns = () => {
   }
 };
 onMounted(async () => {
-  if(authStore.user.role === 'USER_COURT_STAFF'){
+  if (authStore.user.role === "USER_COURT_STAFF") {
     router.push("/staff");
   }
   if (clubStore.clubs.length === 0) {
@@ -116,7 +116,6 @@ onMounted(async () => {
   if (isExistCookie) {
     authStore.checkTokenValidity();
   }
-  
 });
 </script>
 
