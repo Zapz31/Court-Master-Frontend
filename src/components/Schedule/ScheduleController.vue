@@ -223,6 +223,11 @@ const prepareBookingData = () => {
   }
 };
 
+const handleNormalBooking = () => {
+  // Logic hiện tại cho One-time play và Fixed
+  goToConfirmPayment();
+};
+
 const cancelFlexibleBooking = () => {
   isFlexiblePopupVisible.value = false;
 };

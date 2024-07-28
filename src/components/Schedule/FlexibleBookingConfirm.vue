@@ -2,10 +2,8 @@
   <div v-if="isVisible" class="popup-overlay">
     <div class="popup-content">
       <h2>Đặt sân linh hoạt</h2>
-      <p>
-        Bạn muốn đặt giờ chơi theo kiểu linh hoạt? Thời gian sẽ được trừ vào
-        tổng giờ chơi
-      </p>
+      <p>Bạn muốn đặt giờ chơi theo kiểu linh hoạt?</p>
+      <p>Giờ chơi sẽ được trừ vào tổng giờ chơi bạn đã đăng kí</p>
       <div class="button-group">
         <button @click="confirm" class="confirm-btn">Xác nhận</button>
         <button @click="cancel" class="cancel-btn">Hủy</button>
