@@ -6,20 +6,7 @@
       <user-avatar />
     </div>
     <div class="content">
-      <general @update="updateGeneralInfo" />
-      <location @update="updateLocationInfo" />
-      <booking-type @update="updateBookingInfo" />
-      <div class="safety-submit">
-        <div class="assurance">
-          <h4>
-            <i>Tôi cam đoan tất cả những thông tin trên là đúng</i>
-          </h4>
-          <input type="checkbox" v-model="isAssured" />
-        </div>
-        <button class="register-btn" :disabled="!isAssured || !isFormValid" @click="handleSubmit">
-          Đăng ký cho câu lạc bộ
-        </button>
-      </div>
+      <club-register-form />
     </div>
     <div class="footer">
       <div class="footer-content">
@@ -96,66 +83,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
-import { submitForm } from '../stores/ClubRegister.js';
-import BookingType from "../components/ClubRegister/BookingType.vue";
-import General from "../components/ClubRegister/General.vue";
-import Location from "../components/ClubRegister/Location.vue";
+import ClubRegisterForm from '../components/ClubRegister/ClubRegisterForm.vue';
 import Logo from "../components/ClubRegister/Logo.vue";
 import PageName from "../components/ClubRegister/PageName.vue";
 import UserAvatar from "../components/ClubRegister/UserAvatar.vue";
-
-const isAssured = ref(false);
-
-const formData = reactive({
-  badmintonClub: {
-    badmintonClubName: "",
-    description: "",
-    courtManagerId: "STF000010"
-  },
-  address: {
-    unitNumber: "",
-    ward: "",
-    district: "",
-    province: ""
-  },
-  timeFramesList: [],
-  courtList: []
-});
-
-const isFormValid = computed(() => {
-  // Implement your form validation logic here
-  return true; // Placeholder, replace with actual validation
-});
-
-const updateGeneralInfo = (data) => {
-  formData.badmintonClub = { ...formData.badmintonClub, ...data };
-};
-
-const updateLocationInfo = (data) => {
-  formData.address = data;
-};
-
-const updateBookingInfo = (data) => {
-  formData.timeFramesList = data.timeFramesList;
-  formData.courtList = data.courtList;
-};
-
-const handleSubmit = async () => {
-  if (isFormValid.value && isAssured.value) {
-    const result = await submitForm(formData);
-    if (result.success) {
-      console.log('Club registered successfully:', result.data);
-      // Handle successful registration (e.g., show success message, redirect)
-    } else {
-      console.error('Error registering club:', result.error);
-      // Handle error (e.g., show error message)
-    }
-  } else {
-    console.log("Form is not valid or not assured");
-    // Show validation error message to user
-  }
-};
 </script>
 
 <style>
@@ -336,43 +267,4 @@ const handleSubmit = async () => {
   margin-right: 5px;
 }
 
-.safety-submit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
-}
-
-.assurance {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-}
-
-.assurance h4 {
-  margin-right: 10px;
-}
-
-.register-btn {
-  background-color: #28a745;
-  color: white;
-  padding: 15px 200px;
-  border: none;
-  cursor: pointer;
-  font-size: 20px;
-  border-radius: 20px;
-  transition: background-color 0.3s ease;
-}
-
-.register-btn:hover {
-  background-color: #218838;
-}
-
-.register-btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-/* ------------------------------------------------------ */
 </style>
