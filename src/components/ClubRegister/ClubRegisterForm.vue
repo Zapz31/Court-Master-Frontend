@@ -505,8 +505,6 @@ const isFormValid = computed(() => {
 });
 
 const submitForm = async () => {
-    console.log("isFormValid:", isFormValid.value);
-    console.log("isConfirmed:", isConfirmed.value);
     if (!isFormValid.value || !isConfirmed.value) {
         console.log("Form is not valid or not confirmed");
         return;
@@ -523,6 +521,7 @@ const submitForm = async () => {
     error.value = null;
 
     try {
+        const formData = new FormData();
         const clubData = {
             badmintonClub: {
                 badmintonClubName: form.badmintonClub.badmintonClubName,
@@ -536,18 +535,36 @@ const submitForm = async () => {
                 province: form.address.selectedCity
             },
             courtList: form.courtList.map(court => ({ courtName: court.courtName })),
-            timeFramesList: formatTimeFrames(),
-            avatar: form.avatar,
-            descriptionImages: form.descriptionImages.map(img => img.file)
+            timeFramesList: formatTimeFrames()
         };
-        
-        console.log('Submitting data:', JSON.stringify(clubData, null, 2));
-        const response = await clubRegister.registerClub(clubData);
+
+        formData.append('clubData', JSON.stringify(clubData));
+
+        // Handle avatar
+        if (form.avatar) {
+            formData.append('avatar', form.avatar);
+        }
+
+        // Handle description images
+        if (Array.isArray(form.descriptionImages) && form.descriptionImages.length > 0) {
+            form.descriptionImages.forEach((img, index) => {
+                if (img.file) {
+                    formData.append(`images`, img.file);
+                }
+            });
+        }
+
+        console.log('FormData contents:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+
+        const response = await clubRegister.registerClub(formData);
         console.log('Form submitted successfully:', response);
-        // Xử lý phản hồi thành công (ví dụ: hiển thị thông báo, chuyển hướng, etc.)
+        // Handle successful response (e.g., show message, redirect, etc.)
     } catch (err) {
         console.error('Error submitting form:', err);
-        error.value = err.message || 'An error occurred while submitting the form';
+        error.value = err.response?.data?.message || err.message || 'An error occurred while submitting the form';
     } finally {
         isLoading.value = false;
     }

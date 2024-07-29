@@ -12,44 +12,28 @@ export const useClubRegister = defineStore('clubRegister', {
   }),
 
   actions: {
-    async registerClub(clubData) {
+    async registerClub(formData) {
       this.isLoading = true;
       this.error = null;
-
-      const authStore = useAuthStore();
-      
+    
       try {
-        const formData = new FormData();
-
-        // Ensure courtManagerId is set
-        clubData.badmintonClub.courtManagerId = clubData.badmintonClub.courtManagerId || authStore.user.userId;
-
-        formData.append('badmintonClub', JSON.stringify(clubData.badmintonClub));
-        formData.append('address', JSON.stringify(clubData.address));
-        formData.append('courtList', JSON.stringify(clubData.courtList));
-        formData.append('timeFramesList', JSON.stringify(clubData.timeFramesList));
-
-        if (clubData.avatar) {
-          formData.append('avatar', clubData.avatar);
+        console.log('FormData contents in registerClub:');
+        for (let [key, value] of formData.entries()) {
+          console.log(key, value);
         }
-
-        clubData.descriptionImages.forEach((image, index) => {
-          formData.append(`descriptionImage${index}`, image);
-        });
-
+    
         const response = await axios.post(`${API_URL}/register-club`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-
+    
         this.clubId = response.data.clubId;
         this.isLoading = false;
         return response.data;
-
       } catch (error) {
         this.isLoading = false;
         this.error = error.response?.data?.message || 'There was an error!';
         throw error;
       }
-    },
+    }
   },
 });
