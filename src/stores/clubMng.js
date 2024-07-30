@@ -9,11 +9,6 @@ export const useClubStore = defineStore('club', {
     currentClub: null,
   }),
 
-  getters: {
-    customerPlayableTime: (state) => {
-      return state.currentClub ? state.currentClub.customerPlayableTime : "00:00";
-    }
-  },
 
   actions: {
     async fetchClubs() {
@@ -26,7 +21,12 @@ export const useClubStore = defineStore('club', {
       }
     },
     async fetchClubById(clubId, userId) {
+      if (!clubId || !userId) {
+        console.error('Invalid clubId or userId');
+        return;
+      }
       try {
+        console.log(`cludid: ${clubId}, userid: ${userId}`);
         const response = await axiosInstance.get(`/courtmaster/clubs/detail/${clubId}/${userId}`);
         this.currentClub = response.data;
         console.log(response.data);

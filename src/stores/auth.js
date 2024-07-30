@@ -1,7 +1,7 @@
-import router from "../router";
+import axios from "axios";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import axios from "axios";
+import router from "../router";
 axios.defaults.withCredentials = true;
 export const useAuthStore = defineStore("auth", ()=> {
     const user = ref({
@@ -74,7 +74,7 @@ export const useAuthStore = defineStore("auth", ()=> {
   function clearUser(){
     localStorage.removeItem("user");
     user.value = {
-      userId: "",
+      userId: JSON.parse(localStorage.get("user")).userId ?? '',
       email: "",
       phoneNumber: "",
       birthDay: "",

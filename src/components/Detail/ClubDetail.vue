@@ -28,10 +28,9 @@
     <div class="clubAddress">
       <p>{{ currentClub.clubAddress }}</p>
     </div>
+
     <div>
-      <button class="button">
-        <router-link :to="getTargetRoute()"> Xem giờ chơi </router-link>
-      </button>
+      <button @click="navigateAndRefresh" class="button">Xem giờ chơi</button>
     </div>
 
     <div class="time-frame-container">
@@ -192,20 +191,38 @@
 <script setup>
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "../../stores/auth";
 import { useClubStore } from "../../stores/clubMng";
 
+const router = useRouter();
+
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
+
+const navigateAndRefresh = () => {
+  const route = getTargetRoute();
+  router.push(route).then(() => {
+    // window.location.reload();
+  });
+};
 const getTargetRoute = () => {
-  let uId = authStore.user.userId;
-  if (uId === "") {
-    uId = "1";
+  let userId = "";
+  const userString = localStorage.getItem("user");
+  if (userString) {
+    const user = JSON.parse(userString);
+    userId = user.userId || "";
   }
-  if (uId !== "1") {
+  if (userId === "") {
+    userId = "1";
+  }
+
+  const clubId = currentClub.value ? currentClub.value.clubId : "";
+
+  if (userId !== "1" && clubId) {
     return {
       name: "ScheduleScreen",
-      params: { clubId: currentClub.value.clubId },
+      params: { clubId: clubId, userId: userId },
     };
   } else {
     return {
@@ -214,6 +231,11 @@ const getTargetRoute = () => {
   }
 };
 
+onMounted(async () => {
+  if (!currentClub.value) {
+    await clubStore.fetchClubById(route.params.clubId, authStore.userId);
+  }
+});
 const props = defineProps({
   clubId: {
     type: String,

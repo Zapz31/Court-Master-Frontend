@@ -37,7 +37,7 @@
       <div class="total-play-time">
         <span>Tổng giờ chơi: </span>
         <span class="total-play-time-value">{{
-          formattedCustomerPlayableTime
+          currentClub.customerPlayableTime
         }}</span>
       </div>
       <button class="add-play-time-btn" @click="showBuyPlayTimePopup">
@@ -84,8 +84,10 @@
 </template>
 
 <script setup>
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "../../stores/auth";
 import { useClubStore } from "../../stores/clubMng";
 import { usePaymentStore } from "../../stores/PaymentStore";
 import { useScheduleStore } from "../../stores/scheduleStore";
@@ -100,19 +102,72 @@ const selectedType = ref("one-time");
 const scheduleStore = useScheduleStore();
 const clubStore = useClubStore();
 const paymentStore = usePaymentStore();
-const currentClub = computed(() => clubStore.currentClub);
+// const currentClub = computed(() => clubStore.currentClub);
 const route = useRoute();
 const router = useRouter();
-
+const { currentClub } = storeToRefs(clubStore);
 const isBuyPlayTimePopupVisible = ref(false);
+const authStore = useAuthStore();
+
+// const { user } = storeToRefs(authStore);
+
+const userId = computed(() => user.value?.userId);
 
 const currentTotalPrice = ref(0);
 
-const formattedCustomerPlayableTime = computed(() => {
-  const time = clubStore.customerPlayableTime;
-  const [hours, minutes] = time.split(":");
-  return `${parseInt(hours)}h${minutes !== "00" ? ` ${minutes}m` : ""}`;
-});
+//------------------------------------------------------------------------
+
+const getUserIdFromLocalStorage = () => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    const user = JSON.parse(storedUser);
+    return user.userId || null;
+  }
+  return null;
+};
+
+const initializeData = async () => {
+  if (clubStore.currentClub) {
+    console.log("Club data already fetched, skipping fetch");
+    return;
+  }
+
+  userId.value = getUserIdFromLocalStorage();
+  console.log("User ID from localStorage:", userId.value);
+
+  if (!userId.value) {
+    console.error("User ID not found in localStorage");
+    // Xử lý trường hợp không có userId, có thể redirect đến trang đăng nhập
+    return;
+  }
+
+  try {
+    const clubId = route.params.clubId;
+    await clubStore.fetchClubById(clubId, userId.value);
+    console.log(
+      "Club data fetched successfully for clubId:",
+      clubId,
+      "and userId:",
+      userId.value
+    );
+  } catch (error) {
+    console.error("Error fetching club data:", error);
+  }
+};
+
+const user = ref(null);
+
+const loadUserFromLocalStorage = () => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    user.value = JSON.parse(storedUser);
+  }
+};
+
+// Gọi hàm này trong initializeData
+loadUserFromLocalStorage();
+
+//------------------------------------------------------------------------
 
 const showBuyPlayTimePopup = () => {
   isBuyPlayTimePopupVisible.value = true;
@@ -126,26 +181,6 @@ const updateTotalPrice = (price) => {
   currentTotalPrice.value = price;
 };
 
-const getMostCommonPrice = (timeFrameList) => {
-  if (!timeFrameList || timeFrameList.length === 0) return 0;
-
-  const priceCounts = timeFrameList.reduce((acc, tf) => {
-    if (tf.type === "flexible") {
-      acc[tf.price] = (acc[tf.price] || 0) + 1;
-    }
-    return acc;
-  }, {});
-
-  return Object.entries(priceCounts).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
-};
-
-const flexiblePrice = computed(() => {
-  if (clubStore.currentClub && clubStore.currentClub.timeFrameList) {
-    return Number(getMostCommonPrice(clubStore.currentClub.timeFrameList));
-  }
-  return 0;
-});
-
 const minPlayTime = computed(() => {
   if (clubStore.currentClub && clubStore.currentClub.timeFrameList) {
     return Math.min(
@@ -155,17 +190,6 @@ const minPlayTime = computed(() => {
     );
   }
   return 1;
-});
-
-const maxPlayTime = computed(() => {
-  if (clubStore.currentClub && clubStore.currentClub.timeFrameList) {
-    return Math.max(
-      ...clubStore.currentClub.timeFrameList
-        .filter((tf) => tf.type === "flexible")
-        .map((tf) => tf.maxPlayTime || 24)
-    );
-  }
-  return 24;
 });
 
 const handleBuyPlayTime = ({ hours, totalPrice }) => {
@@ -222,6 +246,7 @@ const prepareBookingData = () => {
     handleNormalBooking();
   }
 };
+const a = ref(null);
 
 const handleNormalBooking = () => {
   // Logic hiện tại cho One-time play và Fixed
@@ -238,15 +263,15 @@ const minEndDate = computed(() => {
   return minDate.toISOString().split("T")[0];
 });
 
-onMounted(async () => {
-  const currentDate = new Date().toISOString().split("T")[0];
-  selectedDate.value = currentDate;
-  paymentStore.bookingSchedule.startDate = selectedDate.value;
-  updateCurrentBookingType();
-
-  if (!currentClub.value) {
-    await clubStore.fetchClubById(route.params.clubId /* userId here */);
-  }
+const totalPlayTime = computed(() => {
+  if (selectedType.value !== "flexible" || !scheduleStore.bookingResponse)
+    return 0;
+  return scheduleStore.bookingResponse.unpaidBookingList.reduce(
+    (total, booking) => {
+      return total + (booking.endTime - booking.startTime) / (60 * 60 * 1000); // Convert milliseconds to hours
+    },
+    0
+  );
 });
 
 const updateCurrentBookingType = () => {
@@ -296,15 +321,23 @@ watch(selectedType, (newType) => {
   updateCurrentBookingType();
 });
 
-const totalPlayTime = computed(() => {
-  if (selectedType.value !== "flexible" || !scheduleStore.bookingResponse)
-    return 0;
-  return scheduleStore.bookingResponse.unpaidBookingList.reduce(
-    (total, booking) => {
-      return total + (booking.endTime - booking.startTime) / (60 * 60 * 1000); // Convert milliseconds to hours
-    },
-    0
-  );
+watch(
+  () => route.params.clubId,
+  (newClubId, oldClubId) => {
+    if (newClubId !== oldClubId) {
+      console.log("Club ID changed, re-initializing data");
+      initializeData();
+    }
+  }
+);
+
+onMounted(async () => {
+  const currentDate = new Date().toISOString().split("T")[0];
+  selectedDate.value = currentDate;
+  paymentStore.bookingSchedule.startDate = selectedDate.value;
+  updateCurrentBookingType();
+
+  await initializeData();
 });
 </script>
 
