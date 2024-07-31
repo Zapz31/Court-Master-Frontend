@@ -2,7 +2,7 @@
   <!-- Phân quyền cho từng role (có thể chỉnh sửa nhanh) -->
   <div class="dropdown" @click="toggleMenu">
     <div v-if="authStore.user.userId === ''" class="box-login">
-      <button class="button" @click="backToLogin"><h5>Đăng xuất</h5></button>
+      <button class="button" @click="backToLogin"><h5>Đăng nhập</h5></button>
     </div>
     <div v-else class="box">
       <div class="username">
@@ -36,18 +36,9 @@
             <router-link to="/customer/profile">Xem hồ sơ</router-link>
             <router-link to="/customer/booking">Lịch đã đặt</router-link>
 
-            <button @click="signout">Đăng xuất</button>
+            <button @click="signout">Log out</button>
             <!-- Thêm các router-link khác cho customer -->
           </template>
-
-          <template v-else-if="authStore.user.role === 'SYSTEM_ADMIN'">
-            <router-link to="/customer/profile">Xem hồ sơ</router-link>
-            <router-link to="/customer/booking">Lịch đã đặt</router-link>
-
-            <button @click="signout">Đăng xuất</button>
-            <!-- Thêm các router-link khác cho customer -->
-          </template>
-
           <template
             class="staff"
             v-else-if="authStore.user.role === 'USER_COURT_STAFF'"
@@ -56,7 +47,7 @@
             <router-link to="/staff/customers">Quản lí khách hàng</router-link>
             <router-link to="/customer/profile">Xem hồ sơ</router-link>
 
-            <button @click="signout">Đăng xuất</button>
+            <button @click="signout">Log out</button>
           </template>
           <template v-else-if="authStore.user.role === 'USER_COURT_MANAGER'">
             <a @click="navigateToClub">Câu lạc bộ của tôi</a>
@@ -67,7 +58,7 @@
             <router-link to="/manager/court">Quản lí sân</router-link>
             <router-link to="/manager-staffs">Quản lí nhân viên</router-link>
 
-            <button @click="signout">Đăng xuất</button>
+            <button @click="signout">Log out</button>
             <!-- Thêm các router-link khác cho manager -->
           </template>
         </div>

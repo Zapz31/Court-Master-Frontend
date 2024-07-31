@@ -63,6 +63,12 @@ const routes = [
     },
 
     {
+        path: '/admin',
+        name: 'AdminHomePageScreen',
+        component: () => import('../views/AdminHomePageScreen.vue') ,
+    },
+
+    {
         path: '/staff',
         name: 'StaffHomePageScreen',
         component: () => import('../views/StaffHomePageScreen.vue') ,
@@ -124,6 +130,13 @@ const routes = [
         name: 'BookingSlotScreen',
         component: () => import('../views/BookingSlotScreen.vue') ,  
     },
+
+    {
+        path: '/admin-clubregister',
+        name: 'AdminClubRegisterScreen',
+        component: () => import('../views/AdminClubRegisterScreen.vue') , 
+    },
+
     {
         path: '/clubregister',
         name: 'ClubRegisterScreen',
@@ -161,6 +174,12 @@ const routes = [
         path: '/manager-staffs',
         name: 'MngStaffScreen',
         component: () => import('../views/MngStaffScreen.vue') ,
+    },
+
+    {
+        path: '/admin-users',
+        name: 'AdminUserMngScreen',
+        component: () => import('../views/AdminUserMngScreen.vue') ,
     },
 
 ]
