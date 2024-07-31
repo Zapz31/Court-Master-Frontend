@@ -49,33 +49,15 @@
         <div v-if="!isFlexibleBooking" class="payment-options">
           <h3>Chọn phương thức thanh toán</h3>
           <div class="option">
-            <input
-              id="fullyPay"
-              v-model="paymentOption"
-              value="Paid"
-              name="paymentOption"
-              type="radio"
-            />
+            <input id="fullyPay" v-model="paymentOption" value="Paid" name="paymentOption" type="radio" />
             <label for="fullyPay">Trả trước toàn bộ</label>
           </div>
           <div class="option">
-            <input
-              id="deposit50"
-              v-model="paymentOption"
-              value="Deposited 50%"
-              name="paymentOption"
-              type="radio"
-            />
+            <input id="deposit50" v-model="paymentOption" value="Deposited 50%" name="paymentOption" type="radio" />
             <label for="deposit50">Trả trước 50%</label>
           </div>
           <div class="option">
-            <input
-              id="deposit25"
-              v-model="paymentOption"
-              value="Deposited 25%"
-              name="paymentOption"
-              type="radio"
-            />
+            <input id="deposit25" v-model="paymentOption" value="Deposited 25%" name="paymentOption" type="radio" />
             <label for="deposit25">Trả trước 25%</label>
           </div>
         </div>
@@ -112,10 +94,7 @@
 
     <div class="actions">
       <button @click="goBack" class="btn back-btn">Trở về</button>
-      <button
-        @click="confirmPayment(calculatedTotalPrice)"
-        class="btn confirm-btn"
-      >
+      <button @click="confirmPayment(calculatedTotalPrice)" class="btn confirm-btn">
         Xác nhận
       </button>
     </div>
@@ -247,6 +226,7 @@ onMounted(() => {
       bookingDate: convertDateFormat(booking.bookingDate),
       bookingType: booking.bookingType,
       price: booking.price,
+      isTemp: 1
     })),
     totalPrice: totalPrice,
   };
@@ -303,27 +283,42 @@ function convertDateFormat(dateString) {
 }
 
 const confirmPayment = async (totalPrice) => {
-  paymentStore.savePaymentPayloadToSessionStorage();
+
+  //paymentStore.savePaymentPayloadToSessionStorage();
+
   try {
-    const getPaymentUrlResponse = await axios.get(
-      `http://localhost:8080/courtmaster/payment/vn-pay?amount=${totalPrice}`,
-      { withCredentials: true }
-    );
-    console.log(
-      "Day la data cua getPaymentUrlResponse: ",
-      getPaymentUrlResponse.data
-    );
-    const paymentUrl = getPaymentUrlResponse.data.data.paymentUrl;
-    if (paymentUrl) {
-      // Second API call using the extracted payment URL
-      window.location.href = paymentUrl;
-      console.log(
-        "This is the data of paymentResponse: ",
-        paymentResponse.data
-      );
+    // Call API to insert booking schedule and booking slot to database before payment
+
+    console.log('BookingSchedule value: ', bookingSchedule.value);
+    const response = await axios.post('http://localhost:8080/courtmaster/booking/insert-temp-bookingscheduleslot', bookingSchedule.value);
+    console.log('Response:', response.data.massage);
+    if (response.data.massage === "dup") {
+
+      console.log("Your booking is duplicate with other !")
     } else {
-      console.log("Payment URL not found in the response.");
-    }
+      paymentStore.paymentPayload.tempBookingId = response.data.massage;
+      paymentStore.savePaymentPayloadToSessionStorage();
+      const getPaymentUrlResponse = await axios.get(
+        `http://localhost:8080/courtmaster/payment/vn-pay?amount=${totalPrice}`,
+        { withCredentials: true }
+      );
+
+      console.log(
+        "Day la data cua getPaymentUrlResponse: ",
+        getPaymentUrlResponse.data
+      );
+      const paymentUrl = getPaymentUrlResponse.data.data.paymentUrl;
+      if (paymentUrl) {
+        // Second API call using the extracted payment URL
+        window.location.href = paymentUrl;
+        console.log(
+          "This is the data of paymentResponse: ",
+          paymentResponse.data
+        );
+      } else {
+        console.log("Payment URL not found in the response.");
+      }
+    } 
   } catch (error) {
     console.log(
       "Error at confirmPayment function in ConfirmPayment.vue: ",
@@ -414,13 +409,15 @@ h2 {
   margin-left: 10px;
   cursor: pointer;
 }
+
 .booking-info {
   position: relative;
   overflow: hidden;
 }
 
 .table-responsive {
-  max-height: 400px; /* Điều chỉnh chiều cao tối đa theo nhu cầu */
+  max-height: 400px;
+  /* Điều chỉnh chiều cao tối đa theo nhu cầu */
   overflow-y: auto;
 }
 
@@ -459,6 +456,7 @@ h2 {
 .booking-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
+
 .actions {
   display: flex;
   justify-content: space-between;
@@ -499,7 +497,8 @@ h2 {
   }
 
   .table-responsive {
-    max-height: 300px; /* Điều chỉnh cho màn hình nhỏ hơn */
+    max-height: 300px;
+    /* Điều chỉnh cho màn hình nhỏ hơn */
   }
 
   .booking-table {

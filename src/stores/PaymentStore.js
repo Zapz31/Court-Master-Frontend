@@ -5,9 +5,11 @@ axios.defaults.withCredentials = true;
 
 export const usePaymentStore = defineStore("paymentStore", ()=> {
   
+    const tempBookingId = ref('');
     const paymentPayload = ref({
       currentClubInfo : "",
-      bookingSchedule : ""
+      bookingSchedule : "",
+      tempBookingId : ""
     })
 
     const currentClubInfo = ref({
@@ -102,15 +104,27 @@ export const usePaymentStore = defineStore("paymentStore", ()=> {
     }
   }
 
+  function deletePaymentPayloadFromSessionStorage() {
+    try {
+      sessionStorage.removeItem('paymentPayload');
+      console.log('Payment payload deleted from sessionStorage');
+    } catch (error) {
+      console.error('Failed to delete Payment payload from sessionStorage:', error);
+    }
+  }
+
+  
   return {
     bookingSchedule,
     currentClubInfo,
     paymentPayload,
+    tempBookingId,
     setBookingSchedule,
     clearBookingSchedule,
     saveBookingScheduleToSessionStorage,
     loadBookingScheduleFromSessionStorage,
     savePaymentPayloadToSessionStorage,
-    loadPaymentPayloadSessionStorage
+    loadPaymentPayloadSessionStorage,
+    deletePaymentPayloadFromSessionStorage
   };
 });

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <!-- <div>
         <p>This page handle payment result from VNPAY</p>
         <p v-if="amountString">Payment amount: {{ amountString }}</p>
         <p v-if="bankCode">Bank code: {{ bankCode }}</p>
@@ -7,9 +7,9 @@
         <p v-if="transationNo">Transactiono: {{ transationNo }}</p>
         <p v-if="responseCode">Payment responseCode: {{ responseCode }}</p>
         <p v-if="vnpCardType">Payment Method: {{ vnpCardType }}</p>
-       
+
     </div>
-    <p>{{ paymentDataValue }}</p>
+    <p>{{ paymentDataValue }}</p> -->
 
 </template>
 
@@ -29,48 +29,59 @@ const { currentClub } = storeToRefs(useClubStr)
 const paymentStore = usePaymentStore()
 const responseCode = ref('');
 const amountString = ref(''); // 
-const bankCode = ref(''); 
+const bankCode = ref('');
 const payDate = ref(''); // 
-const transationNo = ref('');   
+const transationNo = ref('');
 const vnpCardType = ref(''); // 
 const paymentDataValue = ref('');
 onMounted(async () => {
     try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentData = Object.fromEntries(urlParams.entries());
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentData = Object.fromEntries(urlParams.entries());
 
-    paymentDataValue.value = paymentData;
-    responseCode.value = paymentData.vnp_ResponseCode;
-    amountString.value = paymentData.vnp_Amount;
-    bankCode.value = paymentData.vnp_BankCode;
-    payDate.value = paymentData.vnp_PayDate;
-    transationNo.value = paymentData.vnp_TransactionNo;
-    vnpCardType.value = paymentData.vnp_CardType;
-    currentClub.value = currentClub.value ?? {}
-    paymentStore.loadPaymentPayloadSessionStorage();
-    console.log(paymentStore.paymentPayload)
-    if(responseCode.value === "00"){
-        console.log('Day la court manager phone', currentClub.value.courtManagerPhone)
-        const paymentDetail = {
-            amount: amountString.value,
-            paymentTime: parseDateTimeString(payDate.value) ,
-            paymentMethod: vnpCardType.value,
-        };
-        const payload = {
-            bookingSchedule: paymentStore.paymentPayload.bookingSchedule,
-            paymentDetail: paymentDetail,
-            courtManagerPhone: paymentStore.paymentPayload.currentClubInfo.courtManagerPhone,
-            clubId: paymentStore.paymentPayload.currentClubInfo.clubId,
-            clubName: paymentStore.paymentPayload.currentClubInfo.clubName
-        };
-            
-            const response = await axios.post(`http://localhost:8080/courtmaster/booking/payment-handle`,payload);
+        paymentDataValue.value = paymentData;
+        responseCode.value = paymentData.vnp_ResponseCode;
+        amountString.value = paymentData.vnp_Amount;
+        bankCode.value = paymentData.vnp_BankCode;
+        payDate.value = paymentData.vnp_PayDate;
+        transationNo.value = paymentData.vnp_TransactionNo;
+        vnpCardType.value = paymentData.vnp_CardType;
+        currentClub.value = currentClub.value ?? {}
+        paymentStore.loadPaymentPayloadSessionStorage();
+        console.log(paymentStore.paymentPayload)
+        if (responseCode.value === "00") {
+            console.log('Day la court manager phone', currentClub.value.courtManagerPhone)
+            const paymentDetail = {
+                amount: amountString.value,
+                paymentTime: parseDateTimeString(payDate.value),
+                paymentMethod: vnpCardType.value,
+            };
+            const payload = {
+
+
+                courtManagerPhone: paymentStore.paymentPayload.currentClubInfo.courtManagerPhone,
+                clubId: paymentStore.paymentPayload.currentClubInfo.clubId,
+                clubName: paymentStore.paymentPayload.currentClubInfo.clubName,
+                bookingSchedule: paymentStore.paymentPayload.bookingSchedule,
+                paymentDetail: paymentDetail,
+                scheduleAndSlotIdTemp: paymentStore.paymentPayload.tempBookingId
+            };
+
+            const response = await axios.post(`http://localhost:8080/courtmaster/booking/payment-handle`, payload);
             console.log('Response from server:', response.data);
             router.push("/payment-success")
-        } 
-    }catch (error) {
-            console.error('Error sending payment data:', error);
+        } else if(responseCode.value === "24"){
+            const cancelPayload = {
+                tempIdStr : paymentStore.paymentPayload.tempBookingId
+            };
+            const cancelPaymentResponse = await axios.post(`http://localhost:8080/courtmaster/booking/remove-temp-booking`, cancelPayload);
+            console.log(cancelPaymentResponse.data);
+            paymentStore.deletePaymentPayloadFromSessionStorage();
+            router.push("/");
         }
+    } catch (error) {
+        console.error('Error sending payment data:', error);
+    }
 });
 
 function parseDateTimeString(dateTimeString) {

@@ -74,7 +74,7 @@ export const useAuthStore = defineStore("auth", ()=> {
   function clearUser(){
     localStorage.removeItem("user");
     user.value = {
-      userId: JSON.parse(localStorage.get("user")).userId ?? '',
+      userId: "",
       email: "",
       phoneNumber: "",
       birthDay: "",
