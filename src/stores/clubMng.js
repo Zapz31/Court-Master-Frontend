@@ -7,10 +7,26 @@ export const useClubStore = defineStore('club', {
   state: () => ({
     clubs: [],
     currentClub: null,
+    clubId: null, // Thêm clubId vào state
   }),
 
 
   actions: {
+
+    async fetchClubIdByManagerId(managerId) {
+      try {
+        const response = await axiosInstance.get("/courtmaster/courtmanager/get-clubId-by-mngid", {
+          params: { id: managerId }
+        });
+        this.clubId = response.data.massage; // Lưu clubId vào state
+        return this.clubId;
+      } catch (error) {
+        console.error("Failed to fetch clubId:", error);
+        throw error;
+      }
+    },
+      
+
     async fetchClubs() {
       try {
         const response = await axiosInstance.get("/courtmaster/clubs/clubsView");

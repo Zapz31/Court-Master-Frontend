@@ -59,6 +59,21 @@
         <label>
           <input
             class="input"
+            type="date"
+            v-model="birthday"
+            placeholder=""
+            required
+            @input="validateInput('birthday')"
+            @blur="validateInput('birthday')"
+            @invalid="handleInvalid($event, 'birthday')"
+          />
+          <span>Ngày sinh</span>
+          <p v-if="birthdayError" class="error">{{ birthdayError }}</p>
+        </label>
+
+        <label>
+          <input
+            class="input"
             type="email"
             v-model="email"
             placeholder=""
@@ -110,6 +125,9 @@
         <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
 
         <button class="submit">Đăng kí</button>
+        <button @click="goBack" type="button" class="back-submit">
+          Trở về
+        </button>
         <!-- <p class="signin">Already have an acount ? <a href="#">Signin</a></p> -->
         <div>
           <p
@@ -152,6 +170,7 @@ const formErrorMessage = ref();
 const firstName = ref("");
 const lastName = ref("");
 const phoneNumber = ref("");
+const birthday = ref(""); // Add this at the top with other ref declarations
 const isValidPhoneNumber = computed(() => /^\d{10}$/.test(phoneNumber.value));
 const email = ref("");
 const isValidEmail = computed(() => {
@@ -164,6 +183,11 @@ const role = ref("customer"); // Add the role ref
 
 const handleInvalid = (event, field) => {
   event.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
+};
+
+const goBack = () => {
+  localStorage.setItem("shouldReload", "true");
+  window.history.back();
 };
 
 const roleName = computed(() => {
@@ -245,11 +269,12 @@ const registerUser = async () => {
         firstName: firstName.value,
         lastName: lastName.value,
         phoneNumber: phoneNumber.value,
+        birthday: birthday.value,
         email: email.value,
         password: password.value,
         role: 3, // Sử dụng roleId thay vì role
         registerDate: currentDate,
-        courtManagerId: authStore.user.userId
+        courtManagerId: authStore.user.userId,
       }
     );
     console.log(response.data);
@@ -390,6 +415,21 @@ const registerUser = async () => {
 
 .submit:hover {
   background-color: rgb(56, 90, 194);
+  cursor: pointer;
+}
+
+.back-submit {
+  border: none;
+  outline: none;
+  background-color: grey;
+  padding: 10px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  transform: 0.3s ease;
+}
+.back-submit:hover {
+  background-color: darkgray;
   cursor: pointer;
 }
 

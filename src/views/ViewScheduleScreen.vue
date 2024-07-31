@@ -8,8 +8,8 @@
 </template>
 
 <script setup>
-import ScheduleController from "../components/StaffSchedule/ScheduleController.vue";
-import ScheduleTable from "../components/StaffSchedule/ScheduleTable.vue";
+import ScheduleController from "../components/ViewSchedule/ScheduleController.vue";
+import ScheduleTable from "../components/ViewSchedule/ScheduleTable.vue";
 
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";

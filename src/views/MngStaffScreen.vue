@@ -6,7 +6,42 @@
       <user-avatar />
     </div>
     <div class="filter_search">
-      <filter-search class="filter-search" />
+      <div class="box-search">
+        <div class="search">
+          <input
+            v-model="searchTerm"
+            placeholder="Nhập số điện thoại hoặc tên"
+            type="text"
+          />
+          <div class="button-func">
+            <div class="button">
+              <button @click="searchStaff" type="submit" class="button">
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15.5 15.5L19 19"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M5 11C5 14.3137 7.68629 17 11 17C12.6597 17 14.1621 16.3261 15.2483 15.237C16.3308 14.1517 17 12.654 17 11C17 7.68629 14.3137 5 11 5C7.68629 5 5 7.68629 5 11Z"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="content">
@@ -16,6 +51,7 @@
           <button @click="updateUsers" class="action-button update">
             Cập nhật
           </button>
+
           <button @click="deleteUsers" class="action-button delete">Xóa</button>
         </div>
         <div class="table-container">
@@ -30,29 +66,71 @@
                   />
                   Chọn tất cả
                 </th>
-                <th>userId</th>
-                <th>Name</th>
+                <th>ID</th>
+                <th>Họ</th>
+                <th>Tên</th>
                 <th>Email</th>
-                <th>Phone Number</th>
-                <th>Birthday</th>
-                <th>Register Date</th>
-                <th>Avatar Image</th>
+                <th>Số điện thoại</th>
+                <th>Ngày sinh</th>
+                <!-- <th>Ngày tham gia</th> -->
+                <th>Ảnh</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="user in users" :key="user.userId">
-                <td><input type="checkbox" v-model="user.selected" /></td>
+                <td>
+                  <input
+                    type="checkbox"
+                    v-model="user.selected"
+                    @change="toggleEditable(user)"
+                  />
+                </td>
                 <td>{{ user.userId }}</td>
-                <td>{{ user.name }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.phoneNumber }}</td>
-                <td>{{ user.birthday }}</td>
-                <td>{{ user.registerDate }}</td>
+                <td>
+                  <input
+                    v-model="user.firstName"
+                    :disabled="!user.editable"
+                    class="editable-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    v-model="user.lastName"
+                    :disabled="!user.editable"
+                    class="editable-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    v-model="user.email"
+                    type="email"
+                    :disabled="!user.editable"
+                    class="editable-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    v-model="user.phoneNumber"
+                    type="tel"
+                    :disabled="!user.editable"
+                    class="editable-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    v-model="user.birthDay"
+                    type="date"
+                    :disabled="!user.editable"
+                    class="editable-input"
+                  />
+                </td>
+                <!-- <td>{{ formatDate(user.registerDate) }}</td> -->
                 <td>
                   <img
-                    :src="user.avatarImage"
+                    :src="user.avatarImage || defaultAvatarPath"
                     :alt="user.name"
                     class="avatar-image"
+                    @error="handleImageError"
                   />
                 </td>
               </tr>
@@ -133,133 +211,225 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import FilterSearch from "../components/Check-in/CheckinSearch.vue";
+import axios from "axios";
+import { onMounted, ref } from "vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
+const defaultAvatarPath = "../../public/img/default.png";
+const searchTerm = ref("");
+const actionStatus = ref("");
+const updateStatus = ref("");
 
-const users = ref([
-  {
-    userId: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    phoneNumber: "1234567890",
-    birthday: "1990-01-01",
-    registerDate: "2024-01-01",
-    avatarImage: "../../public/img/avatarCourtMaster.jpg",
-    selected: false,
-  },
-  {
-    userId: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phoneNumber: "0987654321",
-    birthday: "1992-05-15",
-    registerDate: "2024-02-01",
-    avatarImage: "../../public/img/avatarCourtMaster.jpg",
-    selected: false,
-  },
-  {
-    userId: 3,
-    name: "Bob Johnson",
-    email: "bob@example.com",
-    phoneNumber: "5555555555",
-    birthday: "1988-11-30",
-    registerDate: "2024-03-01",
-    avatarImage: "../../public/img/avatarCourtMaster.jpg",
-    selected: false,
-  },
-  {
-    userId: 4,
-    name: "Alice Brown",
-    email: "alice@example.com",
-    phoneNumber: "1112223333",
-    birthday: "1995-07-20",
-    registerDate: "2024-04-01",
-    avatarImage: "../../public/img/avatarCourtMaster.jpg",
-    selected: false,
-  },
-  {
-    userId: 5,
-    name: "Charlie Davis",
-    email: "charlie@example.com",
-    phoneNumber: "4444444444",
-    birthday: "1993-03-10",
-    registerDate: "2024-05-01",
-    avatarImage: "../../public/img/avatarCourtMaster.jpg",
-    selected: false,
-  },
-  {
-    userId: 6,
-    name: "Eva Wilson",
-    email: "eva@example.com",
-    phoneNumber: "6666666666",
-    birthday: "1991-09-05",
-    registerDate: "2024-06-01",
-    avatarImage: "../../public/img/avatarCourtMaster.jpg",
-    selected: false,
-  },
-  {
-    userId: 7,
-    name: "Frank Miller",
-    email: "frank@example.com",
-    phoneNumber: "7777777777",
-    birthday: "1987-12-25",
-    registerDate: "2024-07-01",
-    avatarImage: "frank.jpg",
-    selected: false,
-  },
-  {
-    userId: 8,
-    name: "Grace Lee",
-    email: "grace@example.com",
-    phoneNumber: "8888888888",
-    birthday: "1994-02-14",
-    registerDate: "2024-08-01",
-    avatarImage: "grace.jpg",
-    selected: false,
-  },
-  {
-    userId: 9,
-    name: "Henry Taylor",
-    email: "henry@example.com",
-    phoneNumber: "9999999999",
-    birthday: "1989-06-30",
-    registerDate: "2024-09-01",
-    avatarImage: "henry.jpg",
-    selected: false,
-  },
-  {
-    userId: 10,
-    name: "Ivy Moore",
-    email: "ivy@example.com",
-    phoneNumber: "1010101010",
-    birthday: "1996-04-18",
-    registerDate: "2024-10-01",
-    avatarImage: "ivy.jpg",
-    selected: false,
-  },
-]);
-
+const handleImageError = (event) => {
+  event.target.src = defaultAvatarPath;
+};
+const users = ref([]);
 const selectAll = ref(false);
 
-function toggleAll() {
-  users.value.forEach((user) => (user.selected = selectAll.value));
-}
+const getUserIdFromLocalStorage = () => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    const user = JSON.parse(storedUser);
+    return user.userId ? user.userId.trim() : null;
+  }
+  return null;
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  const [year, month, day] = dateString.split("-");
+  return day && month && year ? `${day}/${month}/${year}` : "N/A";
+};
+
+const fetchUsers = async () => {
+  const courtManagerId = getUserIdFromLocalStorage();
+  if (!courtManagerId) {
+    console.error("Court manager ID not found in localStorage");
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/courtmaster/courtmanager/get-all-staff?court_manager_id=${courtManagerId}`
+    );
+    users.value = response.data.map((user) => ({
+      ...user,
+      selected: false,
+      name:
+        user.firstName && user.lastName
+          ? `${user.firstName} ${user.lastName}`
+          : "N/A",
+      registerDate: user.registerDate || "N/A",
+      avatarImage: user.imageUrlString || "N/A",
+      firstName: user.firstName || "N/A",
+      lastName: user.lastName || "N/A",
+      phoneNumber: user.phoneNumber || "N/A",
+      email: user.email || "N/A",
+    }));
+  } catch (error) {
+    console.error("Error fetching users:", error);
+  }
+};
+const searchStaff = async () => {
+  const courtManagerId = getUserIdFromLocalStorage();
+  if (!courtManagerId) {
+    console.error("Court manager ID not found in localStorage");
+    return;
+  }
+
+  try {
+    const query = searchTerm.value;
+    const payload = {
+      courtManagerId: courtManagerId.trim(), // Ensure no trailing spaces
+      search: query,
+    };
+    const response = await axios.post(
+      `http://localhost:8080/courtmaster/courtmanager/search-staff`,
+      payload
+    );
+    users.value = response.data.map((user) => ({
+      ...user,
+      selected: false,
+      name: `${user.firstName}  ${user.lastName}`,
+      registerDate: "N/A", // This field is not provided in the API response
+      avatarImage: user.imageUrlString,
+    }));
+  } catch (error) {
+    console.error(
+      "Error searching staff:",
+      error.response ? error.response.data : error.message
+    );
+  }
+};
+
+const toggleEditable = (user) => {
+  user.editable = user.selected;
+};
+
+const toggleAll = () => {
+  users.value.forEach((user) => {
+    user.selected = selectAll.value;
+    user.editable = selectAll.value;
+  });
+};
+
+const updateSingleUser = async (user) => {
+  const courtManagerId = getUserIdFromLocalStorage();
+  if (!courtManagerId) {
+    console.error("Court manager ID not found in localStorage");
+    return false;
+  }
+
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/courtmaster/courtmanager/update-staff",
+      {
+        staffId: user.userId.trim(),
+        courtManagerId: courtManagerId.trim(),
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        birthday: user.birthDay,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return false;
+  }
+};
+
+const updateUsers = async () => {
+  const selectedUsers = users.value.filter((user) => user.selected);
+  if (selectedUsers.length === 0) {
+    updateStatus.value = "Không có nhân viên nào được chọn để cập nhật.";
+    return;
+  }
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const user of selectedUsers) {
+    const result = await updateSingleUser(user);
+    if (result) {
+      successCount++;
+    } else {
+      failCount++;
+    }
+  }
+
+  updateStatus.value = `Cập nhật hoàn tất. Thành công: ${successCount}, Thất bại: ${failCount}`;
+
+  await fetchUsers();
+};
 
 function addUser() {
   // Implement add user logic
 }
 
-function updateUsers() {
-  // Implement update users logic
-}
+const deleteSingleUser = async (user) => {
+  const courtManagerId = getUserIdFromLocalStorage();
+  if (!courtManagerId) {
+    console.error("Court manager ID not found in localStorage");
+    return false;
+  }
 
-function deleteUsers() {
-  // Implement delete users logic
-}
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/courtmaster/courtmanager/delete-staff`,
+      {
+        params: {
+          staff_id: user.userId.trim(),
+          court_manager_id: courtManagerId.trim(),
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return false;
+  }
+};
+
+const deleteUsers = async () => {
+  const selectedUsers = users.value.filter((user) => user.selected);
+  if (selectedUsers.length === 0) {
+    actionStatus.value = "Không có nhân viên nào được chọn để xóa.";
+    return;
+  }
+
+  if (
+    !confirm(
+      `Bạn có chắc chắn muốn xóa ${selectedUsers.length} nhân viên đã chọn?`
+    )
+  ) {
+    return;
+  }
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const user of selectedUsers) {
+    const result = await deleteSingleUser(user);
+    if (result) {
+      successCount++;
+    } else {
+      failCount++;
+    }
+  }
+
+  actionStatus.value = `Xóa hoàn tất. Thành công: ${successCount}, Thất bại: ${failCount}`;
+
+  await fetchUsers();
+};
+
+onMounted(() => {
+  fetchUsers();
+});
 </script>
-
 <style>
 .container {
   display: flex;
@@ -279,15 +449,16 @@ function deleteUsers() {
 .table-actions {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 200px); /* Adjust this value based on your layout */
+  height: calc(100vh - 200px);
 }
 
 .content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  padding: 5rem;
+  padding: 2rem;
 }
+
 .filter_search {
   padding: 36px;
   display: flex;
@@ -298,12 +469,75 @@ function deleteUsers() {
   width: 100%;
 }
 
+.box-search {
+  width: 100%;
+  font-style: bold;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  border: solid #6babf4;
+  border-radius: 25px;
+  max-width: 50%;
+  transition: transform 0.3s ease;
+  flex-wrap: wrap;
+}
+
+.search {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.search input[type="text"] {
+  background-color: white;
+  color: black;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px 0 0 20px;
+  font-size: 16px;
+  outline: none;
+  width: 100%;
+  max-width: 600px;
+}
+
+.button-func {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.button {
+  display: flex;
+}
+
+.button button[type="submit"] {
+  margin-left: -20px;
+  background-color: #6babf4;
+  border: none;
+  color: white;
+  font-style: bold;
+  cursor: pointer;
+  padding: 8px 28px;
+  border-radius: 20px 20px 20px 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: 0.3s ease;
+}
+
+.button button[type="submit"]:hover {
+  border-radius: 20px 20px 20px 20px;
+  transform: scale(1.05);
+  color: white;
+  background-color: royalblue;
+}
+
 .table-container {
   flex-grow: 1;
   overflow-y: auto;
   border: 2px solid #ddd;
-  border-radius: 0px;
+  border-radius: 8px;
 }
+
 .fixed-header {
   width: 100%;
   border-collapse: separate;
@@ -325,8 +559,9 @@ function deleteUsers() {
 
 .fixed-header td {
   background-color: white;
-  padding: 8px;
+  padding: 6px;
   border-bottom: 1px solid #ddd;
+  font-size: 14px;
 }
 
 .fixed-header tr:hover td {
@@ -335,8 +570,8 @@ function deleteUsers() {
 
 .actions {
   display: flex;
-  justify-content: center;
-  padding: 15px 0;
+  justify-content: flex-start;
+  padding: 18px 0;
   position: sticky;
   top: 0;
   background-color: #6babf4;
@@ -345,9 +580,10 @@ function deleteUsers() {
 }
 
 .action-button {
+  margin-left: 18px;
   border-radius: 8px;
   margin: 0 10px;
-  padding: 12px 24px;
+  padding: 8px 20px;
   font-size: 16px;
   cursor: pointer;
   text-decoration: none;
@@ -358,19 +594,30 @@ function deleteUsers() {
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
 }
 
-.action-button.register {
-  background-color: white;
-  color: black;
-}
-
-.action-button.update {
-  background-color: white;
-  color: black;
-}
-
+.action-button.register,
+.action-button.update,
 .action-button.delete {
   background-color: white;
   color: black;
+}
+
+.action-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 15px rgba(0, 0, 0, 0.1);
+}
+
+.editable-input {
+  width: 100%;
+  padding: 0px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.editable-input:focus {
+  outline: none;
+  border-color: #6babf4;
+  box-shadow: 0 0 0 2px rgba(107, 171, 244, 0.2);
 }
 
 .avatar-image {

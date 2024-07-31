@@ -69,9 +69,9 @@ const routes = [
     },
 
     {
-        path: '/staff-schedule/:clubId',
-        name: 'StaffSchedulePageScreen',
-        component: () => import('../views/StaffScheduleScreen.vue') ,
+        path: '/view-schedule/:clubId',
+        name: 'ViewScheduleScreen',
+        component: () => import('../views/ViewScheduleScreen.vue') ,
         props: true,
     },
 
@@ -81,6 +81,13 @@ const routes = [
         props: true,
         component: () => import('../views/ScheduleScreen.vue') ,
     },
+
+    {
+        path: '/clubs',
+        name: 'ClubNotFoundScreen',
+        component: () => import('../views/ClubNotFoundScreen.vue') ,
+    },
+
     {
         path: '/clubs/:clubId',
         name: 'ClubDetailScreen',

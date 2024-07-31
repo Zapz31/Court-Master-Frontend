@@ -29,7 +29,18 @@
       <p>{{ currentClub.clubAddress }}</p>
     </div>
 
-    <div>
+    <div class="action-buttons">
+      <template v-if="isClubManager">
+        <button
+          @click="toggleClubStatus"
+          :class="['red-button', { open: isClubClosed }]"
+        >
+          {{ isClubClosed ? "Mở cửa sân" : "Đóng cửa sân" }}
+        </button>
+        <button @click="updateClubInfo" class="grey-button">
+          Cập nhật thông tin sân
+        </button>
+      </template>
       <button @click="navigateAndRefresh" class="button">Xem giờ chơi</button>
     </div>
 
@@ -206,6 +217,19 @@ const navigateAndRefresh = () => {
     // window.location.reload();
   });
 };
+
+const isClubClosed = ref(false); // Thêm biến trạng thái mới
+
+const toggleClubStatus = () => {
+  const action = isClubClosed.value ? "mở cửa" : "đóng cửa";
+  if (confirm(`Bạn có chắc chắn muốn ${action} sân không?`)) {
+    isClubClosed.value = !isClubClosed.value;
+    // Thực hiện các hành động cần thiết khi đóng/mở cửa sân
+    // Ví dụ: gọi API để cập nhật trạng thái của sân
+    updateClubStatus(isClubClosed.value);
+  }
+};
+
 const getTargetRoute = () => {
   let userId = "";
   const userString = localStorage.getItem("user");
@@ -220,17 +244,23 @@ const getTargetRoute = () => {
   const clubId = currentClub.value ? currentClub.value.clubId : "";
 
   if (userId !== "1" && clubId) {
-    return {
-      name: "ScheduleScreen",
-      params: { clubId: clubId, userId: userId },
-    };
+    if (isClubManager.value) {
+      return {
+        name: "ViewScheduleScreen",
+        params: { clubId: clubId, userId: userId },
+      };
+    } else {
+      return {
+        name: "ScheduleScreen",
+        params: { clubId: clubId, userId: userId },
+      };
+    }
   } else {
     return {
       name: "UnableAccessScreen",
     };
   }
 };
-
 onMounted(async () => {
   if (!currentClub.value) {
     await clubStore.fetchClubById(route.params.clubId, authStore.userId);
@@ -359,6 +389,42 @@ const userImageUrl = computed(() => {
 });
 
 onBeforeUnmount(stopAutoSlide);
+
+// New ref to check if the current user is the club manager
+const isClubManager = ref(false);
+
+// Function to check if the user is the club manager
+const checkClubManager = async () => {
+  if (user.value && user.value.userId) {
+    try {
+      const managerClubId = await clubStore.fetchClubIdByManagerId(
+        user.value.userId
+      );
+      isClubManager.value = managerClubId === props.clubId;
+    } catch (error) {
+      console.error("Error checking club manager status:", error);
+    }
+  }
+};
+
+onMounted(async () => {
+  if (!currentClub.value) {
+    await clubStore.fetchClubById(props.clubId, authStore.userId);
+  }
+  await checkClubManager();
+});
+
+// New functions for manager actions
+const closeClub = () => {
+  // Implement club closing logic here
+  console.log("Closing club");
+};
+
+const updateClubInfo = () => {
+  // Implement club info update logic here
+  console.log("Updating club info");
+};
+
 //===========================FIXED FUNCTION OF COMMENT================================================
 const comments = ref([
   {
@@ -516,16 +582,21 @@ h4 {
   top: 10px;
   right: 10px;
 }
-
-.button-container {
+.action-buttons {
   display: flex;
-  justify-content: flex-end;
-  /* Align the button to the right */
-  margin-bottom: 20px;
-  /* Add some spacing */
+  justify-content: space-between;
 }
 
-.button {
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.button,
+.red-button,
+.grey-button {
   appearance: button;
   border: solid transparent;
   border-radius: 16px;
@@ -537,7 +608,6 @@ h4 {
   font-weight: 700;
   letter-spacing: 0.8px;
   line-height: 20px;
-  margin-bottom: 20px;
   outline: none;
   overflow: visible;
   padding: 13px 19px;
@@ -550,12 +620,32 @@ h4 {
   -webkit-user-select: none;
   vertical-align: middle;
   white-space: nowrap;
-  float: right;
 }
 
 .button:after {
-  background-clip: padding-box;
   background-color: #6babf4;
+}
+
+.red-button:after {
+  background-color: red;
+}
+
+.grey-button:after {
+  background-color: grey;
+}
+
+.red-button.open {
+  background-color: #4caf50; /* Màu xanh lá */
+}
+
+.red-button.open:after {
+  background-color: #45a049; /* Màu xanh lá đậm hơn cho phần after */
+}
+
+.button:after,
+.red-button:after,
+.grey-button:after {
+  background-clip: padding-box;
   border: solid transparent;
   border-radius: 16px;
   border-width: 0 0 4px;
@@ -569,27 +659,24 @@ h4 {
 }
 
 .button:main,
-.button:focus {
+.button:focus,
+.red-button:main,
+.red-button:focus,
+.grey-button:main,
+.grey-button:focus {
   user-select: auto;
 }
 
-.button:hover {
+.button:hover,
+.red-button:hover,
+.grey-button:hover {
   transform: scale(1.05);
 }
 
-.button:disabled {
-  cursor: auto;
-}
-
-.button:active {
+.button:active,
+.red-button:active,
+.grey-button:active {
   padding-bottom: 10px;
-}
-
-.button a {
-  color: inherit;
-  /* Inherit text color from parent */
-  text-decoration: none;
-  /* Remove underline */
 }
 
 .table-container {

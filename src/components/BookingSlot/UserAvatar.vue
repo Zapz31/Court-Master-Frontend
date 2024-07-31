@@ -50,8 +50,8 @@
             <button @click="signout">Log out</button>
           </template>
           <template v-else-if="authStore.user.role === 'USER_COURT_MANAGER'">
-            <router-link to="/clubs/C0000004">Câu lạc bộ của tôi</router-link>
-            <router-link to="/schedule/C0000004">Đặt sân cho khách</router-link>
+            <a @click="navigateToClub">Câu lạc bộ của tôi</a>
+            <!-- <a @click="navigateToSchedule">Đặt sân cho khách</a> -->
             <router-link to="/manager/dashboard">Báo cáo</router-link>
             <a href="/register-staff">Đăng kí tài khoản nhân viên</a>
             <router-link to="/customer/profile">Xem hồ sơ cá nhân</router-link>
@@ -68,9 +68,12 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import axios from "axios";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "../../stores/auth";
-
+import { useClubStore } from "../../stores/clubMng";
+const clubStore = useClubStore();
 const authStore = useAuthStore();
 
 // const { user } = storeToRefs(authStore);
@@ -102,6 +105,46 @@ const props = defineProps({
 
 // ===========================================DATA TEST==============================================
 
+const router = useRouter();
+
+const navigateToClub = async () => {
+  try {
+    if (!clubStore.clubId) {
+      await clubStore.fetchClubIdByManagerId(authStore.user.userId);
+    }
+    if (clubStore.clubId) {
+      console.log("Navigating to club:", clubStore.clubId);
+      router.push(`/clubs/${clubStore.clubId}`);
+    } else {
+      console.log("ClubId not available, redirecting to club registration");
+      router.push("/clubs");
+    }
+  } catch (error) {
+    console.error("Error fetching clubId:", error);
+    console.log("Redirecting to club registration due to error");
+    router.push("/clubs");
+  }
+};
+
+// const navigateToSchedule = async () => {
+//   try {
+//     if (!clubStore.clubId) {
+//       await clubStore.fetchClubIdByManagerId(authStore.user.userId);
+//     }
+//     if (clubStore.clubId) {
+//       console.log("Navigating to schedule:", clubStore.clubId);
+//       router.push(`/schedule/${clubStore.clubId}`);
+//     } else {
+//       console.log("ClubId not available, redirecting to club registration");
+//       router.push("/clubs");
+//     }
+//   } catch (error) {
+//     console.error("Error fetching clubId:", error);
+//     console.log("Redirecting to club registration due to error");
+//     router.push("/clubs");
+//   }
+// };
+
 const menuVisible = ref(false);
 
 const toggleMenu = () => {
@@ -118,15 +161,14 @@ const handleOutsideClick = (event) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener("click", handleOutsideClick);
   authStore.loadUserFromLocalStorage();
-  console.log(authStore.user.imageURL);
-  console.log(1);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("click", handleOutsideClick);
+  try {
+    await clubStore.fetchClubIdByManagerId(authStore.user.userId);
+  } catch (error) {
+    console.error("Error fetching clubId on mount:", error);
+  }
 });
 
 const signout = async () => {

@@ -57,60 +57,23 @@
     <div class="footer">
       <div class="footer-content">
         <div class="footer-section about">
-          <h2>About Us</h2>
+          <h2>Giới Thiệu</h2>
           <p>
-            Court Master is a platform that allows you to find and book
-            badminton courts easily. Our mission is to provide a seamless and
-            efficient way for badminton enthusiasts to connect with available
-            courts in their area.
+            Court Master là một nền tảng hấp dẫn cho những người yêu thích cầu
+            lông. Chúng tôi giúp bạn dễ dàng tìm và đặt sân cầu lông. Sứ mệnh
+            của chúng tôi là tạo ra một cách liền mạch và hiệu quả để kết nối
+            những người đam mê cầu lông với các sân có sẵn trong khu vực . 🏸🌟
           </p>
         </div>
         <div class="footer-section contact">
-          <h2>Contact Us</h2>
-          <p>
-            <svg
-              viewBox="0 0 576 512"
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-            >
-              <path
-                d="m528 32h-480c-26.5 0-48 21.5-48 48v352c0 26.5 21.5 48 48 48h480c26.5 0 48-21.5 48-48v-352c0-26.5-21.5-48-48-48zm0 400h-480v-352h480zm-320-176c35.3 0 64-28.7 64-64s-28.7-64-64-64-64 28.7-64 64 28.7 64 64 64zm-89.6 128h179.2c12.4 0 22.4-8.6 22.4-19.2v-19.2c0-31.8-30.1-57.6-67.2-57.6-10.8 0-18.7 8-44.8 8-26.9 0-33.4-8-44.8-8-37.1 0-67.2 25.8-67.2 57.6v19.2c0 10.6 10 19.2 22.4 19.2zm241.6-64h112c4.4 0 8-3.6 8-8v-16c0-4.4-3.6-8-8-8h-112c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm0-64h112c4.4 0 8-3.6 8-8v-16c0-4.4-3.6-8-8-8h-112c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8zm0-64h112c4.4 0 8-3.6 8-8v-16c0-4.4-3.6-8-8-8h-112c-4.4 0-8 3.6-8 8v16c0 4.4 3.6 8 8 8z"
-              />
-            </svg>
-            Court Master Service
-          </p>
+          <h2>Liên hệ</h2>
+          <p>Trung tâm dịch vụ Court Master</p>
 
-          <p>
-            <svg
-              viewBox="0 0 512 512"
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-            >
-              <path
-                d="m497.39 361.8-112-48a24 24 0 0 0 -28 6.9l-49.6 60.6a370.66 370.66 0 0 1 -177.19-177.19l60.6-49.6a23.94 23.94 0 0 0 6.9-28l-48-112a24.16 24.16 0 0 0 -27.5-13.9l-104 24a24 24 0 0 0 -18.6 23.39c0 256.5 207.9 464 464 464a24 24 0 0 0 23.4-18.6l24-104a24.29 24.29 0 0 0 -14.01-27.6z"
-              />
-            </svg>
-            Phone: +84 23456 7890
-          </p>
-          <p>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-            >
-              <path
-                d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm3.519 0L12 11.671 18.481 6H5.52zM20 7.329l-7.341 6.424a1 1 0 0 1-1.318 0L4 7.329V18h16V7.329z"
-                fill="#0D0D0D"
-              />
-            </svg>
-            Email: courtmaster@company.com
-          </p>
+          <p>Phone: +84 23456 7890</p>
+          <p>Email: courtmaster@company.com</p>
         </div>
         <div class="footer-section follow-us">
-          <h2>Follow Us</h2>
+          <h2>Hãy để chúng tôi đến gần với bạn hơn</h2>
           <ul class="wrapper">
             <li class="icon facebook">
               <span class="tooltip">Facebook</span>
@@ -141,6 +104,7 @@
             </li>
             <li class="icon instagram">
               <span class="tooltip">Instagram</span>
+
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="1.2em"

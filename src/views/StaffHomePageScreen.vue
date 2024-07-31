@@ -196,7 +196,7 @@ async function fetchClubId() {
 function navigateToStaffSchedule() {
   if (clubId.value) {
     router.push({
-      name: "StaffSchedulePageScreen",
+      name: "ViewSchedulePageScreen",
       params: { clubId: clubId.value },
     });
   } else {
