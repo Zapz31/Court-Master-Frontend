@@ -1,6 +1,6 @@
 <template>
     <div class="name">
-        <h2><font-awesome-icon :icon="['fas', 'calendar-days']" size="lg" style="color: #007dfa;" /> Club Register</h2>
+        <h2><font-awesome-icon :icon="['fas', 'calendar-days']" size="lg" style="color: #007dfa;" /> Club Update</h2>
     </div>
 
 </template>
