@@ -1,10 +1,9 @@
 <template>
     <div class="club-registration-form">
-        <p class="required-note"><span class="required"></span> Trường bắt buộc</p>
         <!-- General Information Section -->
         <div class="general-form">
             <h1 class="title"><strong>I. Thông tin chung</strong></h1>
-            <h4 class="sub-title required">
+            <h4 class="sub-title">
                 <strong><em>Tên câu lạc bộ</em></strong>
             </h4>
             <input v-model="form.badmintonClub.badmintonClubName" @input="validateClubName" class="input-field"
@@ -22,11 +21,11 @@
 
             <!-- Court section -->
             <div class="court-section">
-                <h4 class="sub-title required">
+                <h4 class="sub-title">
                     <strong><em>Tên sân</em></strong>
                 </h4>
                 <div v-for="(court, courtIndex) in form.courtList" :key="courtIndex" class="court-input">
-                    <input v-model="court.courtName" type="text" placeholder="Nhập tên sân">
+                    <input v-model="court.courtName" @input="validateCourts" type="text" placeholder="Nhập tên sân">
                     <button v-if="courtIndex > 0" @click="removeCourt(courtIndex)" class="remove-court-btn">Bỏ</button>
                 </div>
                 <button @click="addCourt" class="add-court-btn">+</button>
@@ -60,10 +59,10 @@
 
         <!-- Location Section -->
         <div class="location-form">
-            <h1 class="title required"><strong>II. Địa chỉ</strong></h1>
+            <h1 class="title"><strong>II. Địa chỉ</strong></h1>
             <div class="grid-container">
                 <div class="grid-item">
-                    <h4 class="sub-title required"><strong><em>Tỉnh/Thành phố</em></strong></h4>
+                    <h4 class="sub-title"><strong><em>Tỉnh/Thành phố</em></strong></h4>
                     <select v-model="form.address.selectedCity" class="dropdown" @change="onCityChange">
                         <option value="">Select City</option>
                         <option v-for="city in citiesList" :key="city" :value="city">{{ city }}</option>
@@ -89,8 +88,7 @@
                 </div>
             </div>
             <div class="address-container">
-                <h4 class="sub-title required"><strong><em>Địa chỉ chi tiết (số nhà/tòa nhà/tên đường/khu
-                            phố)</em></strong></h4>
+                <h4 class="sub-title"><strong><em>Địa chỉ chi tiết (số nhà/tòa nhà/tên đường/khu phố)</em></strong></h4>
                 <textarea v-model="form.address.unitNumber" @input="validateAddress"
                     class="input-field address-input"></textarea>
                 <p v-if="errors.unitNumber" class="error-message">{{ errors.unitNumber }}</p>
@@ -99,7 +97,7 @@
 
         <!-- Booking Type Section -->
         <div class="booking-type">
-            <h1 class="required"><strong>III. Khung giờ</strong></h1>
+            <h1><strong>III. Khung giờ</strong></h1>
             <div v-for="(slot, slotIndex) in slots" :key="slotIndex" class="slot-section">
                 <div class="slot-container">
                     <h2><strong>Khung giờ {{ slot.number }}</strong></h2>
@@ -124,13 +122,12 @@
                                     <h4>{{ type.label }}</h4>
                                     <div class="price-input">
                                         <input type="text" v-model="subform[type.value]"
-                                            @input="type.value === 'flexible' ? updateFlexiblePrice(subform[type.value]) : validatePrice(subform, type.value)"
-                                            @keypress="allowOnlyNumbers" />
+                                            @input="validatePrice(subform, type.value)" @keypress="allowOnlyNumbers" />
                                     </div>
                                 </div>
                             </div>
-                            <p v-if="subform.priceError" class="error-message">{{ subform.priceError }}</p>
                         </div>
+                        <p v-if="subform.priceError" class="error-message">{{ subform.priceError }}</p>
                         <div class="apply-for-section">
                             <h3><strong>Áp dụng cho:</strong></h3>
                             <div class="weekday-checkboxes">
@@ -139,9 +136,10 @@
                                     {{ day }}
                                 </label>
                             </div>
-                            <p v-if="subform.dayError" class="error-message">{{ subform.dayError }}</p>
                         </div>
+                        <p v-if="subform.dayError" class="error-message">{{ subform.dayError }}</p>
                     </div>
+
                     <!-- Subform buttons -->
                     <div class="button-group">
                         <button @click="removeSubform(slot)" class="remove-subform-btn"
@@ -154,6 +152,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Slot buttons -->
             <div class="button-group">
                 <button @click="removeTimeSlot" class="remove-slot-btn" :disabled="slots.length === 1">
@@ -174,58 +173,23 @@
             </button>
         </div>
 
-        <p v-if="submissionMessage.text" :class="['submission-message', submissionMessage.type]">
-            {{ submissionMessage.text }}
-        </p>
-
         <!-- Thêm một thông báo loading nếu cần -->
         <div v-if="isLoading" class="loading-overlay">
             Đang xử lý, vui lòng đợi...
         </div>
+        <p v-if="error" class="error-message">{{ error }}</p>
     </div>
+
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue';
-import { useAddressFilter } from '../../stores/addressFilter';
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useAddressFilter } from '../../stores/addressFilter'; // Điều chỉnh đường dẫn nếu cần
 import { storeToRefs } from 'pinia';
 import { useClubRegister } from '../../stores/ClubRegister';
+import imageCompression from 'browser-image-compression';
 import { useAuthStore } from '../../stores/auth';
-import { useFormValidation } from '../../stores/useFormValidation';
-
-const validateAllFields = () => {
-    const clubNameValid = validateClubName();
-    const descriptionValid = validateDescription();
-    const courtsValid = validateCourts();
-    const locationValid = validateLocation(form.address);
-
-    let timeFramesValid = true;
-    slots.value.forEach((slot) => {
-        const timeSlotValid = validateTimeSlot(slot);
-        slot.subforms.forEach((subform) => {
-            const priceValid = validatePrice(subform);
-            const daysValid = validateAppliedDays(subform);
-            if (!timeSlotValid || !priceValid || !daysValid) {
-                timeFramesValid = false;
-            }
-        });
-    });
-
-    console.log("Field validation details:", {
-        clubNameValid,
-        descriptionValid,
-        courtsValid,
-        locationValid,
-        timeFramesValid
-    });
-
-    return clubNameValid && descriptionValid && courtsValid && locationValid && timeFramesValid;
-};
-
-const submissionMessage = ref({
-    text: '',
-    type: '' // 'error' hoặc 'success'
-});
+import { useFormValidation } from '../../stores/useFormValidation'; // Import auth store
 
 const errors = reactive({
     clubName: "",
@@ -236,8 +200,7 @@ const errors = reactive({
     city: "",
     district: "",
     ward: "",
-    unitNumber: "",
-    descriptionImagesSizes: []
+    unitNumber: ""
 });
 
 const form = reactive({
@@ -255,24 +218,21 @@ const form = reactive({
     descriptionImages: [],
     avatar: null,
     avatarPreview: null,
-    avatarName: null,
 });
 
 const addressStore = useAddressFilter();
 const clubRegister = useClubRegister();
 const authStore = useAuthStore();
 const error = ref(null);
-const commonFlexiblePrice = ref(0);
 
 const {
     validateClubName,
     validateDescription,
+    validateCourts,
     validateAddress,
     validateTimeSlot,
     validatePrice,
-    validateLocation,
-    validateCourts,
-    validateAppliedDays
+    validateLocation
 } = useFormValidation(form, errors);
 
 const { citiesList, districtsList, wardsList } = storeToRefs(addressStore);
@@ -303,6 +263,21 @@ const isLocationValid = computed(() => {
 const isLoading = ref(false);
 const isConfirmed = ref(false);
 
+const compressImage = async (file) => {
+    const options = {
+        maxSizeMB: 1, // Giảm kích thước tối đa xuống 1MB
+        maxWidthOrHeight: 1024, // Giảm kích thước ảnh xuống
+        useWebWorker: true
+    };
+    try {
+        const compressedFile = await imageCompression(file, options);
+        return compressedFile;
+    } catch (error) {
+        console.error("Error compressing image:", error);
+        return file;
+    }
+};
+
 const formData = reactive({
     badmintonClub: {
         badmintonClubName: "",
@@ -323,9 +298,9 @@ const formData = reactive({
 const slots = ref([createSlot(1)]);
 
 const priceTypes = [
-    { value: "oneTimePlay", label: "Giá lịch trong ngày" },
-    { value: "flexible", label: "Giá lịch linh hoạt" },
-    { value: "fixed", label: "Giá lịch cố định" },
+    { value: "oneTimePlay", label: "One time" },
+    { value: "flexible", label: "Flexible" },
+    { value: "fixed", label: "Fix" },
 ];
 
 const weekdays = [
@@ -348,142 +323,79 @@ function createSlot(number) {
 function createSubform() {
     return {
         oneTimePlay: 0,
-        flexible: commonFlexiblePrice.value,
+        flexible: 0,
         fixed: 0,
-        selectedDays: [],
+        selectedDays: [], // Mảng để lưu các ngày được chọn
         priceError: "",
         dayError: ""
     };
 }
 
-const updateFlexiblePrice = (newPrice) => {
-    commonFlexiblePrice.value = newPrice;
-    slots.value.forEach(slot => {
-        slot.subforms.forEach(subform => {
-            subform.flexible = newPrice;
-        });
-    });
-};
-
-
 const addCourt = () => {
     form.courtList.push({ courtName: "" });
-    validateCourts();
 };
 
 const removeCourt = (index) => {
     if (form.courtList.length > 1) {
         form.courtList.splice(index, 1);
-        validateCourts();
+    } else {
+        errors.courts = "You must have at least one court";
     }
 };
 
-watch(() => form.badmintonClub.badmintonClubName, (newValue) => {
-    validateClubName();
-});
-
-watch(() => form.badmintonClub.description, (newValue) => {
-    validateDescription();
-});
-
-watch(() => form.address.unitNumber, (newValue) => {
-    validateAddress();
-});
-
-watch(() => form.courtList, () => {
-    validateCourts();
-}, { deep: true });
-
-watch(() => slots.value, () => {
-    slots.value.forEach(slot => {
-        slot.subforms.forEach(subform => {
-            validatePrice(subform);
-            validateAppliedDays(subform);
-        });
-    });
-}, { deep: true });
-
-watch(commonFlexiblePrice, (newValue) => {
-    slots.value.forEach(slot => {
-        slot.subforms.forEach(subform => {
-            subform.flexible = newValue;
-        });
-    });
-});
-
-const onAvatarUpload = (event) => {
+const onAvatarUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
         if (file.size > 5 * 1024 * 1024) {
-            errors.avatar = "File ảnh không vượt quá 5Mb";
-            form.avatar = null;
-            form.avatarPreview = null;
-            form.avatarName = null;
+            const compressedFile = await compressImage(file);
+            form.avatar = compressedFile;
         } else {
-            form.avatar = file;  // Store the actual file object
-            form.avatarName = file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                form.avatarPreview = e.target.result;
-            };
-            reader.readAsDataURL(form.avatar);
-            errors.avatar = "";
+            form.avatar = file;
         }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            form.avatarPreview = e.target.result;
+        };
+        reader.readAsDataURL(form.avatar);
+        errors.avatar = "";
     }
 };
 
 const removeAvatar = () => {
     form.avatar = null;
     form.avatarPreview = null;
-    form.avatarName = null;
-    errors.avatar = "";
     if (avatarInput.value) {
         avatarInput.value.value = "";
     }
 };
 
-const onDescriptionImagesUpload = (event) => {
+const onDescriptionImagesUpload = async (event) => {
     const files = event.target.files;
     if (files) {
-        if (form.descriptionImages.length + files.length > 10) {
-            errors.descriptionImages = "Số ảnh đăng tải không quá 10 ảnh";
+        if (form.descriptionImages.length + files.length > 20) {
+            errors.descriptionImages = "You can upload a maximum of 20 description images";
             return;
         }
         for (let file of files) {
             if (file.size > 5 * 1024 * 1024) {
-                errors.descriptionImagesSizes.push(file.name);
-                errors.descriptionImages = "File ảnh không vượt quá 5Mb";
-                continue;
+                const compressedFile = await compressImage(file);
+                file = compressedFile;
             }
             const reader = new FileReader();
             reader.onload = (e) => {
                 form.descriptionImages.push({
-                    file: file,  // Store the actual file object
+                    file: file,
                     preview: e.target.result,
-                    name: file.name
                 });
             };
             reader.readAsDataURL(file);
         }
-        if (errors.descriptionImagesSizes.length === 0) {
-            errors.descriptionImages = "";
-        }
+        errors.descriptionImages = "";
     }
 };
 
 const removeImage = (index) => {
-    const removedImage = form.descriptionImages.splice(index, 1)[0];
-
-    // Remove the file name from the oversized images array if present
-    const sizeErrorIndex = errors.descriptionImagesSizes.indexOf(removedImage.name);
-    if (sizeErrorIndex > -1) {
-        errors.descriptionImagesSizes.splice(sizeErrorIndex, 1);
-    }
-
-    // Clear the error message if all oversized images have been removed
-    if (errors.descriptionImagesSizes.length === 0) {
-        errors.descriptionImages = "";
-    }
+    form.descriptionImages.splice(index, 1);
 };
 
 const images = [
@@ -492,7 +404,10 @@ const images = [
 ];
 formData.images = images;
 
+
+
 const onCityChange = async () => {
+    console.log("City changed to:", form.address.selectedCity);
     form.address.selectedDistrict = '';
     form.address.selectedWard = '';
     if (form.address.selectedCity) {
@@ -502,6 +417,7 @@ const onCityChange = async () => {
 };
 
 const onDistrictChange = async () => {
+    console.log("District changed to:", form.address.selectedDistrict);
     form.address.selectedWard = '';
     if (form.address.selectedDistrict) {
         await fetchWards(form.address.selectedCity, form.address.selectedDistrict);
@@ -510,15 +426,12 @@ const onDistrictChange = async () => {
 };
 
 const onWardChange = () => {
+    console.log("Ward changed to:", form.address.selectedWard);
     validateLocation(form.address);
 };
 
 const addTimeSlot = () => {
-    const newSlot = createSlot(slots.value.length + 1);
-    newSlot.subforms.forEach(subform => {
-        subform.flexible = commonFlexiblePrice.value;
-    });
-    slots.value.push(newSlot);
+    slots.value.push(createSlot(slots.value.length + 1));
 };
 
 const removeTimeSlot = () => {
@@ -529,9 +442,7 @@ const removeTimeSlot = () => {
 
 const addSubform = (slot) => {
     if (slot && slot.subforms) {
-        const newSubform = createSubform();
-        newSubform.flexible = commonFlexiblePrice.value;
-        slot.subforms.push(newSubform);
+        slot.subforms.push(createSubform());
     }
 };
 
@@ -562,22 +473,17 @@ const convertDayToEng = (day) => {
 };
 
 const isFormValid = computed(() => {
-    const isGeneralValid =
-        !!form.badmintonClub.badmintonClubName &&
-        !!getCourtManagerId.value &&
-        validateCourts() &&
+    const isGeneralValid = form.badmintonClub.badmintonClubName &&
+        form.badmintonClub.description &&
+        getCourtManagerId.value &&
         form.courtList.length > 0 &&
-        form.courtList.every(court => court.courtName.trim() !== "");
+        form.courtList.every(court => court.courtName.trim() !== "") &&
+        form.avatar &&
+        form.descriptionImages.length > 0;
+    console.log("isGeneralValid:", isGeneralValid);
 
-    console.log("isGeneralValid details:", {
-        badmintonClubName: !!form.badmintonClub.badmintonClubName,
-        courtManagerId: !!getCourtManagerId.value,
-        validateCourts: validateCourts(),
-        courtListLength: form.courtList.length > 0,
-        courtNamesFilled: form.courtList.every(court => court.courtName.trim() !== "")
-    });
-
-    const isLocationValid0 = isLocationValid.value;
+    const isLocationValid0 = isLocationValid.value; // Sử dụng giá trị của computed property isLocationValid
+    console.log("isLocationValid:", isLocationValid0);
 
     const isBookingTypeValid = slots.value.every(slot =>
         slot.starTime &&
@@ -590,23 +496,17 @@ const isFormValid = computed(() => {
             !subform.dayError
         )
     );
+    console.log("isBookingTypeValid:", isBookingTypeValid);
 
-    console.log("Form validity details:", {
-        isGeneralValid,
-        isLocationValid: isLocationValid0,
-        isBookingTypeValid
-    });
+    const isErrorFree = Object.values(errors).every(error => error === "");
+    console.log("isErrorFree:", isErrorFree);
 
-    return isGeneralValid && isLocationValid0 && isBookingTypeValid;
+    return isGeneralValid && isLocationValid && isBookingTypeValid && isErrorFree;
 });
 
 const submitForm = async () => {
-    const isValid = validateAllFields();
-
-    if (!isFormValid.value || !isConfirmed.value || !isValid) {
-        console.log("Form is not valid");
-        validateCourts();
-        submissionMessage.value = { text: "Nộp form thất bại. Vui lòng kiểm tra lại form", type: 'error' };
+    if (!isFormValid.value || !isConfirmed.value) {
+        console.log("Form is not valid or not confirmed");
         return;
     }
 
@@ -643,21 +543,15 @@ const submitForm = async () => {
         // Handle avatar
         if (form.avatar) {
             formData.append('avatar', form.avatar);
-        } else {
-            // If no avatar is selected, append an empty file or a default image
-            formData.append('avatar', new File([], 'empty.jpg', { type: 'image/jpeg' }));
         }
 
         // Handle description images
-        if (form.descriptionImages.length > 0) {
+        if (Array.isArray(form.descriptionImages) && form.descriptionImages.length > 0) {
             form.descriptionImages.forEach((img, index) => {
                 if (img.file) {
                     formData.append(`images`, img.file);
                 }
             });
-        } else {
-            // If no images are selected, append an empty file
-            formData.append('images', new File([], 'empty.jpg', { type: 'image/jpeg' }));
         }
 
         console.log('FormData contents:');
@@ -666,15 +560,11 @@ const submitForm = async () => {
         }
 
         const response = await clubRegister.registerClub(formData);
-        submissionMessage.value = { text: "Đăng ký câu lạc bộ thành công!", type: 'success' };
         console.log('Form submitted successfully:', response);
         // Handle successful response (e.g., show message, redirect, etc.)
     } catch (err) {
         console.error('Error submitting form:', err);
-        submissionMessage.value = {
-            text: err.response?.data?.message || err.message || 'Đã xảy ra lỗi khi đăng ký câu lạc bộ',
-            type: 'error'
-        };
+        error.value = err.response?.data?.message || err.message || 'An error occurred while submitting the form';
     } finally {
         isLoading.value = false;
     }
@@ -700,10 +590,6 @@ const formatTimeFrames = () => {
 onMounted(async () => {
     await fetchCities();
     form.badmintonClub.courtManagerId = authStore.user.userId;
-    form.avatar = null;
-    form.avatarPreview = null;
-    form.avatarName = null;
-    form.descriptionImages = [];
 });
 </script>
 
@@ -1014,7 +900,7 @@ textarea.input-field {
     align-items: center;
     margin-left: auto;
     position: relative;
-    width: 220px;
+    width: 290px;
 }
 
 .price-input input {
@@ -1183,40 +1069,6 @@ select {
 
 .weekday-checkbox input[type="checkbox"] {
     margin-right: 5px;
-}
-
-.submission-message {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 4px;
-    font-weight: bold;
-    text-align: center;
-}
-
-.submission-message.error {
-    background-color: #ffebee;
-    color: #d32f2f;
-}
-
-.submission-message.success {
-    background-color: #e8f5e9;
-    color: #388e3c;
-}
-
-.required::after {
-    content: '*';
-    color: red;
-    margin-left: 4px;
-}
-
-.required-note {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 20px;
-}
-
-.required-note .required::after {
-    font-size: 1.2em;
 }
 
 /* Responsive design */
