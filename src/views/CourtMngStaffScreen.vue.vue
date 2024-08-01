@@ -2,7 +2,7 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Quản lí sân</h1>
+      <h1>Theo dõi hoạt động sân</h1>
       <user-avatar />
     </div>
     <div class="filter_search">
@@ -13,15 +13,15 @@
         <div v-for="court in courts" :key="court.courtId" class="court-card">
           <h3>{{ court.courtName }}</h3>
           <p>ID: {{ court.courtId }}</p>
-          <button
-            @click="toggleCourtStatus(court.courtId)"
+          <div
+            class="status-display"
             :class="{
               active: court.status === 'Activate',
               'not-active': court.status !== 'Activate',
             }"
           >
             {{ court.status }}
-          </button>
+          </div>
         </div>
       </div>
     </div>
@@ -130,14 +130,6 @@ async function fetchCourts() {
   }
 }
 
-function toggleCourtStatus(courtId) {
-  const court = courts.value.find((c) => c.courtId === courtId);
-  if (court) {
-    court.status = court.status === "Activate" ? "Not Activate" : "Activate";
-    // Tại đây bạn có thể thêm logic để cập nhật trạng thái lên server
-  }
-}
-
 onMounted(async () => {
   await fetchCourts();
 });
@@ -166,6 +158,13 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   padding: 5rem;
+}
+
+.status-display {
+  border-radius: 10px;
+  padding: 8px;
+  color: white;
+  background: #1da1f2;
 }
 
 .filter_search {

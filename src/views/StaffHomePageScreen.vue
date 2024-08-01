@@ -69,8 +69,19 @@
           </div>
         </router-link>
         <router-link to="/staff/court" class="nav-button">
-          <i class="fas fa-calendar-alt"></i>
-          Quản lí sân
+          <div class="icon-text">
+            <svg
+              height="60"
+              viewBox="0 0 64 64"
+              width="60"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2C10.89 2 10 2.89 10 4V8H4C2.89 8 2 8.89 2 10V60C2 61.11 2.89 62 4 62H60C61.11 62 62 61.11 62 60V10C62 8.89 61.11 8 60 8H54V4C54 2.89 53.11 2 52 2S50 2.89 50 4V8H14V4C14 2.89 13.11 2 12 2zM4 22H60V60H4V22zM26 36H14V48H26V36zM30 36V48H44V36H30zM48 36V48H58V36H48z"
+              />
+            </svg>
+            Hoạt động sân động sân
+          </div>
         </router-link>
 
         <div @click="navigateToSchedule" class="nav-button">
@@ -101,7 +112,7 @@
                 d="M12 2C10.89 2 10 2.89 10 4V8H4C2.89 8 2 8.89 2 10V60C2 61.11 2.89 62 4 62H60C61.11 62 62 61.11 62 60V10C62 8.89 61.11 8 60 8H54V4C54 2.89 53.11 2 52 2S50 2.89 50 4V8H14V4C14 2.89 13.11 2 12 2zM4 22H60V60H4V22zM26 36H14V48H26V36zM30 36V48H44V36H30zM48 36V48H58V36H48z"
               />
             </svg>
-            Vận hành câu lạc bộ
+            Lịch vận hành câu lạc bộ
           </div>
         </div>
 

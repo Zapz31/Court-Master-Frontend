@@ -52,7 +52,7 @@ const performSearch = async () => {
     await checkInStore.searchCheckedInBookings(searchQuery.value);
   } else {
     // If the search query is empty, fetch all unchecked-in bookings
-    await checkInStore.fetchUnCheckinList();
+    await checkInStore.fetchCheckedInList();
   }
 };
 </script>

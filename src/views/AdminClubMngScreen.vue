@@ -47,9 +47,6 @@
     <div class="content">
       <div class="table-actions">
         <div class="actions">
-          <a href="/admin-clubregister" class="action-button register"
-            >Đăng ký</a
-          >
           <button @click="updateClubs" class="action-button update">
             Cập nhật
           </button>

@@ -36,29 +36,36 @@
             <router-link to="/customer/profile">Xem hồ sơ</router-link>
             <router-link to="/customer/booking">Lịch đã đặt</router-link>
 
-            <button @click="signout">Log out</button>
+            <button @click="signout">Đăng xuất</button>
             <!-- Thêm các router-link khác cho customer -->
           </template>
+
+          <template v-else-if="authStore.user.role === 'SYSTEM_ADMIN'">
+            <router-link to="/customer/profile">Xem hồ sơ</router-link>
+
+            <button @click="signout">Đăng xuất</button>
+            <!-- Thêm các router-link khác cho customer -->
+          </template>
+
           <template
             class="staff"
             v-else-if="authStore.user.role === 'USER_COURT_STAFF'"
           >
-            <router-link to="/staff/orders">Quản lý lịch đặt</router-link>
-            <router-link to="/staff/customers">Quản lí khách hàng</router-link>
             <router-link to="/customer/profile">Xem hồ sơ</router-link>
 
-            <button @click="signout">Log out</button>
+            <button @click="signout">Đăng xuất</button>
           </template>
           <template v-else-if="authStore.user.role === 'USER_COURT_MANAGER'">
             <a @click="navigateToClub">Câu lạc bộ của tôi</a>
             <!-- <a @click="navigateToSchedule">Đặt sân cho khách</a> -->
             <router-link to="/manager/dashboard">Báo cáo</router-link>
             <a href="/register-staff">Đăng kí tài khoản nhân viên</a>
-            <router-link to="/customer/profile">Xem hồ sơ cá nhân</router-link>
+            <router-link to="/customer/profile">Xem hồ sơ</router-link>
+            <router-link to="/customer/booking">Lịch đã đặt</router-link>
             <router-link to="/manager/court">Quản lí sân</router-link>
             <router-link to="/manager-staffs">Quản lí nhân viên</router-link>
 
-            <button @click="signout">Log out</button>
+            <button @click="signout">Đăng xuất</button>
             <!-- Thêm các router-link khác cho manager -->
           </template>
         </div>
