@@ -5,6 +5,18 @@ axios.defaults.withCredentials = true;
 
 export const usePaymentStore = defineStore("paymentStore", ()=> {
   
+
+    const payloadTimePurchase = ref({
+      amount: "",
+      minuteAmount: "",
+      paymentMethod: "ATM",
+      paymentTime: "",
+      customerId: "",
+      badmintonClubId: "",
+      badmintonClubName: "",
+      playHoursMinuteString: ""
+    });
+
     const tempBookingId = ref('');
     const paymentPayload = ref({
       currentClubInfo : "",
@@ -113,12 +125,57 @@ export const usePaymentStore = defineStore("paymentStore", ()=> {
     }
   }
 
+  function payloadTimePurchaseToSessionStorage() {
+    try {
+      sessionStorage.setItem('payloadTimePurchase', JSON.stringify(payloadTimePurchase.value));
+      console.log('Payment payload saved to sessionStorage');
+    } catch (error) {
+      console.error('Failed to save Payment payload to sessionStorage:', error);
+    }
+  }
+
+  function loadTimePurchaseSessionStorage() {
+    try {
+      const savePaymentPayload = sessionStorage.getItem('payloadTimePurchase');
+      if (savePaymentPayload) {
+        payloadTimePurchase.value = JSON.parse(savePaymentPayload);
+        console.log('Time purchase loaded from sessionStorage');
+      }
+    } catch (error) {
+      console.error('Failed to load Time purchase from sessionStorage:', error);
+    }
+  }
+
+  function deleteTimePurchaseFromSessionStorage() {
+    try {
+      sessionStorage.removeItem('payloadTimePurchase');
+       payloadTimePurchase.value = {
+          amount: "",
+          minuteAmount: "",
+          paymentMethod: "ATM",
+          paymentTime: "",
+          customerId: "",
+          badmintonClubId: "",
+          badmintonClubName: "",
+          playHoursMinuteString: ""
+      };
+      console.log('Time purchase deleted from sessionStorage');
+    } catch (error) {
+      console.error('Failed to delete Time purchase from sessionStorage:', error);
+    }
+  }
+
+
   
   return {
     bookingSchedule,
     currentClubInfo,
     paymentPayload,
     tempBookingId,
+    payloadTimePurchase,
+    payloadTimePurchaseToSessionStorage,
+    loadTimePurchaseSessionStorage,
+    deleteTimePurchaseFromSessionStorage,
     setBookingSchedule,
     clearBookingSchedule,
     saveBookingScheduleToSessionStorage,

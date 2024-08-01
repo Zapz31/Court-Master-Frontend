@@ -123,7 +123,7 @@ const authStore = useAuthStore();
 const { bookingSchedule } = storeToRefs(paymentStore);
 
 const user = computed(() => authStore.user);
-const paymentOption = ref("Deposited 25%");
+const paymentOption = ref("Paid");
 
 const bookingType = computed(() => {
   if (scheduleStore.flexibleBooking.totalPlayTime > 0) {
@@ -288,37 +288,59 @@ const confirmPayment = async (totalPrice) => {
 
   try {
     // Call API to insert booking schedule and booking slot to database before payment
+    if (bookingSchedule.value.scheduleType !== "Flexible") {
+      console.log('BookingSchedule value: ', bookingSchedule.value);
+      const response = await axios.post('http://localhost:8080/courtmaster/booking/insert-temp-bookingscheduleslot', bookingSchedule.value);
+      console.log('Response:', response.data.massage);
+      if (response.data.massage === "dup") {
 
-    console.log('BookingSchedule value: ', bookingSchedule.value);
-    const response = await axios.post('http://localhost:8080/courtmaster/booking/insert-temp-bookingscheduleslot', bookingSchedule.value);
-    console.log('Response:', response.data.massage);
-    if (response.data.massage === "dup") {
-
-      console.log("Your booking is duplicate with other !")
-    } else {
-      paymentStore.paymentPayload.tempBookingId = response.data.massage;
-      paymentStore.savePaymentPayloadToSessionStorage();
-      const getPaymentUrlResponse = await axios.get(
-        `http://localhost:8080/courtmaster/payment/vn-pay?amount=${totalPrice}`,
-        { withCredentials: true }
-      );
-
-      console.log(
-        "Day la data cua getPaymentUrlResponse: ",
-        getPaymentUrlResponse.data
-      );
-      const paymentUrl = getPaymentUrlResponse.data.data.paymentUrl;
-      if (paymentUrl) {
-        // Second API call using the extracted payment URL
-        window.location.href = paymentUrl;
-        console.log(
-          "This is the data of paymentResponse: ",
-          paymentResponse.data
-        );
+        console.log("Your booking is duplicate with other !")
       } else {
-        console.log("Payment URL not found in the response.");
+        paymentStore.paymentPayload.tempBookingId = response.data.massage;
+        paymentStore.savePaymentPayloadToSessionStorage();
+        const getPaymentUrlResponse = await axios.get(
+          `http://localhost:8080/courtmaster/payment/vn-pay?amount=${totalPrice}`,
+          { withCredentials: true }
+        );
+
+        console.log(
+          "Day la data cua getPaymentUrlResponse: ",
+          getPaymentUrlResponse.data
+        );
+        const paymentUrl = getPaymentUrlResponse.data.data.paymentUrl;
+        if (paymentUrl) {
+          // Second API call using the extracted payment URL
+          window.location.href = paymentUrl;
+          console.log(
+            "This is the data of paymentResponse: ",
+            paymentResponse.data
+          );
+        } else {
+          console.log("Payment URL not found in the response.");
+        }
       }
-    } 
+    } else {
+      const paymentDetailFlex = {
+        amount : 1,
+        paymentMethod : "Time",
+        paymentTime : getCurrentDateTime()
+      }
+      const flexPayload = {
+        courtManagerPhone : courtManagerPhone.value,
+        clubId : clubId.value,
+        clubName : clubName.value,
+        bookingSchedule : bookingSchedule,
+        paymentDetail : paymentDetailFlex
+
+      }
+      const flexPaymentResponse = await axios.post('http://localhost:8080/courtmaster/booking/flexible-payment', flexPayload)
+      if(flexPaymentResponse.data.massage === "Payment success"){
+        router.push("/payment-success")
+      } else {
+        console.log(flexPaymentResponse.data.massage);
+      }
+    }
+
   } catch (error) {
     console.log(
       "Error at confirmPayment function in ConfirmPayment.vue: ",
@@ -326,6 +348,21 @@ const confirmPayment = async (totalPrice) => {
     );
   }
 };
+
+function getCurrentDateTime() {
+    const now = new Date();
+    
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+
+
 const goBack = () => {
   // Set a flag in local storage to indicate that a reload is needed
   localStorage.setItem("shouldReload", "true");

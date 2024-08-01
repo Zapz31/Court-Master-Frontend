@@ -14,22 +14,168 @@
 
 
 <script setup>
-import { defineEmits, defineProps } from "vue";
+import { defineEmits, defineProps, computed, onMounted, ref } from "vue";
+import { useAuthStore } from "../../stores/auth";
+import { usePaymentStore } from "../../stores/PaymentStore";
+import { storeToRefs } from "pinia";
+import { useScheduleStore } from "../../stores/scheduleStore";
+import { useClubStore } from "../../stores/clubMng";
+import axios from 'axios';
 
+
+const paymentStore = usePaymentStore();
+const { bookingSchedule } = storeToRefs(paymentStore);
+const clubStore = useClubStore();
+
+const authStore = useAuthStore();
+const scheduleStore = useScheduleStore();
+const user = computed(() => authStore.user);
+const { bookingResponse } = storeToRefs(scheduleStore);
 const props = defineProps({
   isVisible: Boolean,
 });
 
-const emit = defineEmits(["confirm", "cancel"]);
+const emit = defineEmits(['confirm', 'cancel']);
 
-const confirm = () => {
-  emit("confirm");
+// Club information
+const clubName = computed(() => clubStore.currentClub?.clubName || "");
+const courtManagerPhone = computed(() => clubStore.currentClub?.courtManagerPhone || "");
+const clubId = computed(() => clubStore.currentClub?.clubId || "");
+
+const fullName = computed(() => `${user.value.firstName} ${user.value.lastName}`.trim());
+
+const totalPlayingTime = computed(() => {
+  return scheduleStore.flexibleBooking.totalPlayTime || 
+    (bookingResponse.value ? bookingResponse.value.totalHour : "00:00");
+});
+
+const formattedBookings = computed(() => {
+  if (!bookingResponse.value || !bookingResponse.value.unpaidBookingList) return [];
+  return bookingResponse.value.unpaidBookingList.map((slot) => ({
+    courtId: slot.courtId,
+    startBooking: scheduleStore.formatTimeFromBackend(slot.startBooking),
+    endBooking: scheduleStore.formatTimeFromBackend(slot.endBooking),
+    bookingDate: scheduleStore.formatDateFromBackend(slot.bookingDate),
+    price: slot.price,
+  }));
+});
+
+const startDate = ref('');
+const endDate = ref('');
+const errorMessage = ref('');
+
+const formatDate = (dateString) => {
+  const [day, month, year] = dateString.split('/');
+  return `${year}-${month}-${day}`;
+};
+
+const formatTime = (timeString) => {
+  return timeString.padStart(5, '0');
+};
+
+onMounted(() => {
+  paymentStore.currentClubInfo.courtManagerPhone = courtManagerPhone.value;
+  paymentStore.currentClubInfo.clubId = clubId.value;
+  paymentStore.currentClubInfo.clubName = clubName.value;
+
+  if (formattedBookings.value.length > 0) {
+    startDate.value = formatDate(formattedBookings.value[0].bookingDate);
+    endDate.value = formatDate(formattedBookings.value[formattedBookings.value.length - 1].bookingDate);
+  }
+
+  bookingSchedule.value = {
+    customerFullName: fullName.value,
+    customerPhoneNumber: user.value.phoneNumber,
+    bookingScheduleStatus: "Paid",
+    scheduleType: "Flexible",
+    customerId: user.value.userId.trim(), // Ensure no extra spaces
+    totalPlayingTime: totalPlayingTime.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    totalPrice: 0, // Set to 0 or calculate if needed
+    bookingSlotResponseDTOs: formattedBookings.value.map(booking => ({
+      courtId: booking.courtId,
+      startBooking: formatTime(booking.startBooking),
+      endBooking: formatTime(booking.endBooking),
+      bookingDate: formatDate(booking.bookingDate),
+      price: Number(booking.price) // Ensure price is a number
+    }))
+  };
+});
+
+const paymentDetailFlex = computed(() => ({
+  amount: calculateTotalAmount(), // Calculate based on bookings
+  paymentMethod: "Time",
+  paymentTime: getCurrentDateTime()
+}));
+
+function getCurrentDateTime() {
+  const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+
+function calculateTotalAmount() {
+  return bookingSchedule.value.bookingSlotResponseDTOs.reduce((total, booking) => total + booking.price, 0);
+}
+
+const confirm = async () => {
+  console.log(paymentStore.currentClubInfo.clubName);
+  
+  try {
+    const payload = {
+      courtManagerPhone: paymentStore.currentClubInfo.courtManagerPhone,
+      clubId: paymentStore.currentClubInfo.clubId,
+      clubName: paymentStore.currentClubInfo.clubName,
+      bookingSchedule: {
+        ...bookingSchedule.value,
+        totalPrice: 0
+      },
+      paymentDetail: paymentDetailFlex.value 
+    };
+    console.log("Payload being sent:", JSON.stringify(payload, null, 2));
+    const response = await axios.post(`http://localhost:8080/courtmaster/booking/flexible-payment`, payload);
+    console.log("Response:", response.data);
+    emit("confirm");
+  } catch (error) {
+    console.error("Error at FlexibleBookingConfirm: ", error);
+    if (error.response) {
+      console.error("Response data:", error.response.data);
+      console.error("Response status:", error.response.status);
+      console.error("Response headers:", error.response.headers);
+      errorMessage.value = `Error: ${error.response.status} - ${JSON.stringify(error.response.data)}`;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+      errorMessage.value = "No response received from the server.";
+    } else {
+      console.error("Error setting up request:", error.message);
+      errorMessage.value = `Error: ${error.message}`;
+    }
+  }
 };
 
 const cancel = () => {
   emit("cancel");
 };
+const getCourtName = (courtId) => {
+  const court = clubStore.currentClub?.courtList.find(
+    (c) => c.courtId === courtId
+  );
+  return court ? court.courtName : courtId;
+};
+
+function convertDateFormat(dateString) {
+  const [day, month, year] = dateString.split("/");
+  return `${year}-${month}-${day}`;
+}
 </script>
+
 
 
 

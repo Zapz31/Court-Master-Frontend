@@ -4,13 +4,7 @@
       <h2>Mua thêm giờ chơi</h2>
       <div class="input-group">
         <label for="playTime">Số giờ muốn mua:</label>
-        <input
-          type="number"
-          id="playTime"
-          v-model.number="playTime"
-          :min="minPlayTime"
-          step="1"
-        />
+        <input type="number" id="playTime" v-model.number="playTime" :min="minPlayTime" step="1" />
       </div>
       <div class="total-price">Tổng tiền: {{ formattedTotalPrice }}</div>
       <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
@@ -27,9 +21,19 @@ import axios from "axios";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useClubStore } from "../../stores/clubMng";
 import { useScheduleStore } from "../../stores/scheduleStore";
+import { usePaymentStore } from "../../stores/PaymentStore";
+import { useAuthStore } from "../../stores/auth";
+import { useClubStore } from "../../stores/clubMng";
+axios.defaults.withCredentials = true;
 
+
+const paymentStore = usePaymentStore();
+const authStore = useAuthStore();
+const user = computed(() => authStore.user);
+const clubStore = useClubStore();
+const clubId = computed(() => clubStore.currentClub?.clubId || "");
+const fullName = computed(() => `${user.value.firstName} ${user.value.lastName}`.trim());
 const props = defineProps({
   isVisible: Boolean,
   minPlayTime: {
@@ -40,7 +44,6 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "confirm", "updateTotalPrice"]);
 
-const clubStore = useClubStore();
 const { currentClub } = storeToRefs(clubStore);
 const scheduleStore = useScheduleStore();
 const playTime = ref(props.minPlayTime);
@@ -99,7 +102,9 @@ const closePopup = () => {
   emit("close");
 };
 
-const confirmPurchase = () => {
+
+
+const confirmPurchase = async() => {
   if (playTime.value < props.minPlayTime || !Number.isInteger(playTime.value)) {
     errorMessage.value = `Vui lòng nhập số giờ hợp lệ (từ ${props.minPlayTime} đến ${props.maxPlayTime} giờ).`;
     return;
@@ -107,11 +112,39 @@ const confirmPurchase = () => {
   scheduleStore.updateFlexibleBooking(playTime.value, totalPrice.value);
   emit("confirm", { hours: playTime.value, totalPrice: totalPrice.value });
   closePopup();
-  router.push({
-    name: "ConfirmPaymentScreen",
-    params: { clubId: currentClub.value.clubId },
-  });
+  paymentStore.payloadTimePurchase.customerId = user.value.userId;
+  paymentStore.payloadTimePurchase.badmintonClubId = currentClub.value.clubId;
+  paymentStore.payloadTimePurchase.badmintonClubName = currentClub.value.clubName;
+  paymentStore.payloadTimePurchase.playHoursMinuteString = convertIntToTime(playTime.value);
+  paymentStore.payloadTimePurchaseToSessionStorage();
+  const getPaymentUrlResponse = await axios.get(
+    `http://localhost:8080/courtmaster/payment/vn-pay?amount=${calculatedPrice.value}`
+  );
+
+  const paymentUrl = getPaymentUrlResponse.data.data.paymentUrl;
+  if(paymentUrl){
+    window.location.href = paymentUrl;
+  }
+
+  // router.push({
+  //   name: "ConfirmPaymentScreen",
+  //   params: { clubId: currentClub.value.clubId },
+  // });
+
+
+
 };
+
+function convertIntToTime(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  // Định dạng chuỗi thành HH:mm
+  const formattedHours = String(hours).padStart(2, '0');
+  const formattedMinutes = String(minutes).padStart(2, '0');
+
+  return `${formattedMinutes}:${formattedHours}`; 
+}
 
 watch(playTime, async (newValue) => {
   errorMessage.value = "";
@@ -142,8 +175,8 @@ onMounted(() => {
 </script>
 
 
-  
-  <style scoped>
+
+<style scoped>
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -230,5 +263,3 @@ button {
   color: #4caf50;
 }
 </style>
-
-
