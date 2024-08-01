@@ -12,12 +12,12 @@
           <i class="fas fa-calendar-alt"></i>
           Danh sách người dùng
         </router-link>
-        <router-link to="/admin" class="nav-button">
+        <router-link to="/admin-clubs" class="nav-button">
           <i class="fas fa-calendar-alt"></i>
           Quản lý thông tin câu lạc bộ
         </router-link>
 
-        <router-link to="/admin-clubregister" class="nav-button">
+        <router-link to="/clubregister" class="nav-button">
           <i class="fas fa-calendar-alt"></i>
           Đăng ký thông tin sân mới
         </router-link>

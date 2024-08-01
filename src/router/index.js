@@ -182,6 +182,12 @@ const routes = [
         component: () => import('../views/AdminUserMngScreen.vue') ,
     },
 
+    {
+        path: '/admin-clubs',
+        name: 'AdminClubMngScreen',
+        component: () => import('../views/AdminClubMngScreen.vue') ,
+    },
+
 ]
 
 const router = createRouter({

@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 export const useFilterHistoryStore = defineStore("filterHistory", () => {

@@ -2,7 +2,11 @@
   <div class="schedule">
     <div class="table-container">
       <div class="button-container">
-        <button @click="deleteSelected" :disabled="!hasSelection" class="delete-button">
+        <button
+          @click="deleteSelected"
+          :disabled="!hasSelection"
+          class="delete-button"
+        >
           Xóa lựa chọn
         </button>
       </div>
@@ -27,7 +31,7 @@
             <tr v-for="(item, index) in items" :key="index">
               <td>
                 <div class="center-content">
-                  <input type="checkbox" v-model="item.checked">
+                  <input type="checkbox" v-model="item.checked" />
                 </div>
               </td>
               <td>{{ index + 1 }}</td>
@@ -37,13 +41,19 @@
               <td>{{ item.bookingScheduleStatus }}</td>
               <td>{{ item.startDate }}</td>
               <td>{{ item.endDate }}</td>
-              <td v-if="item.scheduleType === 'Flexible'">{{ item.totalPlayingTimeString }}</td>
+              <td v-if="item.scheduleType === 'Flexible'">
+                {{ item.totalPlayingTimeString }}
+              </td>
               <td v-else>{{ item.totalPrice }}</td>
               <td>{{ item.courtManagerPhone }}</td>
               <td>
                 <div class="center-content">
-                  <router-link :to="{ name: 'BookingSlotScreen', params: { scheduleId: item.bookingScheduleId } }"
-                  @click.native.prevent="setCurrentBooking(item)"
+                  <router-link
+                    :to="{
+                      name: 'BookingSlotScreen',
+                      params: { scheduleId: item.bookingScheduleId },
+                    }"
+                    @click.native.prevent="setCurrentBooking(item)"
                   >
                     <font-awesome-icon icon="eye" />
                   </router-link>
@@ -58,42 +68,47 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { useRouter } from 'vue-router';
-import { useFilterHistoryStore } from '../../stores/FilterHistory';
-import { useAuthStore } from '../../stores/auth';
-import axios from 'axios';
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import axios from "axios";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useFilterHistoryStore } from "../../stores/FilterHistory";
+import { useAuthStore } from "../../stores/auth";
 
 const filterHistoryStore = useFilterHistoryStore();
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 const router = useRouter();
 const items = ref([]);
 
-const deleteSelected = async() => {
-  const selectedBookings = items.value.filter(item => item.checked).map(item => item.bookingScheduleId);
+const deleteSelected = async () => {
+  const selectedBookings = items.value
+    .filter((item) => item.checked)
+    .map((item) => item.bookingScheduleId);
   try {
-    const response = await axios.post(`http://localhost:8080/courtmaster/filter/history/remove/booking-schedule`,{
-      bookingScheduleIds: selectedBookings
-    });
+    const response = await axios.post(
+      `http://localhost:8080/courtmaster/filter/history/remove/booking-schedule`,
+      {
+        bookingScheduleIds: selectedBookings,
+      }
+    );
     await filterHistoryStore.getBookingScheduleHitories();
-    items.value = response.data
+    items.value = response.data;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-  items.value = items.value.filter(item => !item.checked);
+  items.value = items.value.filter((item) => !item.checked);
 };
 
 const hasSelection = computed(() => {
-  return items.value.some(item => item.checked);
+  return items.value.some((item) => item.checked);
 });
 
 const navigateToBookingSlot = (scheduleId) => {
-  router.push({ name: 'BookingSlotScreen', params: { scheduleId } });
+  router.push({ name: "BookingSlotScreen", params: { scheduleId } });
 };
 
 const components = {
-  FontAwesomeIcon
+  FontAwesomeIcon,
 };
 
 // Lay du lieu ve booking schedule khi bam vao icon router link de set no vaof cho mot thuoc tinh pinia
@@ -102,15 +117,19 @@ const setCurrentBooking = (item) => {
 };
 
 onMounted(async () => {
-  filterHistoryStore.payload.customerId = authStore.user.userId
+  filterHistoryStore.payload.customerId = authStore.user.userId;
   await filterHistoryStore.getBookingScheduleHitories();
   items.value = filterHistoryStore.bookingScheduleHistoies;
-  console.log('Items:', items.value); // Ensure items are being set correctly
+  console.log("Items:", items.value); // Ensure items are being set correctly
 });
 
-watch(() => useFilterHistoryStore().bookingScheduleHistoies, (newHistories) => {
-  items.value = newHistories;
-}, { immediate: true });
+watch(
+  () => useFilterHistoryStore().bookingScheduleHistoies,
+  (newHistories) => {
+    items.value = newHistories;
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
@@ -154,7 +173,8 @@ table {
   width: 100%;
 }
 
-th, td {
+th,
+td {
   border: none;
   padding: 8px;
   text-align: center;

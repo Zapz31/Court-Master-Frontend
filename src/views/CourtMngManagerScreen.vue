@@ -9,23 +9,18 @@
       <filter-search class="filter-search" />
     </div>
     <div class="content">
-      <!-- Table here -->
       <div class="court-grid">
-        <div
-          v-for="court in courts"
-          :key="court.badminton_court_id"
-          class="court-card"
-        >
-          <h3>{{ court.badminton_court_name }}</h3>
-          <p>ID: {{ court.badminton_court_id }}</p>
+        <div v-for="court in courts" :key="court.courtId" class="court-card">
+          <h3>{{ court.courtName }}</h3>
+          <p>ID: {{ court.courtId }}</p>
           <button
-            @click="toggleCourtStatus(court.badminton_court_id)"
+            @click="toggleCourtStatus(court.courtId)"
             :class="{
-              active: court.badminton_court_status === 'Activate',
-              'not-active': court.badminton_court_status !== 'Activate',
+              active: court.status === 'Activate',
+              'not-active': court.status !== 'Activate',
             }"
           >
-            {{ court.badminton_court_status }}
+            {{ court.status }}
           </button>
         </div>
       </div>
@@ -101,99 +96,65 @@
   </div>
 </template>
 <script setup>
-import { onMounted } from "vue";
+import axios from "axios";
+import { onMounted, ref } from "vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
-import { useCheckInStore } from "../stores/checkInStore";
+import { useClubStore } from "../stores/clubMng";
 
-import { ref } from "vue";
+const courts = ref([]);
+const clubStore = useClubStore();
 
-const courts = ref([
-  {
-    badminton_court_id: "CO000001",
-    badminton_court_name: "Sân B",
-    badminton_court_status: "Activate",
-  },
-  {
-    badminton_court_id: "CO000002",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
+const getUserIdFromLocalStorage = () => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    const user = JSON.parse(storedUser);
+    return user.userId ? user.userId.trim() : null;
+  }
+  return null;
+};
 
-  {
-    badminton_court_id: "CO000003",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
+async function fetchCourts() {
+  try {
+    const managerId = getUserIdFromLocalStorage();
+    console.log("Manager ID:", managerId);
 
-  {
-    badminton_court_id: "CO000004",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-  {
-    badminton_court_id: "CO000005",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-  {
-    badminton_court_id: "CO000006",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-  {
-    badminton_court_id: "CO000007",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-  {
-    badminton_court_id: "CO000008",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-  {
-    badminton_court_id: "CO000009",
-    badminton_court_name: "Court 1",
-    badminton_court_status: "Activate",
-  },
-  // ... add all other courts here
-]);
+    if (!managerId) {
+      console.error("No manager ID found in localStorage");
+      return;
+    }
 
+    const clubId = await clubStore.fetchClubIdByManagerId(managerId);
+    console.log("Club ID:", clubId);
+
+    if (!clubId) {
+      console.error("No club ID returned from fetchClubIdByManagerId");
+      return;
+    }
+
+    const response = await axios.get(
+      `http://localhost:8080/courtmaster/staff/get-all-court?clubId=${clubId}`
+    );
+    console.log("API response:", response.data);
+    courts.value = response.data;
+  } catch (error) {
+    console.error("Failed to fetch courts:", error);
+    if (error.response) {
+      console.error("Response data:", error.response.data);
+      console.error("Response status:", error.response.status);
+    }
+  }
+}
 function toggleCourtStatus(courtId) {
-  const court = courts.value.find((c) => c.badminton_court_id === courtId);
+  const court = courts.value.find((c) => c.courtId === courtId);
   if (court) {
-    court.badminton_court_status =
-      court.badminton_court_status === "Activate" ? "Not Activate" : "Activate";
+    court.status = court.status === "Activate" ? "Not Activate" : "Activate";
+    // Tại đây bạn có thể thêm logic để cập nhật trạng thái lên server
   }
 }
 
-const checkInStore = useCheckInStore();
-
-function formatDate(date) {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes} ${day}/${month}/${year}`;
-}
-
-const formatPrice = (price) => {
-  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-};
-
-const formatTime = (time) => {
-  if (!time) return "";
-  const parts = time.split(":");
-  if (parts.length < 2) return time;
-  const hours = parts[0].padStart(2, "0");
-  const minutes = parts[1].padStart(2, "0");
-  return `${hours}:${minutes}`;
-};
-
 onMounted(async () => {
-  await checkInStore.fetchUnCheckinList();
+  await fetchCourts();
 });
 </script>
 

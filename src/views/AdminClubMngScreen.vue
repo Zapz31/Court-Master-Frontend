@@ -2,7 +2,7 @@
   <div class="container">
     <div class="logo">
       <logo />
-      <h1>Quản lí người dùng</h1>
+      <h1>Quản lí câu lạc bộ</h1>
       <user-avatar />
     </div>
     <div class="filter_search">
@@ -10,12 +10,12 @@
         <div class="search">
           <input
             v-model="searchTerm"
-            placeholder="Nhập id/số điện thoại/tên/email"
+            placeholder="Nhập tên câu lạc bộ hoặc ID"
             type="text"
           />
           <div class="button-func">
             <div class="button">
-              <button @click="searchUsers" type="submit" class="button">
+              <button @click="searchClubs" type="submit" class="button">
                 <svg
                   width="24"
                   height="24"
@@ -47,28 +47,30 @@
     <div class="content">
       <div class="table-actions">
         <div class="actions">
-          <!-- <a href="/register-staff" class="action-button register">Đăng ký</a> -->
-          <button @click="updateUsers" class="action-button update">
+          <a href="/admin-clubregister" class="action-button register"
+            >Đăng ký</a
+          >
+          <button @click="updateClubs" class="action-button update">
             Cập nhật
           </button>
-
-          <button @click="banUsers" class="action-button ban">Chặn</button>
-          <button @click="unbanUsers" class="action-button unban">
-            Bỏ chặn
+          <button @click="closeSelectedClubs" class="action-button close">
+            Đóng
+          </button>
+          <button @click="openSelectedClubs" class="action-button open">
+            Mở
           </button>
 
-          <!-- Dropdown for role filter -->
-          <select
-            v-model="selectedRole"
-            @change="fetchUsers"
-            class="role-filter"
-          >
-            <option value="">Lọc theo vai trò</option>
-            <option value="1">Customer</option>
-            <option value="2">Court Manager</option>
-            <option value="3">Staff</option>
-            <option value="4">Admin</option>
-          </select>
+          <div class="status-filter">
+            <select
+              class="dropdown-status"
+              v-model="selectedStatus"
+              @change="filterClubsByStatus"
+            >
+              <option value="all">All Clubs</option>
+              <option value="active">Active Clubs</option>
+              <option value="inactive">Inactive Clubs</option>
+            </select>
+          </div>
         </div>
         <div class="table-container">
           <table class="fixed-header">
@@ -83,76 +85,54 @@
                   Chọn tất cả
                 </th>
                 <th>ID</th>
-                <th>Họ</th>
                 <th>Tên</th>
-                <th>Email</th>
-                <th>Số điện thoại</th>
-                <th>Ngày sinh</th>
-                <th>Vai trò</th>
-                <th>Trạng thái</th>
-                <th>Ngày đăng ký</th>
-                <th>Ảnh</th>
+                <th>Số nhà</th>
+                <th>Phường/Xã</th>
+                <th>Quận/Huyện</th>
+                <th>Tỉnh/Thành phố</th>
+                <th>
+                  <span> </span><span> </span>Mô tả<span> </span><span> </span>
+                </th>
+                <th>
+                  <p>Trạng</p>
+                  <p>thái</p>
+                </th>
+                <th>Tên chủ CLB</th>
+                <th>ID CLB</th>
+                <!-- <th></th> -->
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in users" :key="user.userId">
+              <tr v-for="club in clubs" :key="club.clubId">
                 <td>
                   <input
                     type="checkbox"
-                    v-model="user.selected"
-                    @change="() => toggleEditable(user)"
+                    v-model="club.selected"
+                    @change="() => toggleEditable(club)"
                   />
                 </td>
-                <td>{{ user.userId }}</td>
+                <td>{{ club.clubId }}</td>
                 <td>
                   <input
-                    v-model="user.firstName"
-                    :disabled="!user.editable"
+                    v-model="club.clubName"
+                    :disabled="!club.editable"
                     class="editable-input"
                   />
                 </td>
+                <td>{{ club.unitNumber }}</td>
+                <td>{{ club.ward }}</td>
+                <td>{{ club.district }}</td>
+                <td>{{ club.province }}</td>
                 <td>
-                  <input
-                    v-model="user.lastName"
-                    :disabled="!user.editable"
-                    class="editable-input"
-                  />
+                  <textarea
+                    v-model="club.description"
+                    :disabled="!club.editable"
+                    class="editable-textarea"
+                  ></textarea>
                 </td>
-                <td>
-                  <input
-                    v-model="user.email"
-                    type="email"
-                    :disabled="!user.editable"
-                    class="editable-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    v-model="user.phoneNumber"
-                    type="tel"
-                    :disabled="!user.editable"
-                    class="editable-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    v-model="user.birthDay"
-                    type="date"
-                    :disabled="!user.editable"
-                    class="editable-input"
-                  />
-                </td>
-                <td>{{ getRoleName(user.role) }}</td>
-                <td>{{ getStatusName(user.userStatus) }}</td>
-                <td>{{ formatDate(user.registerDate) }}</td>
-                <td>
-                  <img
-                    :src="user.avatarImage"
-                    :alt="user.name"
-                    class="avatar-image"
-                    @error="handleImageError"
-                  />
-                </td>
+                <td>{{ club.badmintonClubStatus }}</td>
+                <td>{{ club.fullCourtManagerName }}</td>
+                <td>{{ club.courtManagerId }}</td>
               </tr>
             </tbody>
           </table>
@@ -229,250 +209,159 @@
     </div>
   </div>
 </template>
-
+  
 <script setup>
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import Logo from "../components/AdminHomepage/Logo.vue";
 import UserAvatar from "../components/AdminHomepage/UserAvatar.vue";
 
-const defaultAvatarPath = "../../public/img/default.png";
 const searchTerm = ref("");
-const actionStatus = ref("");
-const updateStatus = ref("");
-const users = ref([]);
 const selectAll = ref(false);
-const selectedRole = ref(""); // Để lưu trữ vai trò được chọn
+const clubs = ref([]);
+const error = ref(null);
+const selectedStatus = ref("all");
 
-const handleImageError = (event) => {
-  event.target.src = defaultAvatarPath;
-};
-
-const getUserIdFromLocalStorage = () => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    const user = JSON.parse(storedUser);
-    return user.userId ? user.userId.trim() : null;
-  }
-  return null;
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  const [year, month, day] = dateString.split("-");
-  return day && month && year ? `${day}/${month}/${year}` : "N/A";
-};
-
-const fetchUsers = async () => {
+const fetchClubs = async () => {
   try {
-    let url = "http://localhost:8080/courtmaster/admin/get-all-user";
-    if (selectedRole.value) {
-      url = `http://localhost:8080/courtmaster/admin/get-all-role?role=${selectedRole.value}`;
-    }
-    const response = await axios.get(url);
-    users.value = response.data.map((user) => ({
-      ...user,
+    const response = await axios.get(
+      "http://localhost:8080/courtmaster/admin/get-all-club"
+    );
+    clubs.value = response.data.map((club) => ({
+      ...club,
       selected: false,
       editable: false,
-      name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "N/A",
-      avatarImage: user.imageUrlString || defaultAvatarPath,
     }));
+    console.log("Fetched clubs:", clubs.value); // For debugging
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error("Error fetching clubs:", error);
+    error.value = "Failed to fetch clubs. Please try again later.";
   }
 };
 
-const getRoleName = (roleId) => {
-  const roles = {
-    1: "Customer",
-    2: "Court Manager",
-    3: "Staff",
-    4: "Admin",
-  };
-  return roles[roleId] || "Unknown";
+const searchClubs = async () => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/courtmaster/admin/search-club",
+      { search: searchTerm.value }
+    );
+    clubs.value = response.data.map((club) => ({
+      ...club,
+      selected: false,
+      editable: false,
+    }));
+    console.log("Search results:", clubs.value); // For debugging
+  } catch (error) {
+    console.error("Error searching clubs:", error);
+    error.value = "Failed to search clubs. Please try again later.";
+  }
 };
 
-const getStatusName = (statusId) => {
-  const statuses = {
-    0: "Hoạt động",
-    1: "Ngưng hoạt động",
-  };
-  return statuses[statusId] || "Unknown";
+const filterClubsByStatus = async () => {
+  let url;
+  switch (selectedStatus.value) {
+    case "active":
+      url = "http://localhost:8080/courtmaster/admin/get-all-active-club";
+      break;
+    case "inactive":
+      url = "http://localhost:8080/courtmaster/admin/get-all-inactive-club";
+      break;
+    default:
+      url = "http://localhost:8080/courtmaster/admin/get-all-club";
+  }
+
+  try {
+    const response = await axios.get(url);
+    clubs.value = response.data.map((club) => ({
+      ...club,
+      selected: false,
+      editable: false,
+    }));
+    console.log("Filtered clubs:", clubs.value);
+  } catch (error) {
+    console.error("Error filtering clubs:", error);
+    error.value = "Failed to filter clubs. Please try again later.";
+  }
 };
 
-const toggleEditable = (user) => {
-  user.editable = user.selected;
+const closeSelectedClubs = async () => {
+  const selectedClubs = clubs.value.filter((club) => club.selected);
+  for (const club of selectedClubs) {
+    try {
+      await axios.get(
+        `http://localhost:8080/courtmaster/admin/close-club?clubId=${club.clubId}`
+      );
+    } catch (error) {
+      console.error(`Error closing club ${club.clubId}:`, error);
+      error.value = `Failed to close club ${club.clubId}. Please try again later.`;
+    }
+  }
+  await fetchClubs(); // Refresh the club list
+};
+
+const openSelectedClubs = async () => {
+  const selectedClubs = clubs.value.filter((club) => club.selected);
+  for (const club of selectedClubs) {
+    try {
+      await axios.get(
+        `http://localhost:8080/courtmaster/admin/open-club?clubId=${club.clubId}`
+      );
+    } catch (error) {
+      console.error(`Error opening club ${club.clubId}:`, error);
+      error.value = `Failed to open club ${club.clubId}. Please try again later.`;
+    }
+  }
+  await fetchClubs(); // Refresh the club list
+};
+const toggleEditable = (club) => {
+  club.editable = club.selected;
 };
 
 const toggleAll = () => {
-  users.value.forEach((user) => {
-    user.selected = selectAll.value;
-    user.editable = selectAll.value;
+  clubs.value.forEach((club) => {
+    club.selected = selectAll.value;
+    club.editable = selectAll.value;
   });
-};
-const searchUsers = async () => {
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/courtmaster/admin/search-account",
-      {
-        search: searchTerm.value,
-      }
-    );
-
-    users.value = response.data.map((user) => ({
-      ...user,
-      selected: false,
-      editable: false,
-      name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "N/A",
-      avatarImage: user.imageUrlString || defaultAvatarPath,
-    }));
-  } catch (error) {
-    console.error("Error searching users:", error);
-    actionStatus.value = "Có lỗi xảy ra khi tìm kiếm người dùng.";
-  }
-};
-
-const updateSingleUser = async (user) => {
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/courtmaster/admin/update-account",
-      {
-        userId: user.userId,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        birthday: user.birthDay, // Note: API expects "birthday", but your data has "birthDay"
-      }
-    );
-
-    if (response.data === "success") {
-      return true;
-    } else {
-      console.error("Failed to update user:", user.userId);
-      return false;
-    }
-  } catch (error) {
-    console.error("Error updating user:", error);
-    return false;
-  }
-};
-
-const updateUsers = async () => {
-  const selectedUsers = users.value.filter(
-    (user) => user.selected && user.editable
-  );
-  if (selectedUsers.length === 0) {
-    updateStatus.value = "Không có người dùng nào được chọn để cập nhật.";
-    return;
-  }
-
-  let successCount = 0;
-  let failCount = 0;
-
-  for (const user of selectedUsers) {
-    const result = await updateSingleUser(user);
-    if (result) {
-      successCount++;
-    } else {
-      failCount++;
-    }
-  }
-
-  updateStatus.value = `Cập nhật hoàn tất. Thành công: ${successCount}, Thất bại: ${failCount}`;
-
-  await fetchUsers(); // Refresh the user list after updates
-};
-
-function addUser() {
-  // Implement add user logic
-}
-
-const banUnbanStatus = ref("");
-
-const banUsers = async () => {
-  const selectedUsers = users.value.filter((user) => user.selected);
-  if (selectedUsers.length === 0) {
-    banUnbanStatus.value = "Không có người dùng nào được chọn để chặn.";
-    return;
-  }
-
-  if (
-    !confirm(
-      `Bạn có chắc chắn muốn chặn ${selectedUsers.length} người dùng đã chọn?`
-    )
-  ) {
-    return;
-  }
-
-  let successCount = 0;
-  let failCount = 0;
-
-  for (const user of selectedUsers) {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/courtmaster/admin/ban-account?userId=${user.userId}`
-      );
-      if (response.data === "success") {
-        successCount++;
-        // Cập nhật trạng thái người dùng trong mảng users
-        user.userStatus = 1; // Chuyển sang trạng thái Inactive
-      } else {
-        failCount++;
-      }
-    } catch (error) {
-      console.error(`Error banning user ${user.userId}:`, error);
-      failCount++;
-    }
-  }
-
-  banUnbanStatus.value = `Chặn người dùng hoàn tất. Thành công: ${successCount}, Thất bại: ${failCount}`;
-};
-
-const unbanUsers = async () => {
-  const selectedUsers = users.value.filter((user) => user.selected);
-  if (selectedUsers.length === 0) {
-    banUnbanStatus.value = "Không có người dùng nào được chọn để bỏ chặn.";
-    return;
-  }
-
-  if (
-    !confirm(
-      `Bạn có chắc chắn muốn bỏ chặn ${selectedUsers.length} người dùng đã chọn?`
-    )
-  ) {
-    return;
-  }
-
-  let successCount = 0;
-  let failCount = 0;
-
-  for (const user of selectedUsers) {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/courtmaster/admin/unban-account?userId=${user.userId}`
-      );
-      if (response.data === "success") {
-        successCount++;
-        // Cập nhật trạng thái người dùng trong mảng users
-        user.userStatus = 0; // Chuyển sang trạng thái Active
-      } else {
-        failCount++;
-      }
-    } catch (error) {
-      console.error(`Error unbanning user ${user.userId}:`, error);
-      failCount++;
-    }
-  }
-
-  banUnbanStatus.value = `Bỏ chặn người dùng hoàn tất. Thành công: ${successCount}, Thất bại: ${failCount}`;
 };
 
 onMounted(() => {
-  fetchUsers();
+  fetchClubs();
 });
+
+const updateClubs = async () => {
+  const selectedClubs = clubs.value.filter((club) => club.selected);
+
+  for (const club of selectedClubs) {
+    try {
+      const updateData = {
+        clubName: club.clubName,
+        description: club.description,
+        clubId: club.clubId,
+      };
+
+      const response = await axios.post(
+        "http://localhost:8080/courtmaster/admin/update-club",
+        updateData
+      );
+
+      console.log(`Club ${club.clubId} updated successfully:`, response.data);
+    } catch (error) {
+      console.error(`Error updating club ${club.clubId}:`, error);
+      error.value = `Failed to update club ${club.clubId}. Please try again later.`;
+    }
+  }
+
+  // Refresh the club list after updates
+  await fetchClubs();
+};
+
+const deleteClubs = () => {
+  // Implement delete logic
+  console.log("Deleting selected clubs...");
+};
 </script>
-<style>
+
+  <style>
 .container {
   display: flex;
   flex-direction: column;
@@ -492,6 +381,14 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 200px);
+}
+
+.dropdown-status {
+  width: 150px;
+  height: 40px;
+  color: #0d0d0d;
+  background: white;
+  border-radius: 10px;
 }
 
 .content {
@@ -576,8 +473,19 @@ onMounted(() => {
 .table-container {
   flex-grow: 1;
   overflow-y: auto;
+  overflow-x: auto;
   border: 2px solid #ddd;
   border-radius: 8px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.editable-textarea {
+  width: 100%;
+  height: 60px;
+  box-sizing: border-box;
 }
 
 .fixed-header {
@@ -654,20 +562,13 @@ onMounted(() => {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 15px;
+  box-sizing: border-box;
 }
 
 .editable-input:focus {
   outline: none;
   border-color: #6babf4;
   box-shadow: 0 0 0 2px rgba(107, 171, 244, 0.2);
-}
-
-.avatar-image {
-  align-items: center;
-  width: 100px; /* Adjust this value as needed */
-  height: 130px; /* Adjust this value as needed */
-  object-fit: cover;
-  border-radius: 5%;
 }
 
 /* ------------------------------------------------------ */

@@ -33,18 +33,38 @@
                 {{ item.status }}
               </span>
             </td>
+            <td>
+              <button class="button" @click="openPopup">Đổi giờ chơi</button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
+    <!-- Popup -->
+    <div v-if="showPopup" class="popup-overlay">
+      <div class="popup-content">
+        <h2>Các giờ chơi có thể thực hiện chuyển</h2>
+        <select v-model="selectedTime" class="dropdown">
+          <option v-for="time in availableTimes" :key="time" :value="time">
+            {{ time }}
+          </option>
+        </select>
+        <div class="button-group">
+          <button @click="confirmChange" class="confirm-button">
+            Xác nhận
+          </button>
+          <button @click="cancelChange" class="cancel-button">Hủy</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup> 
-import { ref, onMounted, computed } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { useFilterHistoryStore } from '../../stores/FilterHistory';
-const filterHistoryStore = useFilterHistoryStore()
+<script setup>
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { computed, onMounted, ref } from "vue";
+import { useFilterHistoryStore } from "../../stores/FilterHistory";
+const filterHistoryStore = useFilterHistoryStore();
 
 const urlParams = new URLSearchParams(window.location.search);
 const paymentData = Object.fromEntries(urlParams.entries());
@@ -55,13 +75,43 @@ const items = computed(() => filterHistoryStore.bookingSlots);
 
 // Registering the component
 const components = {
-  FontAwesomeIcon
+  FontAwesomeIcon,
 };
 
-onMounted(async() => {
-  filterHistoryStore.currentBookingScheduleId = paymentData.scheduleId
-  await filterHistoryStore.getBookingSlots(paymentData.scheduleId)
-  items.value = filterHistoryStore.bookingSlots
+//----------------------------------POP UP----------------------------------------
+
+// Popup related data
+const showPopup = ref(false);
+const selectedTime = ref("");
+const availableTimes = ref([
+  "Monday 10:00 AM - 11:00 AM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "Monday 10:00 AM - 11:00 AM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "Monday 10:00 AM - 11:00 AM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "Monday 10:00 AM - 11:00 AM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+
+  // Add more available times as needed
+]);
+
+const openPopup = () => {
+  showPopup.value = true;
+};
+
+const confirmChange = () => {
+  // Handle confirmation logic here
+  console.log("Confirmed new time:", selectedTime.value);
+  showPopup.value = false;
+};
+
+const cancelChange = () => {
+  showPopup.value = false;
+};
+
+//------------------------------------------------------------------------------
+
+onMounted(async () => {
+  filterHistoryStore.currentBookingScheduleId = paymentData.scheduleId;
+  await filterHistoryStore.getBookingSlots(paymentData.scheduleId);
+  items.value = filterHistoryStore.bookingSlots;
 });
 </script>
 
@@ -69,6 +119,14 @@ onMounted(async() => {
 .clubName {
   font-size: medium;
   color: #033f7a;
+}
+
+.button {
+  border: none;
+  background-color: blue;
+  padding: 12px;
+  border-radius: 10px;
+  color: white;
 }
 
 .center-content {
@@ -130,5 +188,65 @@ input[type="checkbox"] {
 a {
   color: #0066cc;
   text-decoration: none;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 68%;
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dropdown-container {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.confirm-button,
+.cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirm-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
 }
 </style>
