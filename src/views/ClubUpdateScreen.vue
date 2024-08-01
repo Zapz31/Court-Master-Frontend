@@ -6,7 +6,7 @@
       <user-avatar />
     </div>
     <div class="content">
-      <club-register-form />
+      <club-update-form />
     </div>
     <div class="footer">
       <div class="footer-content">
@@ -65,10 +65,10 @@
 </template>
 
 <script setup>
-import ClubRegisterForm from "../components/AdminClubRegister/ClubRegisterForm.vue";
-import Logo from "../components/AdminClubRegister/Logo.vue";
-import PageName from "../components/AdminClubRegister/PageName.vue";
-import UserAvatar from "../components/AdminClubRegister/UserAvatar.vue";
+import ClubUpdateForm from '../components/ClubUpdate/ClubUpdateForm.vue';
+import Logo from "../components/ClubUpdate/Logo.vue";
+import PageName from "../components/ClubUpdate/PageName.vue";
+import UserAvatar from "../components/ClubUpdate/UserAvatar.vue";
 </script>
 
 <style>
