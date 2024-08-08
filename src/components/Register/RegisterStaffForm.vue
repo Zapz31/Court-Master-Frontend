@@ -1,12 +1,21 @@
 <template>
   <div class="parent_container">
     <div class="Register_title">
-      <p class="title">Đăng kí tài khoản nhân viên</p>
+      <p class="title">Đăng kí tài khoản</p>
     </div>
 
     <div class="form_container">
       <form class="form" @submit.prevent="registerUser">
         <br />
+
+        <!-- User Role Dropdown
+        <label class="dropdown-role">
+          <select class="input" v-model="roleId">
+            <option :value="1">Customer</option>
+            <option :value="2">Manager</option>
+          </select>
+          <span>Bạn là:</span>
+        </label> -->
 
         <div class="flex">
           <label>
@@ -54,21 +63,6 @@
           />
           <span>Số điện thoại (10 số)</span>
           <p v-if="phoneNumberError" class="error">{{ phoneNumberError }}</p>
-        </label>
-
-        <label>
-          <input
-            class="input"
-            type="date"
-            v-model="birthday"
-            placeholder=""
-            required
-            @input="validateInput('birthday')"
-            @blur="validateInput('birthday')"
-            @invalid="handleInvalid($event, 'birthday')"
-          />
-          <span>Ngày sinh</span>
-          <p v-if="birthdayError" class="error">{{ birthdayError }}</p>
         </label>
 
         <label>
@@ -125,9 +119,6 @@
         <h3 v-if="formError" class="error">{{ formErrorMessage }}</h3>
 
         <button class="submit">Đăng kí</button>
-        <button @click="goBack" type="button" class="back-submit">
-          Trở về
-        </button>
         <!-- <p class="signin">Already have an acount ? <a href="#">Signin</a></p> -->
         <div>
           <p
@@ -155,8 +146,8 @@
 import axios from "axios";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
-import { useAuthStore } from "../../stores/auth";
-const authStore = useAuthStore();
+
+const roleId = ref(1); // Mặc định là Customer
 const duplicateError = ref("");
 const firstNameError = ref("");
 const lastNameError = ref("");
@@ -170,7 +161,6 @@ const formErrorMessage = ref();
 const firstName = ref("");
 const lastName = ref("");
 const phoneNumber = ref("");
-const birthday = ref(""); // Add this at the top with other ref declarations
 const isValidPhoneNumber = computed(() => /^\d{10}$/.test(phoneNumber.value));
 const email = ref("");
 const isValidEmail = computed(() => {
@@ -183,11 +173,6 @@ const role = ref("customer"); // Add the role ref
 
 const handleInvalid = (event, field) => {
   event.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
-};
-
-const goBack = () => {
-  localStorage.setItem("shouldReload", "true");
-  window.history.back();
 };
 
 const roleName = computed(() => {
@@ -269,12 +254,10 @@ const registerUser = async () => {
         firstName: firstName.value,
         lastName: lastName.value,
         phoneNumber: phoneNumber.value,
-        birthday: birthday.value,
         email: email.value,
         password: password.value,
-        role: 3, // Sử dụng roleId thay vì role
+        role: 3,
         registerDate: currentDate,
-        courtManagerId: authStore.user.userId,
       }
     );
     console.log(response.data);
@@ -415,21 +398,6 @@ const registerUser = async () => {
 
 .submit:hover {
   background-color: rgb(56, 90, 194);
-  cursor: pointer;
-}
-
-.back-submit {
-  border: none;
-  outline: none;
-  background-color: grey;
-  padding: 10px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 16px;
-  transform: 0.3s ease;
-}
-.back-submit:hover {
-  background-color: darkgray;
   cursor: pointer;
 }
 

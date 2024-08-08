@@ -188,6 +188,12 @@ const routes = [
         component: () => import('../views/AdminClubMngScreen.vue') ,
     },
 
+    {
+        path: '/add-court',
+        name: 'Abc',
+        component: () => import('../views/AbcScreen.vue') ,
+    },
+
 ]
 
 const router = createRouter({

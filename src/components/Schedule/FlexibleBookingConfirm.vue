@@ -20,6 +20,7 @@ import { usePaymentStore } from "../../stores/PaymentStore";
 import { storeToRefs } from "pinia";
 import { useScheduleStore } from "../../stores/scheduleStore";
 import { useClubStore } from "../../stores/clubMng";
+import router from "../../router";
 import axios from 'axios';
 
 
@@ -45,7 +46,7 @@ const clubId = computed(() => clubStore.currentClub?.clubId || "");
 const fullName = computed(() => `${user.value.firstName} ${user.value.lastName}`.trim());
 
 const totalPlayingTime = computed(() => {
-  return scheduleStore.flexibleBooking.totalPlayTime || 
+  return scheduleStore.flexibleBooking.totalPlayTime ||
     (bookingResponse.value ? bookingResponse.value.totalHour : "00:00");
 });
 
@@ -111,14 +112,14 @@ const paymentDetailFlex = computed(() => ({
 
 function getCurrentDateTime() {
   const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
 function calculateTotalAmount() {
@@ -127,7 +128,7 @@ function calculateTotalAmount() {
 
 const confirm = async () => {
   console.log(paymentStore.currentClubInfo.clubName);
-  
+  console.log("This is formatbooking: ", formattedBookings.value);
   try {
     const payload = {
       courtManagerPhone: paymentStore.currentClubInfo.courtManagerPhone,
@@ -135,13 +136,23 @@ const confirm = async () => {
       clubName: paymentStore.currentClubInfo.clubName,
       bookingSchedule: {
         ...bookingSchedule.value,
-        totalPrice: 0
+
+        totalPrice: 0,
+        totalPlayingTime: totalPlayingTime.value,
+        bookingSlotResponseDTOs: formattedBookings.value.map(booking => ({
+          courtId: booking.courtId,
+          startBooking: formatTime(booking.startBooking),
+          endBooking: formatTime(booking.endBooking),
+          bookingDate: formatDate(booking.bookingDate),
+          price: Number(booking.price) // Ensure price is a number
+        }))
       },
-      paymentDetail: paymentDetailFlex.value 
+      paymentDetail: paymentDetailFlex.value
     };
     console.log("Payload being sent:", JSON.stringify(payload, null, 2));
     const response = await axios.post(`http://localhost:8080/courtmaster/booking/flexible-payment`, payload);
     console.log("Response:", response.data);
+    router.push("/payment-success")
     emit("confirm");
   } catch (error) {
     console.error("Error at FlexibleBookingConfirm: ", error);
