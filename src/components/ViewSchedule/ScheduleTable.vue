@@ -55,6 +55,7 @@ import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useAuthStore } from "../../stores/auth";
 import { useClubStore } from "../../stores/clubMng";
 import { useScheduleStore } from "../../stores/scheduleStore";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 const props = defineProps({
   clubId: {
@@ -149,7 +150,7 @@ const bookings = ref([]);
 const fetchBookings = async () => {
   try {
     const response = await axios.get(
-      `http://localhost:8080/courtmaster/api/test/get-all-bookedlist-${props.clubId}`
+      `${API_END_POINT}/courtmaster/api/test/get-all-bookedlist-${props.clubId}`
     );
     const formattedBookings = formatBookings(response.data);
     bookings.value = formattedBookings;

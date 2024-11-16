@@ -16,6 +16,7 @@
 import LoginForm from "../components/Login/LoginForm.vue";
 import Logo from "../components/Login/Logo.vue";
 import Register from "../components/Login/RegisterBtn.vue";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 // export default {
 //   data() {
@@ -29,7 +30,7 @@ import Register from "../components/Login/RegisterBtn.vue";
 //   methods: {
 //     fetchPosts() {
 //       axios
-//         .get("http://localhost:8080/api/posts")
+//         .get(`${API_END_POINT}/api/posts`)
 //         .then((response) => {
 //           this.posts = response.data;
 //         })

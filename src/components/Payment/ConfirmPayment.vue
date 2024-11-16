@@ -49,15 +49,33 @@
         <div v-if="!isFlexibleBooking" class="payment-options">
           <h3>Chọn phương thức thanh toán</h3>
           <div class="option">
-            <input id="fullyPay" v-model="paymentOption" value="Paid" name="paymentOption" type="radio" />
+            <input
+              id="fullyPay"
+              v-model="paymentOption"
+              value="Paid"
+              name="paymentOption"
+              type="radio"
+            />
             <label for="fullyPay">Trả trước toàn bộ</label>
           </div>
           <div class="option">
-            <input id="deposit50" v-model="paymentOption" value="Deposited 50%" name="paymentOption" type="radio" />
+            <input
+              id="deposit50"
+              v-model="paymentOption"
+              value="Deposited 50%"
+              name="paymentOption"
+              type="radio"
+            />
             <label for="deposit50">Trả trước 50%</label>
           </div>
           <div class="option">
-            <input id="deposit25" v-model="paymentOption" value="Deposited 25%" name="paymentOption" type="radio" />
+            <input
+              id="deposit25"
+              v-model="paymentOption"
+              value="Deposited 25%"
+              name="paymentOption"
+              type="radio"
+            />
             <label for="deposit25">Trả trước 25%</label>
           </div>
         </div>
@@ -94,7 +112,10 @@
 
     <div class="actions">
       <button @click="goBack" class="btn back-btn">Trở về</button>
-      <button @click="confirmPayment(calculatedTotalPrice)" class="btn confirm-btn">
+      <button
+        @click="confirmPayment(calculatedTotalPrice)"
+        class="btn confirm-btn"
+      >
         Xác nhận
       </button>
     </div>
@@ -112,6 +133,7 @@ import { useClubStore } from "../../stores/clubMng";
 import { usePaymentStore } from "../../stores/PaymentStore";
 import { useScheduleStore } from "../../stores/scheduleStore";
 axios.defaults.withCredentials = true;
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 const paymentStore = usePaymentStore();
 const clubStore = useClubStore();
@@ -226,7 +248,7 @@ onMounted(() => {
       bookingDate: convertDateFormat(booking.bookingDate),
       bookingType: booking.bookingType,
       price: booking.price,
-      isTemp: 1
+      isTemp: 1,
     })),
     totalPrice: totalPrice,
   };
@@ -283,23 +305,24 @@ function convertDateFormat(dateString) {
 }
 
 const confirmPayment = async (totalPrice) => {
-
   //paymentStore.savePaymentPayloadToSessionStorage();
 
   try {
     // Call API to insert booking schedule and booking slot to database before payment
     if (bookingSchedule.value.scheduleType !== "Flexible") {
-      console.log('BookingSchedule value: ', bookingSchedule.value);
-      const response = await axios.post('http://localhost:8080/courtmaster/booking/insert-temp-bookingscheduleslot', bookingSchedule.value);
-      console.log('Response:', response.data.massage);
+      console.log("BookingSchedule value: ", bookingSchedule.value);
+      const response = await axios.post(
+        "${API_END_POINT}/courtmaster/booking/insert-temp-bookingscheduleslot",
+        bookingSchedule.value
+      );
+      console.log("Response:", response.data.massage);
       if (response.data.massage === "dup") {
-
-        console.log("Your booking is duplicate with other !")
+        console.log("Your booking is duplicate with other !");
       } else {
         paymentStore.paymentPayload.tempBookingId = response.data.massage;
         paymentStore.savePaymentPayloadToSessionStorage();
         const getPaymentUrlResponse = await axios.get(
-          `http://localhost:8080/courtmaster/payment/vn-pay?amount=${totalPrice}`,
+          `${API_END_POINT}/courtmaster/payment/vn-pay?amount=${totalPrice}`,
           { withCredentials: true }
         );
 
@@ -321,26 +344,27 @@ const confirmPayment = async (totalPrice) => {
       }
     } else {
       const paymentDetailFlex = {
-        amount : 1,
-        paymentMethod : "Time",
-        paymentTime : getCurrentDateTime()
-      }
+        amount: 1,
+        paymentMethod: "Time",
+        paymentTime: getCurrentDateTime(),
+      };
       const flexPayload = {
-        courtManagerPhone : courtManagerPhone.value,
-        clubId : clubId.value,
-        clubName : clubName.value,
-        bookingSchedule : bookingSchedule,
-        paymentDetail : paymentDetailFlex
-
-      }
-      const flexPaymentResponse = await axios.post('http://localhost:8080/courtmaster/booking/flexible-payment', flexPayload)
-      if(flexPaymentResponse.data.massage === "Payment success"){
-        router.push("/payment-success")
+        courtManagerPhone: courtManagerPhone.value,
+        clubId: clubId.value,
+        clubName: clubName.value,
+        bookingSchedule: bookingSchedule,
+        paymentDetail: paymentDetailFlex,
+      };
+      const flexPaymentResponse = await axios.post(
+        `${API_END_POINT}/courtmaster/booking/flexible-payment`,
+        flexPayload
+      );
+      if (flexPaymentResponse.data.massage === "Payment success") {
+        router.push("/payment-success");
       } else {
         console.log(flexPaymentResponse.data.massage);
       }
     }
-
   } catch (error) {
     console.log(
       "Error at confirmPayment function in ConfirmPayment.vue: ",
@@ -350,18 +374,17 @@ const confirmPayment = async (totalPrice) => {
 };
 
 function getCurrentDateTime() {
-    const now = new Date();
-    
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-}
+  const now = new Date();
 
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
 
 const goBack = () => {
   // Set a flag in local storage to indicate that a reload is needed

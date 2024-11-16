@@ -201,6 +201,7 @@ import UserAvatar from "../components/Homepage/UserAvatar.vue";
 import Logo from "../components/StaffHomepage/Logo.vue";
 import { useAuthStore } from "../stores/auth";
 import { useClubStore } from "../stores/clubMng";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 const clubStore = useClubStore();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -214,7 +215,7 @@ async function fetchClubId() {
   const staffId = authStore.user.userId;
   try {
     const response = await axios.get(
-      `http://localhost:8080/courtmaster/staff/get-clubId-by-userId?staffId=${staffId}`
+      `${API_END_POINT}/courtmaster/staff/get-clubId-by-userId?staffId=${staffId}`
     );
     clubId.value = response.data.clubId;
     console.log("Club ID:", clubId.value);

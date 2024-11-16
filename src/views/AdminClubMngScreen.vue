@@ -212,6 +212,7 @@ import axios from "axios";
 import { onMounted, ref } from "vue";
 import Logo from "../components/AdminHomepage/Logo.vue";
 import UserAvatar from "../components/AdminHomepage/UserAvatar.vue";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 const searchTerm = ref("");
 const selectAll = ref(false);
@@ -222,7 +223,7 @@ const selectedStatus = ref("all");
 const fetchClubs = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:8080/courtmaster/admin/get-all-club"
+      `${API_END_POINT}/courtmaster/admin/get-all-club`
     );
     clubs.value = response.data.map((club) => ({
       ...club,
@@ -239,7 +240,7 @@ const fetchClubs = async () => {
 const searchClubs = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/admin/search-club",
+      `${API_END_POINT}/courtmaster/admin/search-club`,
       { search: searchTerm.value }
     );
     clubs.value = response.data.map((club) => ({
@@ -258,13 +259,13 @@ const filterClubsByStatus = async () => {
   let url;
   switch (selectedStatus.value) {
     case "active":
-      url = "http://localhost:8080/courtmaster/admin/get-all-active-club";
+      url = `${API_END_POINT}/courtmaster/admin/get-all-active-club`;
       break;
     case "inactive":
-      url = "http://localhost:8080/courtmaster/admin/get-all-inactive-club";
+      url = `${API_END_POINT}/courtmaster/admin/get-all-inactive-club`;
       break;
     default:
-      url = "http://localhost:8080/courtmaster/admin/get-all-club";
+      url = `${API_END_POINT}/courtmaster/admin/get-all-club`;
   }
 
   try {
@@ -286,7 +287,7 @@ const closeSelectedClubs = async () => {
   for (const club of selectedClubs) {
     try {
       await axios.get(
-        `http://localhost:8080/courtmaster/admin/close-club?clubId=${club.clubId}`
+        `${API_END_POINT}/courtmaster/admin/close-club?clubId=${club.clubId}`
       );
     } catch (error) {
       console.error(`Error closing club ${club.clubId}:`, error);
@@ -301,7 +302,7 @@ const openSelectedClubs = async () => {
   for (const club of selectedClubs) {
     try {
       await axios.get(
-        `http://localhost:8080/courtmaster/admin/open-club?clubId=${club.clubId}`
+        `${API_END_POINT}/courtmaster/admin/open-club?clubId=${club.clubId}`
       );
     } catch (error) {
       console.error(`Error opening club ${club.clubId}:`, error);
@@ -337,7 +338,7 @@ const updateClubs = async () => {
       };
 
       const response = await axios.post(
-        "http://localhost:8080/courtmaster/admin/update-club",
+        `${API_END_POINT}/courtmaster/admin/update-club`,
         updateData
       );
 

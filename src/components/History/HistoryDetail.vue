@@ -75,6 +75,8 @@ import { useRouter } from "vue-router";
 import { useFilterHistoryStore } from "../../stores/FilterHistory";
 import { useAuthStore } from "../../stores/auth";
 
+const API_END_POINT = import.meta.env.VITE_API_URL;
+
 const filterHistoryStore = useFilterHistoryStore();
 const authStore = useAuthStore();
 const router = useRouter();
@@ -86,7 +88,7 @@ const deleteSelected = async () => {
     .map((item) => item.bookingScheduleId);
   try {
     const response = await axios.post(
-      `http://localhost:8080/courtmaster/filter/history/remove/booking-schedule`,
+      `${API_END_POINT}/courtmaster/filter/history/remove/booking-schedule`,
       {
         bookingScheduleIds: selectedBookings,
       }

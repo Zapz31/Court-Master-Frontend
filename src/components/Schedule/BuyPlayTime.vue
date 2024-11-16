@@ -4,7 +4,13 @@
       <h2>Mua thêm giờ chơi</h2>
       <div class="input-group">
         <label for="playTime">Số giờ muốn mua:</label>
-        <input type="number" id="playTime" v-model.number="playTime" :min="minPlayTime" step="1" />
+        <input
+          type="number"
+          id="playTime"
+          v-model.number="playTime"
+          :min="minPlayTime"
+          step="1"
+        />
       </div>
       <div class="total-price">Tổng tiền: {{ formattedTotalPrice }}</div>
       <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
@@ -21,19 +27,21 @@ import axios from "axios";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useScheduleStore } from "../../stores/scheduleStore";
 import { usePaymentStore } from "../../stores/PaymentStore";
 import { useAuthStore } from "../../stores/auth";
 import { useClubStore } from "../../stores/clubMng";
+import { useScheduleStore } from "../../stores/scheduleStore";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 axios.defaults.withCredentials = true;
-
 
 const paymentStore = usePaymentStore();
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
 const clubStore = useClubStore();
 const clubId = computed(() => clubStore.currentClub?.clubId || "");
-const fullName = computed(() => `${user.value.firstName} ${user.value.lastName}`.trim());
+const fullName = computed(() =>
+  `${user.value.firstName} ${user.value.lastName}`.trim()
+);
 const props = defineProps({
   isVisible: Boolean,
   minPlayTime: {
@@ -77,7 +85,7 @@ const fetchCalculatedPrice = async () => {
 
   try {
     const response = await axios.get(
-      "http://localhost:8080/courtmaster/booking/total-hours-calculated-price",
+      `${API_END_POINT}/courtmaster/booking/total-hours-calculated-price`,
       {
         params: {
           clubId: currentClub.value.clubId,
@@ -102,9 +110,7 @@ const closePopup = () => {
   emit("close");
 };
 
-
-
-const confirmPurchase = async() => {
+const confirmPurchase = async () => {
   if (playTime.value < props.minPlayTime || !Number.isInteger(playTime.value)) {
     errorMessage.value = `Vui lòng nhập số giờ hợp lệ (từ ${props.minPlayTime} đến ${props.maxPlayTime} giờ).`;
     return;
@@ -114,15 +120,18 @@ const confirmPurchase = async() => {
   closePopup();
   paymentStore.payloadTimePurchase.customerId = user.value.userId;
   paymentStore.payloadTimePurchase.badmintonClubId = currentClub.value.clubId;
-  paymentStore.payloadTimePurchase.badmintonClubName = currentClub.value.clubName;
-  paymentStore.payloadTimePurchase.playHoursMinuteString = convertIntToTime(playTime.value);
+  paymentStore.payloadTimePurchase.badmintonClubName =
+    currentClub.value.clubName;
+  paymentStore.payloadTimePurchase.playHoursMinuteString = convertIntToTime(
+    playTime.value
+  );
   paymentStore.payloadTimePurchaseToSessionStorage();
   const getPaymentUrlResponse = await axios.get(
-    `http://localhost:8080/courtmaster/payment/vn-pay?amount=${calculatedPrice.value}`
+    `${API_END_POINT}/courtmaster/payment/vn-pay?amount=${calculatedPrice.value}`
   );
 
   const paymentUrl = getPaymentUrlResponse.data.data.paymentUrl;
-  if(paymentUrl){
+  if (paymentUrl) {
     window.location.href = paymentUrl;
   }
 
@@ -130,9 +139,6 @@ const confirmPurchase = async() => {
   //   name: "ConfirmPaymentScreen",
   //   params: { clubId: currentClub.value.clubId },
   // });
-
-
-
 };
 
 function convertIntToTime(totalMinutes) {
@@ -140,10 +146,10 @@ function convertIntToTime(totalMinutes) {
   const minutes = totalMinutes % 60;
 
   // Định dạng chuỗi thành HH:mm
-  const formattedHours = String(hours).padStart(2, '0');
-  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedHours = String(hours).padStart(2, "0");
+  const formattedMinutes = String(minutes).padStart(2, "0");
 
-  return `${formattedMinutes}:${formattedHours}`; 
+  return `${formattedMinutes}:${formattedHours}`;
 }
 
 watch(playTime, async (newValue) => {

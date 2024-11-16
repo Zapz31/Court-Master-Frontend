@@ -216,6 +216,7 @@ import { onMounted, ref } from "vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
 const defaultAvatarPath = "../../public/img/default.png";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 const searchTerm = ref("");
 const actionStatus = ref("");
 const updateStatus = ref("");
@@ -250,7 +251,7 @@ const fetchUsers = async () => {
 
   try {
     const response = await axios.get(
-      `http://localhost:8080/courtmaster/courtmanager/get-all-staff?court_manager_id=${courtManagerId}`
+      `${API_END_POINT}/courtmaster/courtmanager/get-all-staff?court_manager_id=${courtManagerId}`
     );
     users.value = response.data.map((user) => ({
       ...user,
@@ -284,7 +285,7 @@ const searchStaff = async () => {
       search: query,
     };
     const response = await axios.post(
-      `http://localhost:8080/courtmaster/courtmanager/search-staff`,
+      `${API_END_POINT}/courtmaster/courtmanager/search-staff`,
       payload
     );
     users.value = response.data.map((user) => ({
@@ -322,7 +323,7 @@ const updateSingleUser = async (user) => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/courtmanager/update-staff",
+      `${API_END_POINT}/courtmaster/courtmanager/update-staff`,
       {
         staffId: user.userId.trim(),
         courtManagerId: courtManagerId.trim(),
@@ -378,7 +379,7 @@ const deleteSingleUser = async (user) => {
 
   try {
     const response = await axios.get(
-      `http://localhost:8080/courtmaster/courtmanager/delete-staff`,
+      `${API_END_POINT}/courtmaster/courtmanager/delete-staff`,
       {
         params: {
           staff_id: user.userId.trim(),

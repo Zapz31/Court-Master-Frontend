@@ -101,6 +101,7 @@ import { onMounted, ref } from "vue";
 import Logo from "../components/Homepage/Logo.vue";
 import UserAvatar from "../components/Homepage/UserAvatar.vue";
 import { useClubStore } from "../stores/clubMng";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 const courts = ref([]);
 const clubStore = useClubStore();
@@ -133,7 +134,7 @@ async function fetchCourts() {
     }
 
     const response = await axios.get(
-      `http://localhost:8080/courtmaster/staff/get-all-court?clubId=${clubId}`
+      `${API_END_POINT}/courtmaster/staff/get-all-court?clubId=${clubId}`
     );
     console.log("API response:", response.data);
     courts.value = response.data;

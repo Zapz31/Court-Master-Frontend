@@ -2,17 +2,14 @@
   <div class="dashboard">
     <header class="header">
       <a href="/">
-
         <div class="logo">
-       
-       <img
-         src="../../public/img/mono_white_crop.png"
-         alt="Logo Court Master"
-       />
-     </div>
-
+          <img
+            src="../../public/img/mono_white_crop.png"
+            alt="Logo Court Master"
+          />
+        </div>
       </a>
-      
+
       <h1>Bảng Điều Khiển</h1>
       <div class="user-info">
         <img
@@ -82,10 +79,11 @@
 </template>
   
   <script setup>
+import axios from "axios";
 import Chart from "chart.js/auto";
 import { onMounted, ref } from "vue";
 import { useAuthStore } from "../stores/auth";
-import axios from "axios";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 // Dữ liệu mẫu
 const totalRevenue = ref();
@@ -94,7 +92,7 @@ const totalCustomers = ref();
 
 const authStore = useAuthStore();
 
-const clubId = ref('');
+const clubId = ref("");
 
 const revenuePercentage = ref();
 const bookingsPercentage = ref();
@@ -126,41 +124,63 @@ const month = ref(new Date().getMonth() + 1);
 const dailyRevenue = ref([]);
 const dailyBookings = ref([]);
 
-
-
 // Lay club id thong qua court manager id
 const fetchClubId = async () => {
   try {
-    const response = await axios.get(`http://localhost:8080/courtmaster/courtmanager/get-clubId-by-cId`, {
-      params: {
-        userId: authStore.user.userId
+    const response = await axios.get(
+      `${API_END_POINT}/courtmaster/courtmanager/get-clubId-by-cId`,
+      {
+        params: {
+          userId: authStore.user.userId,
+        },
       }
-    });
+    );
     clubId.value = response.data.clubId;
   } catch (error) {
-    console.error('Error fetching clubId:', error);
+    console.error("Error fetching clubId:", error);
   }
 };
 
 const fetchDashboardData = async () => {
   if (!clubId.value) {
-    console.error('ClubId is not set');
+    console.error("ClubId is not set");
     return;
   }
 
   const requestBody = {
     clubId: "C0000001",
     year: year.value,
-    month: 8
+    month: 8,
   };
 
   try {
-    const [revenueResponse, bookingsResponse, totalRevenueResponse, totalBookingResponse, totalCustomerResponse] = await Promise.all([
-      axios.post('http://localhost:8080/courtmaster/courtmanager/get-daily-revenue', requestBody),
-      axios.post('http://localhost:8080/courtmaster/courtmanager/get-daily-booking', requestBody),
-      axios.post('http://localhost:8080/courtmaster/courtmanager/gettotalrevenueinfor', requestBody),
-      axios.post('http://localhost:8080/courtmaster/courtmanager/gettotalbookinginfor', requestBody),
-      axios.post('http://localhost:8080/courtmaster/courtmanager/gettotalcustomernumber', requestBody),
+    const [
+      revenueResponse,
+      bookingsResponse,
+      totalRevenueResponse,
+      totalBookingResponse,
+      totalCustomerResponse,
+    ] = await Promise.all([
+      axios.post(
+        `${API_END_POINT}/courtmaster/courtmanager/get-daily-revenue`,
+        requestBody
+      ),
+      axios.post(
+        `${API_END_POINT}/courtmaster/courtmanager/get-daily-booking`,
+        requestBody
+      ),
+      axios.post(
+        `${API_END_POINT}/courtmaster/courtmanager/gettotalrevenueinfor`,
+        requestBody
+      ),
+      axios.post(
+        `${API_END_POINT}/courtmaster/courtmanager/gettotalbookinginfor`,
+        requestBody
+      ),
+      axios.post(
+        `${API_END_POINT}/courtmaster/courtmanager/gettotalcustomernumber`,
+        requestBody
+      ),
     ]);
 
     dailyRevenue.value = transformDailyData(revenueResponse.data);
@@ -171,8 +191,6 @@ const fetchDashboardData = async () => {
     bookingsPercentage.value = totalBookingResponse.data.percentVariation;
     totalCustomers.value = totalCustomerResponse.data.totalCustomer;
     customersPercentage.value = totalCustomerResponse.data.percentVariation;
-
-
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
   }
@@ -183,7 +201,7 @@ const transformDailyData = (data) => {
   const aggregatedData = {};
 
   // Aggregate the data by date
-  data.forEach(item => {
+  data.forEach((item) => {
     const date = new Date(item.paymentTime).getDate();
     if (!aggregatedData[date]) {
       aggregatedData[date] = { paymentTime: date, amount: 0 };
@@ -192,7 +210,9 @@ const transformDailyData = (data) => {
   });
 
   // Convert the aggregated data object back to an array
-  return Object.values(aggregatedData).sort((a, b) => a.paymentTime - b.paymentTime);
+  return Object.values(aggregatedData).sort(
+    (a, b) => a.paymentTime - b.paymentTime
+  );
 };
 
 const formatCurrency = (value) => {
@@ -231,7 +251,6 @@ const daysInCurrentMonth = getDaysInMonth(currentYear, currentMonth);
 onMounted(async () => {
   await fetchClubId();
   await fetchDashboardData();
-
 
   // Biểu đồ doanh thu
   const ctxRevenue = document.getElementById("revenueChart").getContext("2d");

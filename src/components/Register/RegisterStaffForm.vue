@@ -146,6 +146,7 @@
 import axios from "axios";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 const roleId = ref(1); // Mặc định là Customer
 const duplicateError = ref("");
@@ -248,7 +249,7 @@ const registerUser = async () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/auth/register",
+      `${API_END_POINT}/courtmaster/auth/register`,
       {
         userId: 3,
         firstName: firstName.value,

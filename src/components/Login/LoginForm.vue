@@ -199,6 +199,8 @@ import axios from "axios";
 import { ref } from "vue";
 import router from "../../router";
 import { useAuthStore } from "../../stores/auth";
+
+const API_END_POINT = import.meta.env.VITE_API_URL;
 axios.defaults.withCredentials = true;
 const authStore = useAuthStore();
 const invalidMess = ref("");
@@ -221,7 +223,7 @@ const newUser = ref({
 const signin = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/auth/signin",
+      `${API_END_POINT}/courtmaster/auth/signin`,
       {
         emailOrPhoneNumber: emailOrPhone.value,
         password: password.value,

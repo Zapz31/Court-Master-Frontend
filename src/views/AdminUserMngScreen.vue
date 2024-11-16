@@ -235,6 +235,7 @@ import axios from "axios";
 import { onMounted, ref } from "vue";
 import Logo from "../components/AdminHomepage/Logo.vue";
 import UserAvatar from "../components/AdminHomepage/UserAvatar.vue";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 
 const defaultAvatarPath = "../../public/img/default.png";
 const searchTerm = ref("");
@@ -265,9 +266,9 @@ const formatDate = (dateString) => {
 
 const fetchUsers = async () => {
   try {
-    let url = "http://localhost:8080/courtmaster/admin/get-all-user";
+    let url = `${API_END_POINT}/courtmaster/admin/get-all-user`;
     if (selectedRole.value) {
-      url = `http://localhost:8080/courtmaster/admin/get-all-role?role=${selectedRole.value}`;
+      url = `${API_END_POINT}/courtmaster/admin/get-all-role?role=${selectedRole.value}`;
     }
     const response = await axios.get(url);
     users.value = response.data.map((user) => ({
@@ -313,7 +314,7 @@ const toggleAll = () => {
 const searchUsers = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/admin/search-account",
+      `${API_END_POINT}/courtmaster/admin/search-account`,
       {
         search: searchTerm.value,
       }
@@ -335,7 +336,7 @@ const searchUsers = async () => {
 const updateSingleUser = async (user) => {
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/admin/update-account",
+      `${API_END_POINT}/courtmaster/admin/update-account`,
       {
         userId: user.userId,
         firstName: user.firstName,
@@ -411,7 +412,7 @@ const banUsers = async () => {
   for (const user of selectedUsers) {
     try {
       const response = await axios.get(
-        `http://localhost:8080/courtmaster/admin/ban-account?userId=${user.userId}`
+        `${API_END_POINT}/courtmaster/admin/ban-account?userId=${user.userId}`
       );
       if (response.data === "success") {
         successCount++;
@@ -450,7 +451,7 @@ const unbanUsers = async () => {
   for (const user of selectedUsers) {
     try {
       const response = await axios.get(
-        `http://localhost:8080/courtmaster/admin/unban-account?userId=${user.userId}`
+        `${API_END_POINT}/courtmaster/admin/unban-account?userId=${user.userId}`
       );
       if (response.data === "success") {
         successCount++;

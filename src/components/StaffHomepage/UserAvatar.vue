@@ -80,6 +80,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../../stores/auth";
 import { useClubStore } from "../../stores/clubMng";
+const API_END_POINT = import.meta.env.VITE_API_URL;
 const clubStore = useClubStore();
 const authStore = useAuthStore();
 
@@ -181,7 +182,7 @@ onMounted(async () => {
 const signout = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8080/courtmaster/auth/signout",
+      `${API_END_POINT}/courtmaster/auth/signout`,
       {},
       { withCredentials: true }
     );

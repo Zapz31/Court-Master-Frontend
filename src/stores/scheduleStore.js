@@ -1,12 +1,12 @@
-import axios from 'axios';
-import { defineStore } from 'pinia';
+import axios from "axios";
+import { defineStore } from "pinia";
 axios.defaults.withCredentials = true;
-
-export const useScheduleStore = defineStore('schedule', {
+const API_END_POINT = import.meta.env.VITE_API_URL;
+export const useScheduleStore = defineStore("schedule", {
   state: () => ({
     duplicateSlotError: null,
-    selectedDate: '',
-    endDate: '', // Thêm endDate vào state
+    selectedDate: "",
+    endDate: "", // Thêm endDate vào state
     slots: [],
     invalidSlots: [],
     slotsToPost: [],
@@ -17,20 +17,16 @@ export const useScheduleStore = defineStore('schedule', {
     pendingSlots: [],
     flexibleBooking: {
       totalPlayTime: 0,
-      totalPrice: 0
+      totalPrice: 0,
     },
-    currentBookingType: 'one-time',
-    errorMessageTimer: null
+    currentBookingType: "one-time",
+    errorMessageTimer: null,
   }),
 
-  
-  
   actions: {
     setCurrentBookingType(type) {
       this.currentBookingType = type;
     },
-
-    
 
     setDateRange(startDate, endDate) {
       this.selectedDate = startDate;
@@ -39,7 +35,6 @@ export const useScheduleStore = defineStore('schedule', {
     updateEndDate(endDate) {
       this.endDate = endDate;
     },
-
 
     async addSlot(start, end, courtNumber, status, date) {
       const hours = this.calculateHours(start, end);
@@ -55,57 +50,56 @@ export const useScheduleStore = defineStore('schedule', {
         bookingType: this.currentBookingType,
       };
       this.slots.push(newSlot);
-    
-      if (status === 'selected') {
+
+      if (status === "selected") {
         this.slotsToPost.push(newSlot);
         await this.postSlotsToBackend();
       }
     },
 
-
     saveSelectedSlots() {
-      this.selectedSlots = this.slots.filter(slot => slot.status === 'selected');
+      this.selectedSlots = this.slots.filter(
+        (slot) => slot.status === "selected"
+      );
     },
-  
+
     restoreSelectedSlots() {
-      this.selectedSlots.forEach(slot => {
-        const existingSlot = this.slots.find(s => 
-          s.startTime === slot.startTime && 
-          s.court === slot.court && 
-          s.date === slot.date
+      this.selectedSlots.forEach((slot) => {
+        const existingSlot = this.slots.find(
+          (s) =>
+            s.startTime === slot.startTime &&
+            s.court === slot.court &&
+            s.date === slot.date
         );
         if (existingSlot) {
-          existingSlot.status = 'selected';
+          existingSlot.status = "selected";
         } else {
-          this.slots.push({...slot, status: 'selected'});
+          this.slots.push({ ...slot, status: "selected" });
         }
       });
       this.slotsToPost = [...this.selectedSlots];
     },
-  
+
     clearSelectedSlots() {
       this.selectedSlots = [];
     },
 
-
     parseDate(dateString) {
-      const [day, month, year] = dateString.split('/');
+      const [day, month, year] = dateString.split("/");
       return new Date(year, month - 1, day);
     },
 
     convertDateStringToDate(dateString) {
-      if (!dateString || typeof dateString !== 'string') {
-        throw new Error('Invalid dateString');
+      if (!dateString || typeof dateString !== "string") {
+        throw new Error("Invalid dateString");
       }
-      const [day, month, year] = dateString.split('/');
+      const [day, month, year] = dateString.split("/");
       return new Date(`${year}-${month}-${day}`);
     },
-    
-
 
     async addFixedSlots(startTime, endTime, courtNumber, status, startDate) {
       if (!this.endDate) {
-        this.setErrorMessage('Vui lòng chọn ngày kết thúc.', 5000);
+        this.setErrorMessage("Vui lòng chọn ngày kết thúc.", 5000);
         return;
       }
 
@@ -113,12 +107,15 @@ export const useScheduleStore = defineStore('schedule', {
       const endDate = this.convertDateStringToDate(this.endDate);
 
       if (!currentDate || !endDate) {
-        this.setErrorMessage('Ngày bắt đầu hoặc ngày kết thúc không hợp lệ.', 5000);
+        this.setErrorMessage(
+          "Ngày bắt đầu hoặc ngày kết thúc không hợp lệ.",
+          5000
+        );
         return;
       }
 
       this.pendingSlots = [];
-    
+
       while (currentDate <= endDate) {
         const formattedDate = this.formatDate(currentDate);
         const newSlot = {
@@ -127,19 +124,19 @@ export const useScheduleStore = defineStore('schedule', {
           court: courtNumber,
           status,
           date: formattedDate,
-          bookingType: 'Fixed'
+          bookingType: "Fixed",
         };
         this.pendingSlots.push(newSlot);
         currentDate.setDate(currentDate.getDate() + 7);
       }
-    
+
       const validationPassed = await this.validateAndAddPendingSlots();
-    
+
       if (!validationPassed) {
         // Clear invalid slots from the view
-        this.pendingSlots.forEach(slot => {
+        this.pendingSlots.forEach((slot) => {
           const index = this.slots.findIndex(
-            existingSlot =>
+            (existingSlot) =>
               existingSlot.startTime === slot.startTime &&
               existingSlot.court === slot.court &&
               existingSlot.date === slot.date
@@ -150,7 +147,7 @@ export const useScheduleStore = defineStore('schedule', {
         });
       }
     },
-    
+
     generateFixedSlots(initialSlot) {
       let currentDate = this.convertDateStringToDate(this.initialSlot.date);
       const endDate = this.convertDateStringToDate(this.endDate);
@@ -160,22 +157,30 @@ export const useScheduleStore = defineStore('schedule', {
           ...initialSlot,
           date: this.currentDate,
         };
-        this.addFixedSlots(newFixedSlot.startTime, newFixedSlot.endTime, newFixedSlot.court, newFixedSlot.status, newFixedSlot.date);
+        this.addFixedSlots(
+          newFixedSlot.startTime,
+          newFixedSlot.endTime,
+          newFixedSlot.court,
+          newFixedSlot.status,
+          newFixedSlot.date
+        );
         currentDate.setDate(currentDate.getDate() + 7);
       }
     },
 
-
-
     async updateSlot(updatedSlot) {
       const index = this.slots.findIndex(
-        slot => slot.startTime === updatedSlot.startTime && slot.court === updatedSlot.court
+        (slot) =>
+          slot.startTime === updatedSlot.startTime &&
+          slot.court === updatedSlot.court
       );
       if (index !== -1) {
         this.slots[index] = { ...this.slots[index], ...updatedSlot };
-        if (updatedSlot.status === 'selected') {
+        if (updatedSlot.status === "selected") {
           const postIndex = this.slotsToPost.findIndex(
-            slot => slot.startTime === updatedSlot.startTime && slot.court === updatedSlot.court
+            (slot) =>
+              slot.startTime === updatedSlot.startTime &&
+              slot.court === updatedSlot.court
           );
           if (postIndex === -1) {
             this.slotsToPost.push(this.slots[index]);
@@ -185,7 +190,9 @@ export const useScheduleStore = defineStore('schedule', {
         } else {
           // Remove from slotsToPost if status is not 'selected'
           this.slotsToPost = this.slotsToPost.filter(
-            slot => slot.startTime !== updatedSlot.startTime || slot.court !== updatedSlot.court
+            (slot) =>
+              slot.startTime !== updatedSlot.startTime ||
+              slot.court !== updatedSlot.court
           );
         }
         await this.postSlotsToBackend();
@@ -194,65 +201,77 @@ export const useScheduleStore = defineStore('schedule', {
 
     async removeSlot(startTime, court) {
       const slotsToRemove = this.slots.filter(
-        slot => slot.startTime === startTime && slot.court === court && slot.status === "selected"
+        (slot) =>
+          slot.startTime === startTime &&
+          slot.court === court &&
+          slot.status === "selected"
       );
-    
+
       for (const slot of slotsToRemove) {
-        const index = this.slots.findIndex(s => s === slot);
+        const index = this.slots.findIndex((s) => s === slot);
         if (index !== -1) {
           this.slots.splice(index, 1);
-          this.slotsToPost = this.slotsToPost.filter(
-            s => s !== slot
-          );
+          this.slotsToPost = this.slotsToPost.filter((s) => s !== slot);
         }
       }
-    
+
       await this.postSlotsToBackend();
     },
 
     async validateSlots(slotsToValidate) {
       try {
-        const response = await axios.post('http://localhost:8080/courtmaster/booking/getDuplicateBookingSlot', slotsToValidate);
+        const response = await axios.post(
+          `${API_END_POINT}/courtmaster/booking/getDuplicateBookingSlot`,
+          slotsToValidate
+        );
         return response.data;
       } catch (error) {
-        console.error('Error validating slots:', error);
+        console.error("Error validating slots:", error);
         throw error;
       }
     },
     //check trung
     async validateAndAddPendingSlots() {
-      const slotsToValidate = this.pendingSlots.map(slot => ({
+      const slotsToValidate = this.pendingSlots.map((slot) => ({
         courtId: slot.court,
         startBooking: slot.startTime,
         endBooking: slot.endTime,
         bookingDate: this.formatDateForBackend(slot.date),
         bookingType: this.formatBookingType(slot.bookingType),
       }));
-    
+
       try {
         const duplicateSlots = await this.validateSlots(slotsToValidate);
-    
+
         if (duplicateSlots.length > 0) {
           this.invalidSlots = duplicateSlots;
-          const errorMessages = duplicateSlots.map(slot =>
-            `Giờ chơi tại sân ${slot.courtName} từ ${slot.startTime.slice(0, 5)} đến ${slot.endTime.slice(0, 5)} - ${this.formatDate(slot.bookingDate)} đã được đặt, vui lòng chọn 1 giờ chơi khác.`
+          const errorMessages = duplicateSlots.map(
+            (slot) =>
+              `Giờ chơi tại sân ${slot.courtName} từ ${slot.startTime.slice(
+                0,
+                5
+              )} đến ${slot.endTime.slice(0, 5)} - ${this.formatDate(
+                slot.bookingDate
+              )} đã được đặt, vui lòng chọn 1 giờ chơi khác.`
           );
-          this.duplicateSlotError = errorMessages.join('\n');
+          this.duplicateSlotError = errorMessages.join("\n");
           this.setErrorMessage(this.duplicateSlotError, 10000, true); // Display error for 10s and mark as duplicate error
           this.pendingSlots = [];
           return false;
         }
-    
+
         this.duplicateSlotError = null;
-        this.pendingSlots.forEach(slot => {
+        this.pendingSlots.forEach((slot) => {
           this.slots.push(slot);
           this.slotsToPost.push(slot);
         });
         this.pendingSlots = [];
         return true;
       } catch (error) {
-        console.error('Error validating slots:', error);
-        this.setErrorMessage('An error occurred while validating slots. Please try again.');
+        console.error("Error validating slots:", error);
+        this.setErrorMessage(
+          "An error occurred while validating slots. Please try again."
+        );
         this.pendingSlots = [];
         return false;
       }
@@ -260,88 +279,98 @@ export const useScheduleStore = defineStore('schedule', {
 
     async postSlotsToBackend() {
       if (this.slotsToPost.length === 0) {
-        console.log('No slots to post');
+        console.log("No slots to post");
         this.bookingResponse = null;
         return;
       }
 
-            // Validate that all slots have the same date for one-time play
-            if (this.currentBookingType === 'one-time') {
-              const dates = new Set(this.slotsToPost.map(slot => slot.date));
-              if (dates.size > 1) {
-                const errorMessage = 'Với chế độ trong ngày, bạn không được chọn slot không cùng 1 ngày';
-                this.setErrorMessage(errorMessage);
-                this.removeInvalidSlotsForOneTimePlay();
-                return;
-              }
-            }
-    
-      const slotsToPost = this.slotsToPost.map(slot => ({
+      // Validate that all slots have the same date for one-time play
+      if (this.currentBookingType === "one-time") {
+        const dates = new Set(this.slotsToPost.map((slot) => slot.date));
+        if (dates.size > 1) {
+          const errorMessage =
+            "Với chế độ trong ngày, bạn không được chọn slot không cùng 1 ngày";
+          this.setErrorMessage(errorMessage);
+          this.removeInvalidSlotsForOneTimePlay();
+          return;
+        }
+      }
+
+      const slotsToPost = this.slotsToPost.map((slot) => ({
         courtId: slot.court,
         startBooking: slot.startTime,
         endBooking: slot.endTime,
         bookingDate: this.formatDateForBackend(slot.date),
-        bookingType: this.formatBookingType(slot.bookingType || this.currentBookingType),
+        bookingType: this.formatBookingType(
+          slot.bookingType || this.currentBookingType
+        ),
       }));
-    
+
       try {
-        const response = await axios.post('http://localhost:8080/courtmaster/booking/unpaidbookings', slotsToPost);
-        console.log('Bookings posted successfully:', response.data);
+        const response = await axios.post(
+          `${API_END_POINT}/courtmaster/booking/unpaidbookings`,
+          slotsToPost
+        );
+        console.log("Bookings posted successfully:", response.data);
         this.setBookingResponse(response.data);
         this.clearErrorMessage();
         // this.slotsToPost = []; // Clear slotsToPost after successful posting
       } catch (error) {
-        console.error('Error posting bookings:', error);
-        this.setErrorMessage('An error occurred while booking. Please try again.');
+        console.error("Error posting bookings:", error);
+        this.setErrorMessage(
+          "An error occurred while booking. Please try again."
+        );
       }
     },
 
     removeInvalidSlots() {
-      this.invalidSlots.forEach(invalidSlot => {
-        const index = this.slots.findIndex(slot => 
-          slot.court === invalidSlot.courtId &&
-          slot.startTime === invalidSlot.startTime.slice(0, 5) &&
-          slot.endTime === invalidSlot.endTime.slice(0, 5) &&
-          slot.date === this.formatDate(invalidSlot.bookingDate)
+      this.invalidSlots.forEach((invalidSlot) => {
+        const index = this.slots.findIndex(
+          (slot) =>
+            slot.court === invalidSlot.courtId &&
+            slot.startTime === invalidSlot.startTime.slice(0, 5) &&
+            slot.endTime === invalidSlot.endTime.slice(0, 5) &&
+            slot.date === this.formatDate(invalidSlot.bookingDate)
         );
         if (index !== -1) {
           this.slots.splice(index, 1);
         }
       });
-      this.slotsToPost = this.slots.filter(slot => slot.status === 'selected');
+      this.slotsToPost = this.slots.filter(
+        (slot) => slot.status === "selected"
+      );
       this.invalidSlots = [];
     },
 
     removeInvalidSlotsForOneTimePlay() {
       const validDate = this.slotsToPost[0].date;
-      this.slotsToPost = this.slotsToPost.filter(slot => slot.date === validDate);
-      this.slots = this.slots.map(slot => {
-        if (slot.date !== validDate && slot.status === 'selected') {
-          return { ...slot, status: 'available' };
+      this.slotsToPost = this.slotsToPost.filter(
+        (slot) => slot.date === validDate
+      );
+      this.slots = this.slots.map((slot) => {
+        if (slot.date !== validDate && slot.status === "selected") {
+          return { ...slot, status: "available" };
         }
         return slot;
       });
     },
 
-
-
-    
     setErrorMessage(message, duration = 5000, isDuplicateError = false) {
       this.errorMessage = message;
       this.errorMessageVisible = true;
       this.isDuplicateError = isDuplicateError;
-    
+
       if (this.errorMessageTimer) {
         clearTimeout(this.errorMessageTimer);
       }
-    
+
       if (duration > 0 && !isDuplicateError) {
         this.errorMessageTimer = setTimeout(() => {
           this.clearErrorMessage();
         }, duration);
       }
     },
-    
+
     clearErrorMessage() {
       if (this.isDuplicateError) {
         return;
@@ -353,7 +382,7 @@ export const useScheduleStore = defineStore('schedule', {
         this.errorMessageTimer = null;
       }
     },
-    
+
     clearDuplicateSlotError() {
       this.isDuplicateError = false;
       this.clearErrorMessage();
@@ -387,13 +416,12 @@ export const useScheduleStore = defineStore('schedule', {
       });
     },
 
-
     calculateHours(start, end) {
       start = String(start);
       end = String(end);
 
-      const [startHour, startMinute] = start.split(':').map(Number);
-      const [endHour, endMinute] = end.split(':').map(Number);
+      const [startHour, startMinute] = start.split(":").map(Number);
+      const [endHour, endMinute] = end.split(":").map(Number);
       const startTotalMinutes = startHour * 60 + startMinute;
       const endTotalMinutes = endHour * 60 + endMinute;
       const totalMinutes = endTotalMinutes - startTotalMinutes;
@@ -406,31 +434,30 @@ export const useScheduleStore = defineStore('schedule', {
 
     formatDate(date) {
       if (date instanceof Date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
-      } else if (typeof date === 'string') {
-        const [year, month, day] = date.split('-');
+      } else if (typeof date === "string") {
+        const [year, month, day] = date.split("-");
         return `${day}/${month}/${year}`;
       }
-      return '';
+      return "";
     },
-    
 
     formatDateForBackend(date) {
-      const [day, month, year] = date.split('/');
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      const [day, month, year] = date.split("/");
+      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     },
 
     formatBookingType(type) {
       switch (type) {
-        case 'one-time':
-          return 'One-time play';
-        case 'flexible':
-          return 'Flexible';
-        case 'fixed':
-          return 'Fixed';
+        case "one-time":
+          return "One-time play";
+        case "flexible":
+          return "Flexible";
+        case "fixed":
+          return "Fixed";
         default:
           return type;
       }
@@ -446,10 +473,9 @@ export const useScheduleStore = defineStore('schedule', {
     },
 
     initializeSelectedDate() {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       this.selectedDate = today;
     },
-
 
     updateSelectedDateRange({ start, end }) {
       this.startDate = start;
@@ -465,7 +491,7 @@ export const useScheduleStore = defineStore('schedule', {
     },
 
     formatDateFromBackend(date) {
-      const [year, month, day] = date.split('-');
+      const [year, month, day] = date.split("-");
       return `${day}/${month}/${year}`;
     },
 
@@ -479,28 +505,26 @@ export const useScheduleStore = defineStore('schedule', {
     setTotalPlayingTime(time) {
       this.totalPlayingTime = time;
     },
-      // Add this action to update both booking type and total playing time
-      updateFlexibleBooking(totalPlayTime, totalPrice) {
-        this.flexibleBooking.totalPlayTime = totalPlayTime;
-        this.flexibleBooking.totalPrice = totalPrice;
-      },
-      setBookingResponse(response) {
-        this.bookingResponse = response;
-      },
-    
-    
+    // Add this action to update both booking type and total playing time
+    updateFlexibleBooking(totalPlayTime, totalPrice) {
+      this.flexibleBooking.totalPlayTime = totalPlayTime;
+      this.flexibleBooking.totalPrice = totalPrice;
+    },
+    setBookingResponse(response) {
+      this.bookingResponse = response;
+    },
+
     formatBookingTypeFromBackend(type) {
       switch (type) {
-        case 'one_time_play':
-          return 'One time';
-        case 'flexible':
-          return 'Flexible';
-        case 'fixed':
-          return 'Fixed';
+        case "one_time_play":
+          return "One time";
+        case "flexible":
+          return "Flexible";
+        case "fixed":
+          return "Fixed";
         default:
           return type;
       }
     },
-
   },
 });
